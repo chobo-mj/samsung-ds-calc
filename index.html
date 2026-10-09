@@ -1,0 +1,1380 @@
+updated_html = """<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>삼성전자 DS 성과급 & 연봉 시뮬레이터 (2026 개편판)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- FontAwesome & Pretendard Font -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif'],
+          },
+          colors: {
+            samsung: {
+              blue: '#0c4da2',
+              dark: '#03234d',
+              light: '#e8f0fe',
+              accent: '#2b7fff',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+    .tab-active {
+      background: linear-gradient(135deg, #0c4da2 0%, #1e40af 100%);
+      color: white;
+      box-shadow: 0 4px 14px 0 rgba(12, 77, 162, 0.35);
+    }
+    .card-shadow {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white border-b border-blue-900/50 sticky top-0 z-50 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+          <i class="fa-solid fa-microchip text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-bold tracking-tight flex items-center gap-2">
+            삼성전자 DS 성과급 & 연봉 시뮬레이터
+            <span class="text-[11px] bg-blue-500/30 text-blue-300 border border-blue-400/30 px-2 py-0.5 rounded-full font-medium">2026 임단협 신규제도</span>
+          </h1>
+          <p class="text-xs text-slate-300">OPI · TAI · 특별경영성과급(자사주) 5개년 누적 베스팅 및 실수령 정밀 분석</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 text-xs text-slate-300">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>기준연도: <strong>2026년 실적분 (2027년 지급)</strong></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full space-y-6">
+
+    <!-- Top Controller: Global Division Tabs & Primary Inputs -->
+    <div class="bg-white rounded-2xl p-6 border border-slate-200 card-shadow">
+      <!-- Business Unit Tabs -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-5 border-b border-slate-100 gap-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-blue-600 block mb-0.5">Primary Division</span>
+          <h2 class="text-lg font-bold text-slate-900">소속 사업부문 선택</h2>
+        </div>
+        <div class="flex p-1.5 bg-slate-100 rounded-xl w-full sm:w-auto" id="divisionTabs">
+          <button type="button" onclick="setGlobalDivision('memory')" id="tab-memory" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 tab-active flex items-center justify-center gap-2">
+            <i class="fa-solid fa-memory"></i> 메모리 사업부
+          </button>
+          <button type="button" onclick="setGlobalDivision('common')" id="tab-common" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-lg font-semibold text-sm text-slate-600 hover:text-slate-900 transition-all duration-200 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-network-wired"></i> DS 공통
+          </button>
+          <button type="button" onclick="setGlobalDivision('nonmemory')" id="tab-nonmemory" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-lg font-semibold text-sm text-slate-600 hover:text-slate-900 transition-all duration-200 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-microchip"></i> 비메모리 (파운드리/S.LSI)
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Preset & Condition Indicator -->
+      <div id="divisionAlert" class="mt-4 p-3.5 rounded-xl text-xs sm:text-sm bg-blue-50 border border-blue-200 text-blue-900 flex items-start justify-between gap-3">
+        <div class="flex items-start gap-2.5">
+          <i class="fa-solid fa-circle-info text-blue-600 mt-0.5 text-base"></i>
+          <div id="divisionAlertText">
+            <strong>메모리 사업부:</strong> 26년 상반기 TAI 100%, 특별경영성과급 300조원 기준 연봉 8,500만 1인 평균 <strong>5억 7,690만원</strong> 기준이 적용됩니다.
+          </div>
+        </div>
+      </div>
+
+      <!-- Inputs Grid (4 Cards: 회사성과, 계약연봉, 전년도 원천소득, 기준주가) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        
+        <!-- Input 1: Company Performance -->
+        <div class="bg-slate-50/90 p-4 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="companyProfit" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <i class="fa-solid fa-chart-line text-blue-600"></i> 올해 회사 성과
+            </label>
+            <span class="text-[11px] text-slate-400 font-medium">문턱: 200조</span>
+          </div>
+          <div class="relative flex items-center">
+            <input type="number" id="companyProfit" value="394" min="0" step="1" 
+                   class="w-full bg-white text-slate-900 text-xl font-bold rounded-lg border border-slate-300 px-3 py-2 text-right pr-12 focus:outline-none focus:border-blue-500">
+            <span class="absolute right-3 text-slate-500 font-semibold text-sm pointer-events-none">조 원</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-2 flex justify-between">
+            <span>2026 컨센서스: 394조</span>
+            <button onclick="setProfit(394)" class="text-blue-600 font-semibold hover:underline">394조 복원</button>
+          </p>
+        </div>
+
+        <!-- Input 2: My Base Salary -->
+        <div class="bg-slate-50/90 p-4 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="baseSalary" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <i class="fa-solid fa-won-sign text-blue-600"></i> 내 계약 연봉
+            </label>
+            <span class="text-[11px] text-slate-400 font-medium">성과급 제외</span>
+          </div>
+          <div class="relative flex items-center">
+            <input type="number" id="baseSalary" value="8500" min="1000" step="10" 
+                   class="w-full bg-white text-slate-900 text-xl font-bold rounded-lg border border-slate-300 px-3 py-2 text-right pr-14 focus:outline-none focus:border-blue-500">
+            <span class="absolute right-3 text-slate-500 font-semibold text-sm pointer-events-none">만 원</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-2">
+            세전 기본 월급: <strong id="quickMonthlyGross" class="text-slate-800 font-bold">-</strong>
+          </p>
+        </div>
+
+        <!-- Input 3: Prior Year Withholding Tax Income -->
+        <div class="bg-slate-50/90 p-4 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="prevYearIncome" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <i class="fa-solid fa-file-invoice-dollar text-blue-600"></i> 전년도 원천징수 소득
+            </label>
+            <span class="text-[11px] text-blue-600 font-semibold cursor-pointer hover:underline" onclick="togglePrevYearAuto()" id="prevAutoLabel">수동 입력</span>
+          </div>
+          <div class="relative flex items-center">
+            <input type="number" id="prevYearIncome" value="12750" min="1000" step="100" 
+                   class="w-full bg-white text-slate-900 text-xl font-bold rounded-lg border border-slate-300 px-3 py-2 text-right pr-14 focus:outline-none focus:border-blue-500">
+            <span class="absolute right-3 text-slate-500 font-semibold text-sm pointer-events-none">만 원</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-2">
+            건보료 보수월액 & 소득세율 산정 기준
+          </p>
+        </div>
+
+        <!-- Input 4: Samsung Stock Price (실시간 계산 및 계산 일시 표기) -->
+        <div class="bg-gradient-to-br from-blue-50/80 to-indigo-50/80 p-4 rounded-xl border-2 border-blue-300/80 focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-200 transition-all shadow-sm">
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="samsungStockPrice" class="text-xs font-extrabold text-blue-950 flex items-center gap-1.5">
+              <i class="fa-solid fa-arrow-trend-up text-blue-600"></i> 삼성전자 기준주가
+            </label>
+            <button type="button" onclick="fetchSamsungStockPrice()" id="btnFetchStock" 
+                    class="text-[11px] bg-white border border-blue-300 hover:bg-blue-600 hover:text-white text-blue-700 px-2 py-0.5 rounded font-bold transition-all shadow-xs flex items-center gap-1">
+              <i class="fa-solid fa-rotate text-[10px]"></i> 실시간 계산
+            </button>
+          </div>
+          <div class="relative flex items-center">
+            <input type="number" id="samsungStockPrice" value="270000" step="1000" 
+                   class="w-full bg-white text-blue-950 text-2xl font-black rounded-lg border border-blue-400 px-3 py-2 text-right pr-10 focus:outline-none focus:border-blue-600 tracking-tight shadow-inner">
+            <span class="absolute right-3 text-blue-900 font-bold text-sm pointer-events-none">원</span>
+          </div>
+          <div class="text-[11px] text-blue-800 mt-2" id="stockStatusContainer">
+            <div id="stockStatusText" class="flex items-center justify-between">
+              <span>1주/1달/2달 VWAP 산술평균</span>
+              <span class="text-slate-500 text-[10px]">수정 가능</span>
+            </div>
+            <!-- 계산 일시 표기 영역 -->
+            <div id="stockCalcDateText" class="text-[10px] text-slate-500 mt-0.5 hidden"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RESULT 1: 올해 총 보상 (기본: 간소화 상태) -->
+    <section class="bg-white rounded-2xl p-6 border border-slate-200 card-shadow transition-all">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">결과 1</span>
+            <h2 class="text-lg font-bold text-slate-900">올해 총 보상 산정 (26년 실적분)</h2>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5">계약연봉, OPI, TAI 및 신설 특별경영성과급(자사주) 종합</p>
+        </div>
+
+        <!-- Toggle Detail / Simplified Button (기본: 간소화 활성화) -->
+        <div class="flex items-center bg-slate-100 p-1 rounded-xl">
+          <button type="button" id="btn-comp-simple" onclick="toggleCompMode(true)" 
+                  class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all bg-white text-blue-700 shadow-sm">
+            <i class="fa-solid fa-compress-arrows-alt mr-1"></i> 간소화
+          </button>
+          <button type="button" id="btn-comp-detail" onclick="toggleCompMode(false)" 
+                  class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-600">
+            <i class="fa-solid fa-expand-arrows-alt mr-1"></i> 펼치기 (상세)
+          </button>
+        </div>
+      </div>
+
+      <!-- Simplified View (간소화 모드 - 기본 노출) -->
+      <div id="compSimplifiedView" class="mt-6">
+        <div class="p-6 rounded-2xl bg-gradient-to-br from-blue-900 via-indigo-950 to-slate-900 text-white relative overflow-hidden shadow-lg">
+          <div class="absolute right-0 top-0 translate-x-10 -translate-y-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-xs uppercase tracking-wider text-blue-300 font-semibold flex items-center gap-1.5">
+              <i class="fa-solid fa-award"></i> 특별경영성과급 핵심 요약
+            </span>
+            <span class="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full font-medium">전액 자사주 지급</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+              <span class="text-xs text-slate-300 block mb-1">특별성과급 공제 전 (세전)</span>
+              <p class="text-2xl sm:text-3xl font-extrabold text-white" id="simpleSpecialPre">-</p>
+              <p class="text-[11px] text-slate-400 mt-1">DS 사업성과 10.5% 기반 1인 환산</p>
+            </div>
+            <div class="bg-blue-600/20 border border-blue-400/30 rounded-xl p-4">
+              <span class="text-xs text-blue-200 block mb-1">특별성과급 공제 후 (세후 실지급 자사주)</span>
+              <p class="text-2xl sm:text-3xl font-extrabold text-emerald-400" id="simpleSpecialPost">-</p>
+              <p class="text-[11px] text-blue-200 mt-1">원천징수(54.476%) 차감 후 확정액</p>
+            </div>
+            <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+              <span class="text-xs text-amber-200 block mb-1">1/3 즉시 매도 가능 금액</span>
+              <p class="text-2xl sm:text-3xl font-extrabold text-amber-300" id="simpleSpecialImmediate">-</p>
+              <p class="text-[11px] text-slate-300 mt-1" id="simpleSpecialShares">예상 0주 즉시 매도 가능</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed View (펼치기 모드 - 기본 숨김) -->
+      <div id="compDetailedView" class="hidden mt-6 space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+            <div class="flex items-center justify-between text-xs text-slate-500 font-semibold mb-2">
+              <span>① 계약 연봉</span>
+              <span class="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded text-[10px]">기본급</span>
+            </div>
+            <div class="text-xl font-bold text-slate-900" id="cardBaseSalary">-</div>
+            <div class="text-xs text-slate-500 mt-1 flex justify-between">
+              <span>세후 예상:</span>
+              <span class="font-bold text-slate-700" id="cardBaseSalaryPost">-</span>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+            <div class="flex items-center justify-between text-xs text-slate-500 font-semibold mb-2">
+              <span>② TAI (목표달성장려금)</span>
+              <span class="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-[10px]">연 10% 고정</span>
+            </div>
+            <div class="text-xl font-bold text-blue-700" id="cardTaiPre">-</div>
+            <div class="text-xs text-slate-500 mt-1 flex justify-between">
+              <span>세후 예상:</span>
+              <span class="font-bold text-slate-700" id="cardTaiPost">-</span>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+            <div class="flex items-center justify-between text-xs text-slate-500 font-semibold mb-2">
+              <span>③ OPI (성과인센티브)</span>
+              <span class="bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded text-[10px]">상한 50%</span>
+            </div>
+            <div class="text-xl font-bold text-purple-700" id="cardOpiPre">-</div>
+            <div class="text-xs text-slate-500 mt-1 flex justify-between">
+              <span>세후 예상:</span>
+              <span class="font-bold text-slate-700" id="cardOpiPost">-</span>
+            </div>
+          </div>
+
+          <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-4">
+            <div class="flex items-center justify-between text-xs text-blue-800 font-semibold mb-2">
+              <span>현금 보상 합계 (①+②+③)</span>
+              <span class="bg-blue-600 text-white px-1.5 py-0.5 rounded text-[10px]">계좌 입금</span>
+            </div>
+            <div class="text-xl font-bold text-blue-900" id="cardCashTotalPre">-</div>
+            <div class="text-xs text-blue-800 mt-1 flex justify-between">
+              <span>세후 총 현금:</span>
+              <span class="font-bold text-blue-900" id="cardCashTotalPost">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 text-white rounded-2xl p-6 border border-blue-800/40 relative shadow-xl">
+          <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-white/10 gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-400 text-slate-900">NEW 2026</span>
+                <h3 class="text-lg font-bold">특별경영성과급 세부 명세</h3>
+              </div>
+              <p class="text-xs text-slate-300 mt-1">26년 영업이익에 따라 27년 3월 세후 전액 자사주로 입고되는 주식 성과급</p>
+            </div>
+            <div class="text-right">
+              <span class="text-xs text-slate-400 block">원천징수 기준세율</span>
+              <span class="text-sm font-bold text-amber-300">54.476% (소득·지방세 49.5% + 건보·고용 4.976%)</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+            <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+              <span class="text-xs text-slate-300 block mb-1">원천징수 전 (세전 가치)</span>
+              <div class="text-xl sm:text-2xl font-bold text-white" id="specPreDetail">-</div>
+              <span class="text-[11px] text-slate-400 mt-1 block">영업이익 10.5% 부문 환산액</span>
+            </div>
+            <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+              <span class="text-xs text-rose-300 block mb-1">원천징수 세액 (54.476%)</span>
+              <div class="text-xl sm:text-2xl font-bold text-rose-400" id="specTaxDetail">-</div>
+              <span class="text-[11px] text-slate-400 mt-1 block">최고구간 원천징수 합계</span>
+            </div>
+            <div class="bg-emerald-500/10 border border-emerald-400/30 rounded-xl p-4">
+              <span class="text-xs text-emerald-300 block mb-1">세후 자사주 환산금액</span>
+              <div class="text-xl sm:text-2xl font-bold text-emerald-400" id="specPostDetail">-</div>
+              <span class="text-[11px] text-emerald-300/90 mt-1 block font-semibold" id="specSharesDetail">총 0 주 수령</span>
+            </div>
+            <div class="bg-amber-400/10 border border-amber-400/30 rounded-xl p-4">
+              <span class="text-xs text-amber-300 block mb-1">1/3 즉시 매도 가능액</span>
+              <div class="text-xl sm:text-2xl font-bold text-amber-300" id="specImmDetail">-</div>
+              <span class="text-[11px] text-amber-200 mt-1 block font-semibold" id="specImmSharesDetail">0 주 즉시 매도 가능</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <h4 class="font-bold text-amber-950 flex items-center gap-2">
+                  <i class="fa-solid fa-piggy-bank text-amber-600"></i> 연말정산 예상 환급액
+                </h4>
+                <span class="text-xs bg-amber-200/70 text-amber-900 px-2 py-0.5 rounded font-bold">13월의 월급</span>
+              </div>
+              <p class="text-xs text-amber-800 leading-relaxed mb-4">
+                특별성과급 지급 시 소득세 최고세율(49.5%)로 일괄 원천징수되므로, 종합소득 누진공제 반영 시 실제 결정세액과의 차액만큼 익년도 종합과세/연말정산 시 대규모 환급이 발생합니다.
+              </p>
+            </div>
+            <div class="bg-white rounded-xl p-4 border border-amber-200 flex items-center justify-between">
+              <div>
+                <span class="text-xs text-slate-500 block">예상 환급 세액 (소득세+지방세)</span>
+                <span class="text-2xl font-extrabold text-amber-600" id="refundEstimate">-</span>
+              </div>
+              <div class="text-right text-xs text-slate-500">
+                <span class="block">원천징수 총세액: <strong id="totalWithheldTax" class="text-slate-800">-</strong></span>
+                <span class="block">실제 결정세액: <strong id="finalCalculatedTax" class="text-slate-800">-</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 text-white rounded-2xl p-5 flex flex-col justify-between shadow-md">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <h4 class="font-bold text-white flex items-center gap-2">
+                  <i class="fa-solid fa-calculator text-blue-400"></i> 올해 총 보상 종합 (Grand Total)
+                </h4>
+                <span class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded font-bold">현금 + 자사주</span>
+              </div>
+              <p class="text-xs text-slate-400 mb-4">계약연봉 + TAI + OPI + 특별경영성과급의 총 가치입니다.</p>
+            </div>
+            <div class="grid grid-cols-2 gap-3 bg-slate-800 rounded-xl p-4 border border-slate-700">
+              <div>
+                <span class="text-xs text-slate-400 block mb-0.5">총 보상 (세전)</span>
+                <span class="text-xl sm:text-2xl font-extrabold text-white" id="grandTotalPre">-</span>
+              </div>
+              <div>
+                <span class="text-xs text-emerald-400 block mb-0.5">총 보상 (세후 실지급)</span>
+                <span class="text-xl sm:text-2xl font-extrabold text-emerald-400" id="grandTotalPost">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULT 2: 5년간 특별성과금 및 종합보상 (기본: 간소화 상태) -->
+    <section class="bg-white rounded-2xl p-6 border border-slate-200 card-shadow">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800">결과 2</span>
+            <h2 class="text-lg font-bold text-slate-900">5년간 특별성과금 및 종합보상 (2026~2030 실적)</h2>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5">자사주 1/3 분할 매도 및 연도별 OPI · TAI · 특별성과금 종합 시뮬레이션</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button type="button" id="btn-5yr-detail" onclick="toggle5YrDetail()" 
+                  class="px-4 py-2 text-xs font-bold rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-xs">
+            <i class="fa-solid fa-sliders text-indigo-600"></i>
+            <span id="btn5YrText">5개년 종합 상세표 및 설정 (자세히)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 5-Year Simplified Summary Cards (간소화 뷰) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+          <span class="text-xs text-slate-500 font-semibold block mb-1">5년간 총 특별성과금 (공제 전)</span>
+          <div class="text-2xl font-extrabold text-slate-900" id="fiveYrTotalPre">-</div>
+          <span class="text-[11px] text-slate-400 mt-1 block">5개년 합산 세전 총액</span>
+        </div>
+        <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-4">
+          <span class="text-xs text-blue-700 font-semibold block mb-1">5년간 총 특별성과금 (공제 후)</span>
+          <div class="text-2xl font-extrabold text-blue-800" id="fiveYrTotalPost">-</div>
+          <span class="text-[11px] text-blue-600 mt-1 block">원천징수 후 순수 자사주 가치</span>
+        </div>
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+          <span class="text-xs text-emerald-700 font-semibold block mb-1">5년간 총 매도 가능 해제액</span>
+          <div class="text-2xl font-extrabold text-emerald-700" id="fiveYrUnlockedSum">-</div>
+          <span class="text-[11px] text-emerald-600 mt-1 block">2027~2031년 기간 내 해제액</span>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <span class="text-xs text-amber-800 font-semibold block mb-1">31년 이후 잔여 락업 자사주</span>
+          <div class="text-2xl font-extrabold text-amber-700" id="fiveYrRemainingLocked">-</div>
+          <span class="text-[11px] text-amber-600 mt-1 block">2032~2033년에 해제될 잔액</span>
+        </div>
+      </div>
+
+      <!-- Detail Input & Comprehensive 5-Year Table Section (기본 숨김: 자세히 클릭 시 오픈) -->
+      <div id="fiveYrInputSection" class="hidden mt-6 space-y-6">
+        
+        <!-- Table 1: 연도별 OPI, TAI, 특별성과금, 세전, 세후 종합 명세표 -->
+        <div class="p-5 rounded-2xl bg-indigo-50/50 border border-indigo-200 transition-all">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h4 class="text-sm font-bold text-indigo-950 flex items-center gap-1.5">
+                <i class="fa-solid fa-table-cells text-indigo-600"></i> 5개년 연도별 OPI · TAI · 특별성과금 종합 보상표 (세전 / 세후)
+              </h4>
+              <p class="text-xs text-slate-500 mt-0.5">※ OPI 50% 상한, TAI 연 10%, 특별성과급 및 당해 소득세율 반영 종합 보상 명세서</p>
+            </div>
+            <span class="text-[11px] bg-indigo-200/60 text-indigo-900 px-2.5 py-0.5 rounded font-bold">단위: 만원</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-xs text-right border-collapse bg-white rounded-xl shadow-xs overflow-hidden">
+              <thead>
+                <tr class="bg-indigo-900 text-white font-semibold">
+                  <th class="py-2.5 px-3 text-left">실적연도 (지급연도)</th>
+                  <th class="py-2.5 px-3">계약연봉</th>
+                  <th class="py-2.5 px-3">TAI (10%)</th>
+                  <th class="py-2.5 px-3">OPI (50%)</th>
+                  <th class="py-2.5 px-3 text-amber-300">특별성과금(세전)</th>
+                  <th class="py-2.5 px-3 text-indigo-200 font-bold">총 보상 (세전)</th>
+                  <th class="py-2.5 px-3 text-emerald-300 font-extrabold bg-indigo-950">총 보상 (세후)</th>
+                </tr>
+              </thead>
+              <tbody id="fiveYearCompTableBody" class="divide-y divide-slate-200 text-slate-700">
+                <!-- Dynamic Rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Table 2: 연도별 파견/소속, 영업이익, 연봉 설정 편집표 -->
+        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 transition-all">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h4 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                <i class="fa-solid fa-pen-to-square text-indigo-600"></i> 연도별 소속 사업부(파견), 영업이익, 계약연봉 세부 편집
+              </h4>
+              <p class="text-xs text-slate-500 mt-0.5">※ 상단 메인 탭 선택 시 5년 전체가 자동 동기화되며, 필요한 연도만 개별 수정 가능합니다.</p>
+            </div>
+            <button onclick="reset5YrDefaults()" class="text-xs text-indigo-600 hover:underline font-bold">
+              기본값 리셋
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-xs text-center border-collapse">
+              <thead>
+                <tr class="bg-slate-200/80 text-slate-700 font-semibold border-b border-slate-300">
+                  <th class="py-2.5 px-3 text-left w-36">항목</th>
+                  <th class="py-2.5 px-3">2026년 (27지급)</th>
+                  <th class="py-2.5 px-3">2027년 (28지급)</th>
+                  <th class="py-2.5 px-3">2028년 (29지급)</th>
+                  <th class="py-2.5 px-3">2029년 (30지급)</th>
+                  <th class="py-2.5 px-3">2030년 (31지급)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 bg-white">
+                
+                <tr class="bg-indigo-50/40">
+                  <td class="py-2.5 px-3 font-bold text-indigo-900 text-left bg-indigo-100/40">
+                    <i class="fa-solid fa-arrows-split-up-and-left mr-1"></i> 소속 사업부 (파견)
+                  </td>
+                  <td class="p-1.5">
+                    <select id="div_2026" onchange="recalculateAll()" class="w-full py-1.5 px-1 text-xs border rounded-lg bg-white font-bold text-slate-800">
+                      <option value="memory">메모리 (100%)</option>
+                      <option value="common">DS 공통 (70%)</option>
+                      <option value="nonmemory_surplus">비메모리 (흑자 100%)</option>
+                      <option value="nonmemory_deficit">비메모리 (적자 60%)</option>
+                    </select>
+                  </td>
+                  <td class="p-1.5">
+                    <select id="div_2027" onchange="recalculateAll()" class="w-full py-1.5 px-1 text-xs border rounded-lg bg-white font-bold text-slate-800">
+                      <option value="memory">메모리 (100%)</option>
+                      <option value="common">DS 공통 (70%)</option>
+                      <option value="nonmemory_surplus" selected>비메모리 (흑자 100%)</option>
+                      <option value="nonmemory_deficit">비메모리 (적자 60%)</option>
+                    </select>
+                  </td>
+                  <td class="p-1.5">
+                    <select id="div_2028" onchange="recalculateAll()" class="w-full py-1.5 px-1 text-xs border rounded-lg bg-white font-bold text-slate-800">
+                      <option value="memory">메모리 (100%)</option>
+                      <option value="common">DS 공통 (70%)</option>
+                      <option value="nonmemory_surplus" selected>비메모리 (흑자 100%)</option>
+                      <option value="nonmemory_deficit">비메모리 (적자 60%)</option>
+                    </select>
+                  </td>
+                  <td class="p-1.5">
+                    <select id="div_2029" onchange="recalculateAll()" class="w-full py-1.5 px-1 text-xs border rounded-lg bg-white font-bold text-slate-800">
+                      <option value="memory">메모리 (100%)</option>
+                      <option value="common">DS 공통 (70%)</option>
+                      <option value="nonmemory_surplus" selected>비메모리 (흑자 100%)</option>
+                      <option value="nonmemory_deficit">비메모리 (적자 60%)</option>
+                    </select>
+                  </td>
+                  <td class="p-1.5">
+                    <select id="div_2030" onchange="recalculateAll()" class="w-full py-1.5 px-1 text-xs border rounded-lg bg-white font-bold text-slate-800">
+                      <option value="memory">메모리 (100%)</option>
+                      <option value="common">DS 공통 (70%)</option>
+                      <option value="nonmemory_surplus" selected>비메모리 (흑자 100%)</option>
+                      <option value="nonmemory_deficit">비메모리 (적자 60%)</option>
+                    </select>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="py-2.5 px-3 font-bold text-slate-700 text-left bg-slate-50">
+                    DS 영업이익 (조원)
+                    <span class="block text-[10px] text-slate-400 font-normal">문턱: 26~28년 200조 / 이후 100조</span>
+                  </td>
+                  <td class="p-1.5"><input type="number" id="p_2026" value="394" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
+                  <td class="p-1.5"><input type="number" id="p_2027" value="567" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
+                  <td class="p-1.5"><input type="number" id="p_2028" value="576" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
+                  <td class="p-1.5"><input type="number" id="p_2029" value="518" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
+                  <td class="p-1.5"><input type="number" id="p_2030" value="466" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
+                </tr>
+
+                <tr>
+                  <td class="py-2.5 px-3 font-bold text-slate-700 text-left bg-slate-50">
+                    계약연봉 (만원)
+                    <span class="block text-[10px] text-slate-400 font-normal">연 4% 증가 자동반영</span>
+                  </td>
+                  <td class="p-1.5"><input type="number" id="s_2026" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900"></td>
+                  <td class="p-1.5"><input type="number" id="s_2027" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900"></td>
+                  <td class="p-1.5"><input type="number" id="s_2028" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900"></td>
+                  <td class="p-1.5"><input type="number" id="s_2029" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900"></td>
+                  <td class="p-1.5"><input type="number" id="s_2030" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Chart and Breakdown Table -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6 items-center">
+        <!-- Chart Area (Stacked Bar with Cohort Text Label Inside Stacks) -->
+        <div class="lg:col-span-7 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-chart-column text-blue-600"></i> 지급연도별 누적 현황 (실적 발생연도 및 금액 내부 표기)
+            </h4>
+            <span class="text-[11px] text-slate-500">단위: 억원 (만원 환산)</span>
+          </div>
+          <div class="h-72 sm:h-84 w-full relative">
+            <canvas id="vestingChart"></canvas>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-2 text-center">
+            * 바 내부 텍스트: <strong>[실적년도] [금액(억)]</strong> (녹색: 당해 매도가능 / 주황·회색: 당해 락업잔여)
+          </p>
+        </div>
+
+        <!-- Table Breakdown Area -->
+        <div class="lg:col-span-5 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200 flex flex-col justify-between h-full">
+          <div>
+            <h4 class="text-xs sm:text-sm font-bold text-slate-800 mb-2 flex items-center gap-1.5">
+              <i class="fa-solid fa-table-list text-indigo-600"></i> 연도별 신규 수령 및 매도 해제 명세
+            </h4>
+            <div class="overflow-x-auto text-xs">
+              <table class="w-full text-right border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-300 text-slate-500 text-[11px]">
+                    <th class="py-2 text-left">지급연도</th>
+                    <th class="py-2">신규입고(세후)</th>
+                    <th class="py-2 text-emerald-600 font-bold">당해 매도가능</th>
+                    <th class="py-2 text-amber-600">당해 락업잔여</th>
+                  </tr>
+                </thead>
+                <tbody id="vestingTableBody" class="divide-y divide-slate-200 text-slate-700">
+                  <!-- Dynamic JS rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="mt-4 p-3 rounded-lg bg-blue-100/70 text-blue-950 text-[11px] leading-relaxed">
+            <i class="fa-solid fa-info-circle mr-1 text-blue-700"></i>
+            매년 3월 세후 자사주가 계좌에 입고되며, 입고 즉시 1/3, 1년 뒤 1/3, 2년 뒤 마지막 1/3이 순차 매도 가능해집니다.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULT 3: 향후 5년간 예상 월급 -->
+    <section class="bg-white rounded-2xl p-6 border border-slate-200 card-shadow">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">결과 3</span>
+            <h2 class="text-lg font-bold text-slate-900">향후 5년간 예상 월급 (매월 21일 실수령액 명세)</h2>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5">전년도 원천소득(보수총액) 기반 건보료 및 소득세 누진공제를 정밀 반영한 실수령액</p>
+        </div>
+        <div class="text-xs text-slate-500 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
+          <span>* 성과급 제외한 순수 기본급여 명세서</span>
+        </div>
+      </div>
+
+      <!-- 5-Year Monthly Salary Table -->
+      <div class="mt-6 overflow-x-auto">
+        <table class="min-w-full text-xs text-right border-collapse">
+          <thead>
+            <tr class="bg-slate-100 text-slate-700 font-bold border-y border-slate-200">
+              <th class="py-3 px-3 text-left">연도</th>
+              <th class="py-3 px-3">계약연봉</th>
+              <th class="py-3 px-3">세전 월급</th>
+              <th class="py-3 px-3 text-slate-500">국민연금</th>
+              <th class="py-3 px-3 text-slate-500">건보+장기요양</th>
+              <th class="py-3 px-3 text-slate-500">고용보험</th>
+              <th class="py-3 px-3 text-slate-500">소득세+지방세</th>
+              <th class="py-3 px-3 text-rose-600 font-bold">공제 합계</th>
+              <th class="py-3 px-3 text-emerald-700 text-sm font-extrabold bg-emerald-50/50">예상 실수령 월급</th>
+            </tr>
+          </thead>
+          <tbody id="monthlySalaryTableBody" class="divide-y divide-slate-200 text-slate-700 bg-white">
+            <!-- Dynamic Rows -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-200 leading-relaxed">
+        <div class="flex items-start gap-2">
+          <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
+          <div>
+            <strong>건보료 산정 기준:</strong> 당해 연봉이 아닌 <strong>전년도 원천소득(보수총액)</strong>을 12로 나눈 보수월액 기준으로 매월 원천공제됩니다.
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <i class="fa-solid fa-shield-halved text-blue-600 mt-0.5"></i>
+          <div>
+            <strong>28년 이후 특별성과급 건보료 보호 규정:</strong> 특별성과급은 지급 시점(27년 3월)에 이미 건보료 4.976%를 사전 원천징수해 두므로, 28년에 공단 납부 시 <strong>월급에서 추가로 수백만 원씩 공제되지 않도록 사내 제도로 완벽히 보호</strong>됩니다.
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-slate-900 text-slate-400 text-xs py-8 border-t border-slate-800 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="space-y-1 text-center md:text-left">
+        <p class="font-bold text-slate-200">삼성전자 DS 성과급 & 연봉 시뮬레이터 (2026 사내 규정 반영 모형)</p>
+        <p class="text-slate-500">※ 본 계산기는 사내 공개 자료 및 언론 보도에 기반한 시뮬레이션입니다.</p>
+      </div>
+      <div class="text-slate-500 text-center md:text-right">
+        <p>OPI 상한 50% · TAI 연 10% · 특별경영성과급 10.5% (문턱: 26~28년 200조, 이후 100조)</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Calculator Script -->
+  <script>
+    let globalDivision = 'memory'; // 'memory', 'common', 'nonmemory'
+    let isSimplifiedMode = true; // 기본적으로 간소화 상태로 시작
+    let is5YrDetailOpen = false;  // 기본적으로 닫혀있음 (간소화)
+    let isPrevAuto = false;
+    let chartInstance = null;
+
+    function formatKRW(val) {
+      if (isNaN(val) || val === null) return '0원';
+      const roundVal = Math.round(val);
+      if (Math.abs(roundVal) >= 100000000) {
+        const eok = Math.floor(roundVal / 100000000);
+        const man = Math.floor((roundVal % 100000000) / 10000);
+        return man > 0 ? `${eok.toLocaleString()}억 ${man.toLocaleString()}만원` : `${eok.toLocaleString()}억원`;
+      } else if (Math.abs(roundVal) >= 10000) {
+        const man = Math.floor(roundVal / 10000);
+        return `${man.toLocaleString()}만원`;
+      }
+      return `${roundVal.toLocaleString()}원`;
+    }
+
+    function nComma(num) {
+      return Math.round(num).toLocaleString();
+    }
+
+    // 소속 사업부 변경 시 5년 전체 자동 동기화
+    function setGlobalDivision(div) {
+      globalDivision = div;
+      ['memory', 'common', 'nonmemory'].forEach(d => {
+        const tab = document.getElementById(`tab-${d}`);
+        tab.className = (d === div)
+          ? 'flex-1 sm:flex-initial px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 tab-active flex items-center justify-center gap-2'
+          : 'flex-1 sm:flex-initial px-5 py-2.5 rounded-lg font-semibold text-sm text-slate-600 hover:text-slate-900 transition-all duration-200 flex items-center justify-center gap-2';
+      });
+
+      const alertText = document.getElementById('divisionAlertText');
+      if (div === 'memory') {
+        alertText.innerHTML = `<strong>메모리 사업부:</strong> 26년 상반기 TAI 100%, 특별경영성과급 300조원 기준 연봉 8,500만 1인 평균 <strong>5억 7,690만원</strong> 기준이 적용됩니다.`;
+      } else if (div === 'common') {
+        alertText.innerHTML = `<strong>DS 공통 조직:</strong> 메모리 대비 70% 수준인 300조원 기준 1인 평균 <strong>4억 383만원</strong>이 적용됩니다.`;
+      } else if (div === 'nonmemory') {
+        alertText.innerHTML = `<strong>비메모리 (파운드리 / S.LSI):</strong> 26년 실적분은 유예(100% 반영: 1.6억원), 27년 실적분부터 적자 시 60%(9,600만원) 규칙이 적용됩니다.`;
+      }
+
+      for (let yr = 2026; yr <= 2030; yr++) {
+        const sel = document.getElementById(`div_${yr}`);
+        if (sel) {
+          if (div === 'memory') sel.value = 'memory';
+          else if (div === 'common') sel.value = 'common';
+          else if (div === 'nonmemory') sel.value = (yr === 2026) ? 'nonmemory_surplus' : 'nonmemory_surplus';
+        }
+      }
+
+      recalculateAll();
+    }
+
+    function setProfit(val) {
+      document.getElementById('companyProfit').value = val;
+      recalculateAll();
+    }
+
+    function togglePrevYearAuto() {
+      isPrevAuto = !isPrevAuto;
+      const label = document.getElementById('prevAutoLabel');
+      if (isPrevAuto) {
+        label.innerText = '자동 (연봉×1.5)';
+        label.classList.add('text-blue-600');
+        const sal = parseFloat(document.getElementById('baseSalary').value) || 8500;
+        document.getElementById('prevYearIncome').value = Math.round(sal * 1.5);
+      } else {
+        label.innerText = '수동 입력 중';
+        label.classList.remove('text-blue-600');
+      }
+      recalculateAll();
+    }
+
+    // 결과 1 토글 (간소화 vs 펼치기)
+    function toggleCompMode(isSimple) {
+      isSimplifiedMode = isSimple;
+      const simpleView = document.getElementById('compSimplifiedView');
+      const detailView = document.getElementById('compDetailedView');
+      const btnSimple = document.getElementById('btn-comp-simple');
+      const btnDetail = document.getElementById('btn-comp-detail');
+
+      if (isSimple) {
+        simpleView.classList.remove('hidden');
+        detailView.classList.add('hidden');
+        btnSimple.className = 'px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all bg-white text-blue-700 shadow-sm';
+        btnDetail.className = 'px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-600';
+      } else {
+        simpleView.classList.add('hidden');
+        detailView.classList.remove('hidden');
+        btnSimple.className = 'px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-600';
+        btnDetail.className = 'px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all bg-white text-blue-700 shadow-sm';
+      }
+    }
+
+    // 결과 2 자세히 토글 (5개년 종합표 및 설정)
+    function toggle5YrDetail() {
+      is5YrDetailOpen = !is5YrDetailOpen;
+      const sec = document.getElementById('fiveYrInputSection');
+      const btnText = document.getElementById('btn5YrText');
+      if (is5YrDetailOpen) {
+        sec.classList.remove('hidden');
+        btnText.innerText = '5개년 종합 상세표 및 설정 닫기';
+      } else {
+        sec.classList.add('hidden');
+        btnText.innerText = '5개년 종합 상세표 및 설정 (자세히)';
+      }
+    }
+
+    function reset5YrDefaults() {
+      const profits = [394, 567, 576, 518, 466];
+      for (let i = 0; i < 5; i++) {
+        document.getElementById(`p_${2026 + i}`).value = profits[i];
+      }
+      const base = parseFloat(document.getElementById('baseSalary').value) || 8500;
+      update5YrSalaries(base);
+      setGlobalDivision(globalDivision);
+      recalculateAll();
+    }
+
+    function update5YrSalaries(base) {
+      for (let i = 0; i < 5; i++) {
+        const year = 2026 + i;
+        const sInput = document.getElementById(`s_${year}`);
+        sInput.value = Math.round(base * Math.pow(1.04, i));
+      }
+    }
+
+    // 실시간 기준주가 API 호출 (성공 시 계산 날짜 및 시간 표기)
+    async function fetchSamsungStockPrice() {
+      const btn = document.getElementById('btnFetchStock');
+      const status = document.getElementById('stockStatusText');
+      const dateText = document.getElementById('stockCalcDateText');
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-[10px]"></i> 계산 중...`;
+      
+      try {
+        let calculatedPrice = null;
+
+        // 1차 시도: 로컬/서버리스 엔드포인트 /api/stock 호출
+        try {
+          const apiRes = await fetch('/api/stock');
+          if (apiRes.ok) {
+            const apiData = await apiRes.json();
+            if (apiData.success && apiData.basePrice) {
+              calculatedPrice = apiData.basePrice;
+            }
+          }
+        } catch (e) {
+          // fallback
+        }
+
+        // 2차 시도: 브라우저 프록시 직접 VWAP 계산
+        if (!calculatedPrice) {
+          const proxyUrl = encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/005930.KS?range=3mo&interval=1d');
+          const res = await fetch(`https://api.allorigins.win/raw?url=${proxyUrl}`);
+          if (!res.ok) throw new Error('Proxy fetch error');
+          const data = await res.json();
+          const result = data.chart.result[0];
+          const quotes = result.indicators.quote[0];
+          const closes = quotes.close;
+          const volumes = quotes.volume;
+          
+          const validDays = [];
+          for (let i = 0; i < closes.length; i++) {
+            if (closes[i] !== null && volumes[i] !== null && volumes[i] > 0) {
+              validDays.push({ price: closes[i], volume: volumes[i] });
+            }
+          }
+
+          if (validDays.length < 20) throw new Error('Not enough trading days');
+
+          const calcVWAP = (daysCount) => {
+            const slice = validDays.slice(-daysCount);
+            let sumPV = 0, sumV = 0;
+            slice.forEach(d => {
+              sumPV += d.price * d.volume;
+              sumV += d.volume;
+            });
+            return sumV > 0 ? (sumPV / sumV) : 0;
+          };
+
+          const vwap1w = calcVWAP(5);
+          const vwap1m = calcVWAP(20);
+          const vwap2m = calcVWAP(40);
+
+          calculatedPrice = Math.round((vwap1w + vwap1m + vwap2m) / 3);
+        }
+
+        if (calculatedPrice && calculatedPrice > 0) {
+          document.getElementById('samsungStockPrice').value = calculatedPrice;
+          
+          // 현재 계산 날짜 및 시각 생성
+          const now = new Date();
+          const yyyy = now.getFullYear();
+          const mm = String(now.getMonth() + 1).padStart(2, '0');
+          const dd = String(now.getDate()).padStart(2, '0');
+          const hh = String(now.getHours()).padStart(2, '0');
+          const min = String(now.getMinutes()).padStart(2, '0');
+          const dateStr = `${yyyy}.${mm}.${dd} ${hh}:${min}`;
+
+          status.innerHTML = `<span class="text-emerald-700 font-bold"><i class="fa-solid fa-circle-check"></i> 기준주가(${calculatedPrice.toLocaleString()}원) 반영</span>`;
+          dateText.classList.remove('hidden');
+          dateText.innerHTML = `<i class="fa-regular fa-clock"></i> 계산일시: <strong>${dateStr}</strong>`;
+          
+          recalculateAll();
+        } else {
+          throw new Error('계산 실패');
+        }
+      } catch (e) {
+        console.warn('기준주가 계산 오류:', e);
+        status.innerHTML = `<span class="text-rose-600 font-semibold"><i class="fa-solid fa-triangle-exclamation"></i> 자동계산 실패 (직접 입력해 주세요)</span>`;
+      } finally {
+        btn.innerHTML = `<i class="fa-solid fa-rotate text-[10px]"></i> 실시간 계산`;
+      }
+    }
+
+    function calcIncomeTax(taxableIncomeWon) {
+      if (taxableIncomeWon <= 0) return 0;
+      let salaryDeduction = 0;
+      if (taxableIncomeWon <= 5000000) salaryDeduction = taxableIncomeWon * 0.7;
+      else if (taxableIncomeWon <= 15000000) salaryDeduction = 3500000 + (taxableIncomeWon - 5000000) * 0.4;
+      else if (taxableIncomeWon <= 45000000) salaryDeduction = 7500000 + (taxableIncomeWon - 15000000) * 0.15;
+      else if (taxableIncomeWon <= 100000000) salaryDeduction = 12000000 + (taxableIncomeWon - 45000000) * 0.05;
+      else salaryDeduction = 14750000 + (taxableIncomeWon - 100000000) * 0.02;
+      salaryDeduction = Math.min(salaryDeduction, 20000000);
+
+      const taxBase = Math.max(0, taxableIncomeWon - salaryDeduction - 1500000);
+      let tax = 0;
+      if (taxBase <= 14000000) tax = taxBase * 0.06;
+      else if (taxBase <= 50000000) tax = 840000 + (taxBase - 14000000) * 0.15;
+      else if (taxBase <= 88000000) tax = 6240000 + (taxBase - 50000000) * 0.24;
+      else if (taxBase <= 150000000) tax = 15360000 + (taxBase - 88000000) * 0.35;
+      else if (taxBase <= 300000000) tax = 37060000 + (taxBase - 150000000) * 0.38;
+      else if (taxBase <= 500000000) tax = 94060000 + (taxBase - 300000000) * 0.40;
+      else if (taxBase <= 1000000000) tax = 174060000 + (taxBase - 500000000) * 0.42;
+      else tax = 384060000 + (taxBase - 1000000000) * 0.45;
+
+      let taxCredit = (tax <= 1300000) ? tax * 0.55 : 715000 + (tax - 1300000) * 0.3;
+      if (taxableIncomeWon > 70000000) taxCredit = Math.min(taxCredit, 500000);
+      else if (taxableIncomeWon > 55000000) taxCredit = Math.min(taxCredit, 660000);
+      else taxCredit = Math.min(taxCredit, 740000);
+
+      const finalTax = Math.max(0, tax - taxCredit);
+      return finalTax * 1.1;
+    }
+
+    function calcMonthlyDeductions(monthlyGrossWon, prevYearWon) {
+      const npsBase = Math.min(monthlyGrossWon, 6127500);
+      const nps = Math.floor(npsBase * 0.045);
+
+      const nhiMonthlyBase = Math.max(monthlyGrossWon, (prevYearWon / 12));
+      const nhi = Math.floor(nhiMonthlyBase * 0.03545);
+      const ltc = Math.floor(nhi * 0.1295);
+
+      const ei = Math.floor(monthlyGrossWon * 0.009);
+
+      const yearlyEquiv = monthlyGrossWon * 12;
+      const prevTax = calcIncomeTax(prevYearWon);
+      const effectiveRate = Math.min(0.25, Math.max(0.12, prevTax / prevYearWon));
+      
+      const baseMonthlyTax = Math.floor(calcIncomeTax(yearlyEquiv) / 12);
+      const weightedTax = Math.max(baseMonthlyTax, Math.floor(monthlyGrossWon * effectiveRate));
+
+      const totalDeduction = nps + nhi + ltc + ei + weightedTax;
+      const netMonthly = monthlyGrossWon - totalDeduction;
+
+      return {
+        gross: monthlyGrossWon,
+        nps,
+        nhiPlusLtc: nhi + ltc,
+        ei,
+        incTax: weightedTax,
+        totalDeduction,
+        netMonthly
+      };
+    }
+
+    function getSpecialBonus(pProfit, salaryManwon, divCode, yr) {
+      const threshold = (yr <= 2028) ? 200 : 100;
+      if (pProfit < threshold) return 0;
+
+      let baseBonus = 0;
+      if (divCode === 'memory') {
+        baseBonus = 57690;
+      } else if (divCode === 'common') {
+        baseBonus = 57690 * 0.7;
+      } else if (divCode === 'nonmemory_deficit') {
+        baseBonus = 9600;
+      } else if (divCode === 'nonmemory_surplus') {
+        baseBonus = 16000;
+      }
+
+      return baseBonus * (pProfit / 300) * (salaryManwon / 8500);
+    }
+
+    function recalculateAll() {
+      const currentProfit = parseFloat(document.getElementById('companyProfit').value) || 0;
+      const currentSalary = parseFloat(document.getElementById('baseSalary').value) || 8500;
+      const stockPrice = parseFloat(document.getElementById('samsungStockPrice').value) || 270000;
+      
+      let prevIncome = parseFloat(document.getElementById('prevYearIncome').value);
+      if (isNaN(prevIncome) || prevIncome <= 0) {
+        prevIncome = currentSalary * 1.5;
+        document.getElementById('prevYearIncome').value = Math.round(prevIncome);
+      }
+
+      const quickGross = Math.round((currentSalary * 10000) / 12);
+      document.getElementById('quickMonthlyGross').innerText = `${nComma(quickGross)}원`;
+
+      // 1. 올해 총보상
+      const taiPre = currentSalary * 0.10;
+      const opiPre = currentSalary * 0.50;
+      const cashTotalPre = currentSalary + taiPre + opiPre;
+
+      const prevTax = calcIncomeTax(prevIncome * 10000);
+      const effectiveRate = Math.min(0.40, Math.max(0.15, prevTax / (prevIncome * 10000)));
+
+      const salaryNet = currentSalary * (1 - effectiveRate);
+      const taiNet = taiPre * (1 - effectiveRate);
+      const opiNet = opiPre * (1 - effectiveRate);
+      const cashTotalPost = salaryNet + taiNet + opiNet;
+
+      const div2026Sel = document.getElementById('div_2026');
+      const div2026 = div2026Sel ? div2026Sel.value : globalDivision;
+      const specBonusPre = getSpecialBonus(currentProfit, currentSalary, div2026, 2026);
+      
+      const specTax = specBonusPre * 0.54476;
+      const specBonusPost = specBonusPre - specTax;
+      const specImmSell = specBonusPost / 3;
+
+      const totalShares = Math.floor((specBonusPost * 10000) / stockPrice);
+      const immShares = Math.floor((specImmSell * 10000) / stockPrice);
+
+      const totalGrossWon = (cashTotalPre + specBonusPre) * 10000;
+      const finalAnnualTaxWon = calcIncomeTax(totalGrossWon);
+      const specIncomeTaxWon = (specBonusPre * 0.495) * 10000;
+      const cashWithheldTaxWon = calcIncomeTax(cashTotalPre * 10000);
+      const totalWithheldWon = specIncomeTaxWon + cashWithheldTaxWon;
+      const taxRefundWon = Math.max(0, totalWithheldWon - finalAnnualTaxWon);
+
+      const grandTotalPre = cashTotalPre + specBonusPre;
+      const grandTotalPost = cashTotalPost + specBonusPost;
+
+      document.getElementById('simpleSpecialPre').innerText = formatKRW(specBonusPre * 10000);
+      document.getElementById('simpleSpecialPost').innerText = formatKRW(specBonusPost * 10000);
+      document.getElementById('simpleSpecialImmediate').innerText = formatKRW(specImmSell * 10000);
+      document.getElementById('simpleSpecialShares').innerText = `총 ${totalShares.toLocaleString()}주 중 ${immShares.toLocaleString()}주 즉시 매도 가능`;
+
+      document.getElementById('cardBaseSalary').innerText = formatKRW(currentSalary * 10000);
+      document.getElementById('cardBaseSalaryPost').innerText = formatKRW(salaryNet * 10000);
+      document.getElementById('cardTaiPre').innerText = formatKRW(taiPre * 10000);
+      document.getElementById('cardTaiPost').innerText = formatKRW(taiNet * 10000);
+      document.getElementById('cardOpiPre').innerText = formatKRW(opiPre * 10000);
+      document.getElementById('cardOpiPost').innerText = formatKRW(opiNet * 10000);
+      document.getElementById('cardCashTotalPre').innerText = formatKRW(cashTotalPre * 10000);
+      document.getElementById('cardCashTotalPost').innerText = formatKRW(cashTotalPost * 10000);
+
+      document.getElementById('specPreDetail').innerText = formatKRW(specBonusPre * 10000);
+      document.getElementById('specTaxDetail').innerText = formatKRW(specTax * 10000);
+      document.getElementById('specPostDetail').innerText = formatKRW(specBonusPost * 10000);
+      document.getElementById('specImmDetail').innerText = formatKRW(specImmSell * 10000);
+      document.getElementById('specSharesDetail').innerText = `총 ${totalShares.toLocaleString()}주 수령 (주당 ${stockPrice.toLocaleString()}원)`;
+      document.getElementById('specImmSharesDetail').innerText = `${immShares.toLocaleString()}주 즉시 매도 가능`;
+
+      document.getElementById('refundEstimate').innerText = formatKRW(taxRefundWon);
+      document.getElementById('totalWithheldTax').innerText = formatKRW(totalWithheldWon);
+      document.getElementById('finalCalculatedTax').innerText = formatKRW(finalAnnualTaxWon);
+
+      document.getElementById('grandTotalPre').innerText = formatKRW(grandTotalPre * 10000);
+      document.getElementById('grandTotalPost').innerText = formatKRW(grandTotalPost * 10000);
+
+      calc5YearVesting();
+      renderMonthlySalaryTable(currentSalary, prevIncome * 10000);
+    }
+
+    function calc5YearVesting() {
+      const profits = [];
+      const salaries = [];
+      const divCodes = [];
+
+      for (let i = 0; i < 5; i++) {
+        const yr = 2026 + i;
+        profits.push(parseFloat(document.getElementById(`p_${yr}`).value) || 0);
+        salaries.push(parseFloat(document.getElementById(`s_${yr}`).value) || 8500);
+        const sel = document.getElementById(`div_${yr}`);
+        divCodes.push(sel ? sel.value : globalDivision);
+      }
+
+      const yearlyBonusPre = [];
+      const yearlyBonusPost = [];
+      const yearlyTaiPre = [];
+      const yearlyOpiPre = [];
+      const yearlyCashPre = [];
+      const yearlyGrandPre = [];
+      const yearlyGrandPost = [];
+
+      for (let i = 0; i < 5; i++) {
+        const yr = 2026 + i;
+        const s = salaries[i];
+        const tai = s * 0.10;
+        const opi = s * 0.50;
+        const cashPre = s + tai + opi;
+        
+        const bPre = getSpecialBonus(profits[i], s, divCodes[i], yr);
+        const bPost = bPre * (1 - 0.54476);
+        
+        const estGross = cashPre + bPre;
+        const estTax = calcIncomeTax(estGross * 10000);
+        const cashPost = cashPre * (1 - (estTax / (estGross * 10000)));
+
+        yearlyBonusPre.push(bPre);
+        yearlyBonusPost.push(bPost);
+        yearlyTaiPre.push(tai);
+        yearlyOpiPre.push(opi);
+        yearlyCashPre.push(cashPre);
+        yearlyGrandPre.push(cashPre + bPre);
+        yearlyGrandPost.push(cashPost + bPost);
+      }
+
+      const compTbody = document.getElementById('fiveYearCompTableBody');
+      compTbody.innerHTML = '';
+      for (let i = 0; i < 5; i++) {
+        const pYr = 2026 + i;
+        const payYr = pYr + 1;
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-slate-50 transition-colors';
+        row.innerHTML = `
+          <td class="py-2.5 px-3 text-left font-bold text-slate-800">${pYr}년 (${payYr}년 지급)</td>
+          <td class="py-2.5 px-3">${nComma(salaries[i])}만</td>
+          <td class="py-2.5 px-3 text-blue-600">${nComma(yearlyTaiPre[i])}만</td>
+          <td class="py-2.5 px-3 text-purple-600">${nComma(yearlyOpiPre[i])}만</td>
+          <td class="py-2.5 px-3 text-amber-600 font-bold">${formatKRW(yearlyBonusPre[i] * 10000)}</td>
+          <td class="py-2.5 px-3 text-slate-900 font-bold">${formatKRW(yearlyGrandPre[i] * 10000)}</td>
+          <td class="py-2.5 px-3 text-emerald-600 font-extrabold bg-emerald-50/40">${formatKRW(yearlyGrandPost[i] * 10000)}</td>
+        `;
+        compTbody.appendChild(row);
+      }
+
+      const payYears = [2027, 2028, 2029, 2030, 2031];
+      const unlockedByPerfYear = { 2026: [], 2027: [], 2028: [], 2029: [], 2030: [] };
+      const lockedByPerfYear = { 2026: [], 2027: [], 2028: [], 2029: [], 2030: [] };
+
+      const newInflows = [0, 0, 0, 0, 0];
+      const totalUnlockedThisYear = [0, 0, 0, 0, 0];
+      const totalLockedThisYear = [0, 0, 0, 0, 0];
+
+      for (let cIdx = 0; cIdx < payYears.length; cIdx++) {
+        const calYr = payYears[cIdx];
+        let yearUnlockedSum = 0;
+        let yearLockedSum = 0;
+
+        for (let pIdx = 0; pIdx < 5; pIdx++) {
+          const perfYr = 2026 + pIdx;
+          const payYr = perfYr + 1;
+          const bonus = yearlyBonusPost[pIdx];
+          const oneThird = bonus / 3;
+
+          let unl = 0;
+          let lck = 0;
+
+          if (calYr === payYr) {
+            newInflows[cIdx] += bonus;
+            unl = oneThird;
+            lck = bonus - oneThird;
+          } else if (calYr === payYr + 1) {
+            unl = oneThird;
+            lck = bonus - (oneThird * 2);
+          } else if (calYr === payYr + 2) {
+            unl = oneThird;
+            lck = 0;
+          } else {
+            unl = 0;
+            lck = 0;
+          }
+
+          unlockedByPerfYear[perfYr].push(Math.round(unl));
+          lockedByPerfYear[perfYr].push(Math.round(lck));
+          yearUnlockedSum += unl;
+          yearLockedSum += lck;
+        }
+
+        totalUnlockedThisYear[cIdx] = yearUnlockedSum;
+        totalLockedThisYear[cIdx] = yearLockedSum;
+      }
+
+      const total5Pre = yearlyBonusPre.reduce((a, b) => a + b, 0);
+      const total5Post = yearlyBonusPost.reduce((a, b) => a + b, 0);
+      const total5Unlocked = totalUnlockedThisYear.reduce((a, b) => a + b, 0);
+      const remainingLocked31 = total5Post - total5Unlocked;
+
+      document.getElementById('fiveYrTotalPre').innerText = formatKRW(total5Pre * 10000);
+      document.getElementById('fiveYrTotalPost').innerText = formatKRW(total5Post * 10000);
+      document.getElementById('fiveYrUnlockedSum').innerText = formatKRW(total5Unlocked * 10000);
+      document.getElementById('fiveYrRemainingLocked').innerText = formatKRW(remainingLocked31 * 10000);
+
+      const tbody = document.getElementById('vestingTableBody');
+      tbody.innerHTML = '';
+      for (let i = 0; i < 5; i++) {
+        const calYr = payYears[i];
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-slate-100 transition-colors';
+        row.innerHTML = `
+          <td class="py-2.5 text-left font-bold text-slate-800">${calYr}년 3월</td>
+          <td class="py-2.5 font-medium">${formatKRW(newInflows[i] * 10000)}</td>
+          <td class="py-2.5 text-emerald-600 font-bold">+${formatKRW(totalUnlockedThisYear[i] * 10000)}</td>
+          <td class="py-2.5 text-amber-600 font-medium">${formatKRW(totalLockedThisYear[i] * 10000)}</td>
+        `;
+        tbody.appendChild(row);
+      }
+
+      renderVestingChartWithCohorts(payYears, unlockedByPerfYear, lockedByPerfYear);
+    }
+
+    function renderVestingChartWithCohorts(payYears, unlockedByPerfYear, lockedByPerfYear) {
+      const ctx = document.getElementById('vestingChart').getContext('2d');
+      if (chartInstance) chartInstance.destroy();
+
+      const labels = payYears.map(y => `${y}년`);
+      const greenColors = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0'];
+      const amberColors = ['#d97706', '#f59e0b', '#fbbf24', '#fcd34d', '#94a3b8'];
+
+      const datasets = [];
+
+      [2026, 2027, 2028, 2029, 2030].forEach((pYr, idx) => {
+        datasets.push({
+          label: `🟢 [매도가능] ${pYr}년분`,
+          cohortYear: `${pYr.toString().slice(2)}년`,
+          typeCategory: '매도',
+          data: unlockedByPerfYear[pYr],
+          backgroundColor: greenColors[idx],
+          borderRadius: 3,
+          stack: 'CombinedVestingStack'
+        });
+      });
+
+      [2026, 2027, 2028, 2029, 2030].forEach((pYr, idx) => {
+        datasets.push({
+          label: `🔒 [락업잔여] ${pYr}년분`,
+          cohortYear: `${pYr.toString().slice(2)}년`,
+          typeCategory: '락업',
+          data: lockedByPerfYear[pYr],
+          backgroundColor: amberColors[idx],
+          borderRadius: 3,
+          stack: 'CombinedVestingStack'
+        });
+      });
+
+      const cohortInsideLabelPlugin = {
+        id: 'cohortInsideLabel',
+        afterDatasetsDraw(chart) {
+          const { ctx } = chart;
+          chart.data.datasets.forEach((dataset, datasetIndex) => {
+            const meta = chart.getDatasetMeta(datasetIndex);
+            if (meta.hidden) return;
+
+            meta.data.forEach((element, index) => {
+              const val = dataset.data[index];
+              if (!val || val <= 0) return;
+
+              const { x, y, base } = element;
+              const barHeight = Math.abs(base - y);
+
+              if (barHeight >= 18) {
+                ctx.save();
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 10.5px Pretendard, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                const centerY = (y + base) / 2;
+                const eokVal = (val / 10000).toFixed(1);
+                const displayText = `${dataset.cohortYear} ${eokVal}억`;
+
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+                ctx.shadowBlur = 3;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 1;
+
+                ctx.fillText(displayText, x, centerY);
+                ctx.restore();
+              }
+            });
+          });
+        }
+      };
+
+      chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: datasets
+        },
+        plugins: [cohortInsideLabelPlugin],
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                boxWidth: 9,
+                font: { size: 10, family: 'Pretendard' },
+                filter: function(item) {
+                  return item.text.includes('26년') || item.text.includes('27년') || item.text.includes('28년');
+                }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  if (context.raw <= 0) return null;
+                  return `${context.dataset.label}: ${formatKRW(context.raw * 10000)}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              stacked: true,
+              grid: { display: false }
+            },
+            y: {
+              stacked: true,
+              grid: { color: '#f1f5f9' },
+              ticks: {
+                callback: function(val) {
+                  return (val / 10000).toLocaleString() + '억';
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderMonthlySalaryTable(startSalary, prevGrossWon) {
+      const tbody = document.getElementById('monthlySalaryTableBody');
+      tbody.innerHTML = '';
+
+      for (let i = 0; i < 5; i++) {
+        const yr = 2026 + i;
+        const yearSalary = Math.round(startSalary * Math.pow(1.04, i));
+        const monthlyGross = Math.round((yearSalary * 10000) / 12);
+        const yearPrevGross = prevGrossWon * Math.pow(1.04, i);
+        const d = calcMonthlyDeductions(monthlyGross, yearPrevGross);
+
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-slate-50 transition-colors';
+        row.innerHTML = `
+          <td class="py-3 px-3 text-left font-bold text-slate-800">${yr}년</td>
+          <td class="py-3 px-3 font-semibold text-slate-700">${nComma(yearSalary)}만원</td>
+          <td class="py-3 px-3 font-bold text-slate-900">${nComma(d.gross)}원</td>
+          <td class="py-3 px-3 text-slate-500">${nComma(d.nps)}원</td>
+          <td class="py-3 px-3 text-slate-500">${nComma(d.nhiPlusLtc)}원</td>
+          <td class="py-3 px-3 text-slate-500">${nComma(d.ei)}원</td>
+          <td class="py-3 px-3 text-slate-500">${nComma(d.incTax)}원</td>
+          <td class="py-3 px-3 text-rose-600 font-bold">-${nComma(d.totalDeduction)}원</td>
+          <td class="py-3 px-3 text-emerald-700 font-extrabold text-sm bg-emerald-50/40">${nComma(d.netMonthly)}원</td>
+        `;
+        tbody.appendChild(row);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const baseSalaryInput = document.getElementById('baseSalary');
+      const companyProfitInput = document.getElementById('companyProfit');
+      const samsungStockPriceInput = document.getElementById('samsungStockPrice');
+      const prevYearIncomeInput = document.getElementById('prevYearIncome');
+
+      baseSalaryInput.addEventListener('input', () => {
+        const val = parseFloat(baseSalaryInput.value) || 8500;
+        if (isPrevAuto) {
+          prevYearIncomeInput.value = Math.round(val * 1.5);
+        }
+        update5YrSalaries(val);
+        recalculateAll();
+      });
+
+      companyProfitInput.addEventListener('input', recalculateAll);
+      samsungStockPriceInput.addEventListener('input', recalculateAll);
+      prevYearIncomeInput.addEventListener('input', recalculateAll);
+
+      update5YrSalaries(8500);
+      recalculateAll();
+    });
+  </script>
+</body>
+</html>
