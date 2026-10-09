@@ -5,7 +5,7 @@ final_html = """<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>삼성전자 DS 성과급 & 연봉 시뮬레이터 (2026 개편판)</title>
+  <title>성과급 계산기 - MJ - </title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Chart.js CDN -->
@@ -63,7 +63,7 @@ final_html = """<!DOCTYPE html>
             삼성전자 DS 성과급 & 연봉 시뮬레이터
             <span class="text-[11px] bg-blue-500/30 text-blue-300 border border-blue-400/30 px-2 py-0.5 rounded-full font-medium">2026 임단협 신규제도</span>
           </h1>
-          <p class="text-xs text-slate-300">OPI · TAI · 특별경영성과급(자사주) 5개년 누적 베스팅 및 실수령 정밀 분석</p>
+          <p class="text-xs text-slate-300">OPI · TAI · DS 특별 성과급(자사주) 5개년 누적 베스팅 및 실수령 정밀 분석</p>
         </div>
       </div>
       <div class="flex items-center gap-2 text-xs text-slate-300">
@@ -102,7 +102,7 @@ final_html = """<!DOCTYPE html>
         <div class="flex items-start gap-2.5">
           <i class="fa-solid fa-circle-info text-blue-600 mt-0.5 text-base"></i>
           <div id="divisionAlertText">
-            <strong>메모리 사업부:</strong> 26년 상반기 TAI 100%, 특별경영성과급 300조원 기준 연봉 8,500만 1인 평균 <strong>5억 7,690만원</strong> 기준이 적용됩니다.
+            <strong>메모리 사업부:</strong> 26년 상반기 TAI 100%, DS 특별 성과급 300조원 기준 연봉 8,500만 1인 평균 <strong>5억 7,690만원</strong> 기준이 적용됩니다.
           </div>
         </div>
       </div>
@@ -138,7 +138,7 @@ final_html = """<!DOCTYPE html>
             <span class="text-[11px] text-slate-400 font-medium">성과급 제외</span>
           </div>
           <div class="relative flex items-center">
-            <input type="number" id="baseSalary" value="9364" min="1000" step="10" 
+            <input type="number" id="baseSalary" value="8000" min="1000" step="10" 
                    class="w-full bg-white text-slate-900 text-xl font-bold rounded-lg border border-slate-300 px-3 py-2 text-right pr-14 focus:outline-none focus:border-blue-500">
             <span class="absolute right-3 text-slate-500 font-semibold text-sm pointer-events-none">만 원</span>
           </div>
@@ -156,7 +156,7 @@ final_html = """<!DOCTYPE html>
             <span class="text-[11px] text-blue-600 font-semibold cursor-pointer hover:underline" onclick="togglePrevYearAuto()" id="prevAutoLabel">수동 입력</span>
           </div>
           <div class="relative flex items-center">
-            <input type="number" id="prevYearIncome" value="17000" min="1000" step="100" 
+            <input type="number" id="prevYearIncome" value="14000" min="1000" step="100" 
                    class="w-full bg-white text-slate-900 text-xl font-bold rounded-lg border border-slate-300 px-3 py-2 text-right pr-14 focus:outline-none focus:border-blue-500">
             <span class="absolute right-3 text-slate-500 font-semibold text-sm pointer-events-none">만 원</span>
           </div>
@@ -202,7 +202,7 @@ final_html = """<!DOCTYPE html>
             <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">결과 1</span>
             <h2 class="text-lg font-bold text-slate-900">올해 총 보상 산정 (26년 실적분)</h2>
           </div>
-          <p class="text-xs text-slate-500 mt-0.5">계약연봉, OPI, TAI 및 신설 특별경영성과급(자사주) 종합</p>
+          <p class="text-xs text-slate-500 mt-0.5">계약연봉, OPI, TAI 및 신설 DS 특별 성과급(자사주) 종합</p>
         </div>
 
         <!-- Toggle Detail / Simplified Button (기본: 간소화 활성화) -->
@@ -224,7 +224,7 @@ final_html = """<!DOCTYPE html>
           <div class="absolute right-0 top-0 translate-x-10 -translate-y-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
           <div class="flex items-center justify-between mb-4">
             <span class="text-xs uppercase tracking-wider text-blue-300 font-semibold flex items-center gap-1.5">
-              <i class="fa-solid fa-award"></i> 특별경영성과급 핵심 요약
+              <i class="fa-solid fa-award"></i> DS 특별 성과급 핵심 요약
             </span>
             <span class="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full font-medium">전액 자사주 지급</span>
           </div>
@@ -306,7 +306,7 @@ final_html = """<!DOCTYPE html>
             <div>
               <div class="flex items-center gap-2">
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-400 text-slate-900">NEW 2026</span>
-                <h3 class="text-lg font-bold">특별경영성과급 세부 명세</h3>
+                <h3 class="text-lg font-bold">DS 특별 성과급 세부 명세</h3>
               </div>
               <p class="text-xs text-slate-300 mt-1">26년 영업이익에 따라 27년 3월 세후 전액 자사주로 입고되는 주식 성과급</p>
             </div>
@@ -373,7 +373,7 @@ final_html = """<!DOCTYPE html>
                 </h4>
                 <span class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded font-bold">현금 + 자사주</span>
               </div>
-              <p class="text-xs text-slate-400 mb-4">계약연봉 + TAI + OPI + 특별경영성과급의 총 가치입니다.</p>
+              <p class="text-xs text-slate-400 mb-4">계약연봉 + TAI + OPI + DS 특별 성과급의 총 가치입니다.</p>
             </div>
             <div class="grid grid-cols-2 gap-3 bg-slate-800 rounded-xl p-4 border border-slate-700">
               <div>
@@ -684,7 +684,7 @@ final_html = """<!DOCTYPE html>
         <p class="text-slate-500">※ 본 계산기는 사내 공개 자료 및 언론 보도에 기반한 시뮬레이션입니다.</p>
       </div>
       <div class="text-slate-500 text-center md:text-right">
-        <p>OPI 상한 50% · TAI 연 10% · 특별경영성과급 10.5% (문턱: 26~28년 200조, 이후 100조)</p>
+        <p>OPI 상한 50% · TAI 연 10% · DS 특별 성과급 10.5% (문턱: 26~28년 200조, 이후 100조)</p>
       </div>
     </div>
   </footer>
@@ -822,7 +822,7 @@ final_html = """<!DOCTYPE html>
     function updateDivisionAlertText(div) {
       const alertText = document.getElementById('divisionAlertText');
       if (div === 'memory') {
-        alertText.innerHTML = `<strong>메모리 사업부:</strong> 26년 상반기 TAI 100%, 특별경영성과급 300조원 기준 연봉 8,500만 1인 평균 <strong>5억 7,690만원</strong> 기준이 적용됩니다.`;
+        alertText.innerHTML = `<strong>메모리 사업부:</strong> 26년 상반기 TAI 100%, DS 특별 성과급 300조원 기준 연봉 8,500만 1인 평균 <strong>5억 7,690만원</strong> 기준이 적용됩니다.`;
       } else if (div === 'common') {
         alertText.innerHTML = `<strong>DS 공통 조직:</strong> 메모리 대비 70% 수준인 300조원 기준 1인 평균 <strong>4억 383만원</strong>이 적용됩니다.`;
       } else if (div === 'nonmemory') {
@@ -868,7 +868,7 @@ final_html = """<!DOCTYPE html>
       if (isPrevAuto) {
         label.innerText = '자동 (연봉×1.5)';
         label.classList.add('text-blue-600');
-        const sal = parseFloat(document.getElementById('baseSalary').value) || 9364;
+        const sal = parseFloat(document.getElementById('baseSalary').value) || 8000;
         document.getElementById('prevYearIncome').value = Math.round(sal * 1.5);
       } else {
         label.innerText = '수동 입력 중';
@@ -916,7 +916,7 @@ final_html = """<!DOCTYPE html>
       for (let i = 0; i < 5; i++) {
         document.getElementById(`p_${2026 + i}`).value = profits[i];
       }
-      const base = parseFloat(document.getElementById('baseSalary').value) || 9364;
+      const base = parseFloat(document.getElementById('baseSalary').value) || 8000;
       update5YrSalaries(base);
       setGlobalDivision('memory'); // 5년 전부 메모리로 복원
       recalculateAll();
@@ -1128,7 +1128,7 @@ final_html = """<!DOCTYPE html>
 
     function recalculateAll() {
       const currentProfit = parseFloat(document.getElementById('companyProfit').value) || 0;
-      const currentSalary = parseFloat(document.getElementById('baseSalary').value) || 9364;
+      const currentSalary = parseFloat(document.getElementById('baseSalary').value) || 8000;
       const stockPrice = parseFloat(document.getElementById('samsungStockPrice').value) || 270000;
       
       let prevIncome = parseFloat(document.getElementById('prevYearIncome').value);
@@ -1214,7 +1214,7 @@ final_html = """<!DOCTYPE html>
       for (let i = 0; i < 5; i++) {
         const yr = 2026 + i;
         profits.push(parseFloat(document.getElementById(`p_${yr}`).value) || 0);
-        salaries.push(parseFloat(document.getElementById(`s_${yr}`).value) || 9364);
+        salaries.push(parseFloat(document.getElementById(`s_${yr}`).value) || 8000);
         const sel = document.getElementById(`div_${yr}`);
         divCodes.push(sel ? sel.value : globalDivision);
       }
@@ -1501,7 +1501,7 @@ final_html = """<!DOCTYPE html>
       const prevYearIncomeInput = document.getElementById('prevYearIncome');
 
       baseSalaryInput.addEventListener('input', () => {
-        const val = parseFloat(baseSalaryInput.value) || 9364;
+        const val = parseFloat(baseSalaryInput.value) || 8000;
         if (isPrevAuto) {
           prevYearIncomeInput.value = Math.round(val * 1.5);
         }
@@ -1529,7 +1529,7 @@ final_html = """<!DOCTYPE html>
       // LocalStorage 복원 시도, 없으면 기본값 초기화
       const restored = loadFromLocalStorage();
       if (!restored) {
-        update5YrSalaries(9364);
+        update5YrSalaries(8000);
         setGlobalDivision('memory');
       }
 
