@@ -70,10 +70,24 @@
       </div>
     </div>
   </header>
-
+<!-- Top Navigation Tabs (계산기 / 휴식) -->
+  <div class="bg-slate-900 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-2 pt-2">
+      <button type="button" onclick="switchNavTab('calc')" id="nav-tab-calc"
+              class="px-5 py-2.5 rounded-t-xl font-bold text-sm bg-white text-slate-900 transition-all flex items-center gap-2 shadow-sm">
+        <i class="fa-solid fa-calculator text-blue-600"></i> 성과급 계산기
+      </button>
+      <button type="button" onclick="switchNavTab('game')" id="nav-tab-game"
+              class="px-5 py-2.5 rounded-t-xl font-bold text-sm text-slate-400 hover:text-white transition-all flex items-center gap-2">
+        <i class="fa-solid fa-gamepad text-emerald-400"></i> 휴식
+      </button>
+    </div>
+  </div>
+  
   <!-- Main Container -->
   <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full space-y-6">
-
+   <!-- 1. 기존 성과급 계산기 화면 (ID 추가) -->
+    <div id="calcView" class="space-y-6">
     <!-- Top Controller: Global Division Tabs & Primary Inputs -->
     <div class="bg-white rounded-2xl p-6 border border-slate-200 card-shadow">
       <!-- Business Unit Tabs -->
@@ -678,7 +692,43 @@
         </div>
       </div>
     </section>
+  </div>
 
+    <!-- 2. 휴식 (벽돌깨기 게임) 화면 (기본 숨김: hidden) -->
+    <div id="gameView" class="hidden w-full max-w-3xl mx-auto space-y-4">
+      <div class="bg-white rounded-2xl border border-slate-200 card-shadow overflow-hidden">
+        
+        <!-- 게임 헤더 바 -->
+        <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+          <div class="flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-sm shadow-xs">
+              <i class="fa-solid fa-gamepad"></i>
+            </span>
+            <div>
+              <h3 class="font-bold text-slate-900 text-sm">스와이프 벽돌깨기</h3>
+              <p class="text-[11px] text-slate-400">잠시 머리를 식히며 즐겨보세요.</p>
+            </div>
+          </div>
+          <!-- 전체화면 / 새 창 링크 -->
+          <a href="https://html-games.surge.sh/brick-breaker" target="_blank" 
+             class="text-xs text-slate-500 hover:text-blue-600 flex items-center gap-1 font-semibold transition-colors">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> 새 창에서 열기
+          </a>
+        </div>
+
+        <!-- iframe 영역 (모바일/PC 모두 적합한 높이 720px) -->
+        <div class="w-full flex justify-center bg-slate-950">
+          <iframe id="gameIframe" 
+                  src="https://html-games.surge.sh/brick-breaker" 
+                  class="w-full h-[650px] sm:h-[720px] border-0" 
+                  allow="autoplay; fullscreen"
+                  loading="lazy">
+          </iframe>
+        </div>
+
+      </div>
+    </div>
+    
   </main>
 
   <!-- Footer -->
@@ -702,6 +752,25 @@
     let isPrevAuto = true;
     let chartInstance = null;
 
+    function switchNavTab(tab) {
+      const calcView = document.getElementById('calcView');
+      const gameView = document.getElementById('gameView');
+      const tabCalc = document.getElementById('nav-tab-calc');
+      const tabGame = document.getElementById('nav-tab-game');
+
+      if (tab === 'calc') {
+        calcView.classList.remove('hidden');
+        gameView.classList.add('hidden');
+        tabCalc.className = 'px-5 py-2.5 rounded-t-xl font-bold text-sm bg-white text-slate-900 transition-all flex items-center gap-2 shadow-sm';
+        tabGame.className = 'px-5 py-2.5 rounded-t-xl font-bold text-sm text-slate-400 hover:text-white transition-all flex items-center gap-2';
+      } else if (tab === 'game') {
+        calcView.classList.add('hidden');
+        gameView.classList.remove('hidden');
+        tabGame.className = 'px-5 py-2.5 rounded-t-xl font-bold text-sm bg-white text-slate-900 transition-all flex items-center gap-2 shadow-sm';
+        tabCalc.className = 'px-5 py-2.5 rounded-t-xl font-bold text-sm text-slate-400 hover:text-white transition-all flex items-center gap-2';
+      }
+    }
+    
     function formatKRW(val) {
       if (isNaN(val) || val === null) return '0원';
       const roundVal = Math.round(val);
