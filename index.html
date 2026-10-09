@@ -2,21 +2,26 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DS 성과급 시뮬레이텅 -MJ- </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>DS 성과급 시뮬레이터 -MJ-</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- FontAwesome & Pretendard Font -->
+  <!-- FontAwesome & Pretendard & Arcade Fonts -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700;800&family=Jua&display=swap" rel="stylesheet">
+  
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
             sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif'],
+            arcade: ['Jua', 'Fredoka', 'sans-serif'],
           },
           colors: {
             samsung: {
@@ -45,755 +50,855 @@
       -webkit-appearance: none;
       margin: 0;
     }
-    /* 2048 게임 전용 애니메이션 & 터치 제어 */
-    #game-board-container {
-      touch-action: none; /* 모바일에서 보드 위 스와이프 시 브라우저 스크롤/새로고침 차단 */
-      user-select: none;
-      -webkit-user-select: none;
+
+    /* Jump Game Styles */
+    @keyframes dangerPulse {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 0.75; }
     }
-    @keyframes tilePop {
-      0% { transform: scale(0.6); opacity: 0; }
-      70% { transform: scale(1.1); }
-      100% { transform: scale(1); opacity: 1; }
+    .vignette-danger {
+      animation: dangerPulse 0.8s infinite ease-in-out;
+      pointer-events: none;
+      box-shadow: inset 0 0 100px 30px rgba(239, 68, 68, 0.7);
     }
-    @keyframes tileMerge {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.18); }
-      100% { transform: scale(1); }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
-    .tile-new {
-      animation: tilePop 0.18s ease-out forwards;
+    .touch-btn {
+      transition: transform 0.08s ease, filter 0.08s ease, box-shadow 0.08s ease;
+      touch-action: none !important;
     }
-    .tile-merged {
-      animation: tileMerge 0.18s ease-in-out forwards;
+    .touch-btn:active, .touch-btn.active-key {
+      transform: scale(0.90) translateY(4px);
+      filter: brightness(1.25);
+      box-shadow: 0 4px 15px rgba(255, 255, 255, 0.4);
+    }
+    #game-container {
+      touch-action: none !important;
+      -webkit-touch-callout: none !important;
+      -webkit-user-select: none !important;
+      user-select: none !important;
+      overscroll-behavior: none !important;
+    }
+    #game-container * {
+      touch-action: manipulation;
     }
   </style>
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
-  <!-- Header -->
+  <!-- Header & Navigation -->
   <header class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white border-b border-blue-900/50 sticky top-0 z-50 shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
-          <i class="fa-solid fa-microchip text-xl"></i>
-        </div>
-        <div>
-          <h1 class="text-lg sm:text-xl font-bold tracking-tight flex items-center gap-2">
-            DS 특별 성과급 (자사주) 계산기
-            <span class="text-[11px] bg-blue-500/30 text-blue-300 border border-blue-400/30 px-2 py-0.5 rounded-full font-medium">MJ</span>
-          </h1>
-          <p class="text-xs text-slate-300">계산 결과는 실제와 다를 수 있음. 재미로만 보세요.</p>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 shrink-0">
+            <i class="fa-solid fa-microchip text-xl"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold tracking-tight flex items-center gap-2">
+              DS 특별 성과급 (자사주) 계산기
+              <span class="text-[11px] bg-blue-500/30 text-blue-300 border border-blue-400/30 px-2 py-0.5 rounded-full font-medium">MJ</span>
+            </h1>
+            <p class="text-xs text-slate-300">계산 결과는 실제와 다를 수 있음. 재미로만 보세요.</p>
+          </div>
         </div>
       </div>
-      <div class="flex items-center gap-2 text-xs text-slate-300">
+
+      <!-- Main Navigation Tabs (계산기 / 휴식 2048 / 휴식 jump) -->
+      <div class="flex items-center p-1 bg-slate-800/90 rounded-xl border border-slate-700/80 shadow-inner w-full md:w-auto justify-center">
+        <button type="button" onclick="switchMainTab('calc')" id="mainTab-calc"
+                class="flex-1 md:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 tab-active shadow-md">
+          <i class="fa-solid fa-calculator text-blue-300"></i>
+          <span>계산기</span>
+        </button>
+        <button type="button" onclick="switchMainTab('game2048')" id="mainTab-game2048"
+                class="flex-1 md:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-300 hover:text-white hover:bg-slate-700/60">
+          <i class="fa-solid fa-cubes text-amber-400"></i>
+          <span>휴식 (2048)</span>
+        </button>
+        <button type="button" onclick="switchMainTab('jump')" id="mainTab-jump"
+                class="flex-1 md:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-300 hover:text-white hover:bg-slate-700/60">
+          <i class="fa-solid fa-person-walking-arrow-loop-left text-emerald-400"></i>
+          <span>휴식 (jump)</span>
+        </button>
+      </div>
+
+      <div class="hidden lg:flex items-center gap-2 text-xs text-slate-300">
         <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
         <span>지급시기 : <strong> 27년 3말~4초</strong></span>
       </div>
     </div>
   </header>
-<!-- Top Navigation Tabs (계산기 / 휴식) -->
-  <div class="bg-slate-900 border-b border-slate-800 sticky top-[61px] z-40">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-2 pt-2">
-      <button type="button" onclick="switchNavTab('calc')" id="nav-tab-calc"
-              class="px-5 py-2.5 rounded-t-xl font-bold text-sm bg-white text-slate-900 transition-all flex items-center gap-2 shadow-sm">
-        <i class="fa-solid fa-calculator text-blue-600"></i> 성과급 계산기
-      </button>
-      <button type="button" onclick="switchNavTab('game')" id="nav-tab-game"
-              class="px-5 py-2.5 rounded-t-xl font-bold text-sm text-slate-400 hover:text-white transition-all flex items-center gap-2">
-        <i class="fa-solid fa-gamepad text-amber-400"></i> 휴식 (2048)
-      </button>
-    </div>
-  </div>
-  
+
   <!-- Main Container -->
-  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full space-y-6">
-   <!-- 1. 기존 성과급 계산기 화면 (ID 추가) -->
-    <div id="calcView" class="space-y-6">
-    <!-- Top Controller: Global Division Tabs & Primary Inputs -->
-    <div class="bg-white rounded-2xl p-6 border border-slate-200 card-shadow">
-      <!-- Business Unit Tabs -->
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-5 border-b border-slate-100 gap-4">
-        <div>
-          <span class="text-xs font-bold uppercase tracking-wider text-blue-600 block mb-0.5">Primary Division</span>
-          <h2 class="text-lg font-bold text-slate-900">소속사업부 선택</h2>
-        </div>
-        <div class="flex p-1.5 bg-slate-100 rounded-xl w-full sm:w-auto" id="divisionTabs">
-          <button type="button" onclick="setGlobalDivision('memory')" id="tab-memory" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 tab-active flex items-center justify-center gap-2">
-            <i class="fa-solid fa-memory"></i> 메모리
-          </button>
-          <button type="button" onclick="setGlobalDivision('common')" id="tab-common" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-lg font-semibold text-sm text-slate-600 hover:text-slate-900 transition-all duration-200 flex items-center justify-center gap-2">
-            <i class="fa-solid fa-network-wired"></i>공통
-          </button>
-          <button type="button" onclick="setGlobalDivision('nonmemory')" id="tab-nonmemory" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-lg font-semibold text-sm text-slate-600 hover:text-slate-900 transition-all duration-200 flex items-center justify-center gap-2">
-            <i class="fa-solid fa-microchip"></i> 르팡
-          </button>
-        </div>
-      </div>
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
 
-      <!-- Quick Preset & Condition Indicator -->
-      <div id="divisionAlert" class="mt-4 p-3.5 rounded-xl text-xs sm:text-sm bg-blue-50 border border-blue-200 text-blue-900 flex items-start justify-between gap-3">
-        <div class="flex items-start gap-2.5">
-          <i class="fa-solid fa-circle-info text-blue-600 mt-0.5 text-base"></i>
-          <div id="divisionAlertText">
-            결과2에서 <strong>연도별</strong> 사업부  <strong>반영 가능</strong> 
-          </div>
-        </div>
-      </div>
+    <!-- ==================== TAB 1: 성과급 계산기 ==================== -->
+    <div id="section-calc" class="space-y-6">
 
-      <!-- Inputs Grid (4 Cards: 회사성과, 계약연봉, 전년도 원천소득, 기준주가) -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-        
-        <!-- Input 1: Company Performance -->
-        <div class="bg-slate-50/90 p-4 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
-          <div class="flex items-center justify-between mb-1.5">
-            <label for="companyProfit" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-              <i class="fa-solid fa-chart-line text-blue-600"></i> 올해 회사 성과
-            </label>
-            <span class="text-[11px] text-slate-400 font-medium">문턱: 200조</span>
-          </div>
-          <div class="relative flex items-center">
-            <input type="number" id="companyProfit" value="394" min="0" step="1" 
-                   class="w-full bg-white text-slate-900 text-xl font-bold rounded-lg border border-slate-300 px-3 py-2 text-right pr-12 focus:outline-none focus:border-blue-500">
-            <span class="absolute right-3 text-slate-500 font-semibold text-sm pointer-events-none">조 원</span>
-          </div>
-          <p class="text-[11px] text-slate-500 mt-2 flex justify-between">
-            <span>2026 컨센서스: 394조</span>
-            <button onclick="setProfit(394)" class="text-blue-600 font-semibold hover:underline">394조 복원</button>
-          </p>
-        </div>
-
-        <!-- Input 2: My Base Salary -->
-        <div class="bg-slate-50/90 p-4 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
-          <div class="flex items-center justify-between mb-1.5">
-            <label for="baseSalary" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-              <i class="fa-solid fa-won-sign text-blue-600"></i> 내 계약 연봉
-            </label>
-            <span class="text-[11px] text-slate-400 font-medium">성과급 제외</span>
-          </div>
-          <div class="relative flex items-center">
-            <input type="number" id="baseSalary" value="8000" min="1000" step="10" 
-                   class="w-full bg-white text-slate-900 text-xl font-bold rounded-lg border border-slate-300 px-3 py-2 text-right pr-14 focus:outline-none focus:border-blue-500">
-            <span class="absolute right-3 text-slate-500 font-semibold text-sm pointer-events-none">만 원</span>
-          </div>
-          <p class="text-[11px] text-slate-500 mt-2">
-            세전 기본 월급: <strong id="quickMonthlyGross" class="text-slate-800 font-bold">-</strong>
-          </p>
-        </div>
-
-        <!-- Input 3: Prior Year Withholding Tax Income -->
-        <div class="bg-slate-50/90 p-4 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
-          <div class="flex items-center justify-between mb-1.5">
-            <label for="prevYearIncome" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-              <i class="fa-solid fa-file-invoice-dollar text-blue-600"></i> 전년도 원천징수 소득
-            </label>
-            <span class="text-[11px] text-blue-600 font-semibold cursor-pointer hover:underline" onclick="togglePrevYearAuto()" id="prevAutoLabel">자동 입력(*1.5)</span>
-          </div>
-          <div class="relative flex items-center">
-            <input type="number" id="prevYearIncome" value="" min="1000" step="100" 
-                   class="w-full bg-white text-slate-900 text-xl font-bold rounded-lg border border-slate-300 px-3 py-2 text-right pr-14 focus:outline-none focus:border-blue-500">
-            <span class="absolute right-3 text-slate-500 font-semibold text-sm pointer-events-none">만 원</span>
-          </div>
-          <p class="text-[11px] text-slate-500 mt-2">
-            건보료 보수월액 산정 기준
-          </p>
-        </div>
-
-        <!-- Input 4: Samsung Stock Price (실시간 계산 및 계산 일시 표기) -->
-        <div class="bg-gradient-to-br from-blue-50/80 to-indigo-50/80 p-4 rounded-xl border-2 border-blue-300/80 focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-200 transition-all shadow-sm">
-          <div class="flex items-center justify-between mb-1.5">
-            <label for="samsungStockPrice" class="text-xs font-extrabold text-blue-950 flex items-center gap-1.5">
-              <i class="fa-solid fa-arrow-trend-up text-blue-600"></i> 삼성전자 기준주가
-            </label>
-            <button type="button" onclick="fetchSamsungStockPrice()" id="btnFetchStock" 
-                    class="text-[11px] bg-white border border-blue-300 hover:bg-blue-600 hover:text-white text-blue-700 px-2 py-0.5 rounded font-bold transition-all shadow-xs flex items-center gap-1">
-              <i class="fa-solid fa-rotate text-[10px]"></i> 실시간 계산
-            </button>
-          </div>
-          <div class="relative flex items-center">
-            <input type="number" id="samsungStockPrice" value="270000" step="1000" 
-                   class="w-full bg-white text-blue-950 text-2xl font-black rounded-lg border border-blue-400 px-3 py-2 text-right pr-10 focus:outline-none focus:border-blue-600 tracking-tight shadow-inner">
-            <span class="absolute right-3 text-blue-900 font-bold text-sm pointer-events-none">원</span>
-          </div>
-          <div class="text-[11px] text-blue-800 mt-2" id="stockStatusContainer">
-            <div id="stockStatusText" class="flex items-center justify-between">
-              <span>1주/1달/2달 VWAP 산술평균</span>
-              <span class="text-slate-500 text-[10px]">수정 가능</span>
-            </div>
-            <!-- 계산 일시 표기 영역 -->
-            <div id="stockCalcDateText" class="text-[10px] text-slate-500 mt-0.5 hidden"></div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- RESULT 1: 올해 총 보상 (기본: 간소화 상태) -->
-    <section class="bg-white rounded-2xl p-6 border border-slate-200 card-shadow transition-all">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">결과 1</span>
-            <h2 class="text-lg font-bold text-slate-900">올해 총 보상 산정 (26년 실적분)</h2>
-          </div>
-          <p class="text-xs text-slate-500 mt-0.5">OPI, TAI, DS특별성과급, 환급금</p>
-        </div>
-
-        <!-- Toggle Detail / Simplified Button (기본: 간소화 활성화) -->
-        <div class="flex items-center bg-slate-100 p-1 rounded-xl">
-          <button type="button" id="btn-comp-simple" onclick="toggleCompMode(true)" 
-                  class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all bg-white text-blue-700 shadow-sm">
-            <i class="fa-solid fa-compress-arrows-alt mr-1"></i> 간소화
-          </button>
-          <button type="button" id="btn-comp-detail" onclick="toggleCompMode(false)" 
-                  class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-600">
-            <i class="fa-solid fa-expand-arrows-alt mr-1"></i> 펼치기 (상세)
-          </button>
-        </div>
-      </div>
-
-      <!-- Simplified View (간소화 모드 - 기본 노출) -->
-      <div id="compSimplifiedView" class="mt-6">
-        <div class="p-6 rounded-2xl bg-gradient-to-br from-blue-900 via-indigo-950 to-slate-900 text-white relative overflow-hidden shadow-lg">
-          <div class="absolute right-0 top-0 translate-x-10 -translate-y-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-xs uppercase tracking-wider text-blue-300 font-semibold flex items-center gap-1.5">
-              <i class="fa-solid fa-award"></i> DS 특별 성과급 핵심 요약
-            </span>
-            <span class="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full font-medium">전액 자사주 지급</span>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white/5 border border-white/10 rounded-xl p-4">
-              <span class="text-xs text-slate-300 block mb-1">특별성과급 공제 전</span>
-              <p class="text-2xl sm:text-3xl font-extrabold text-white" id="simpleSpecialPre">-</p>
-              <p class="text-[11px] text-slate-400 mt-1">DS 사업성과 10.5% 기반 1인 환산</p>
-            </div>
-            <div class="bg-blue-600/20 border border-blue-400/30 rounded-xl p-4">
-              <span class="text-xs text-blue-200 block mb-1">특별성과급 공제 후</span>
-              <p class="text-2xl sm:text-3xl font-extrabold text-emerald-400" id="simpleSpecialPost">-</p>
-              <p class="text-[11px] text-blue-200 mt-1">원천징수(54.476%) 차감 후 확정액</p>
-            </div>
-            <div class="bg-white/5 border border-white/10 rounded-xl p-4">
-              <span class="text-xs text-amber-200 block mb-1">1/3 즉시 매도 가능 금액</span>
-              <p class="text-2xl sm:text-3xl font-extrabold text-amber-300" id="simpleSpecialImmediate">-</p>
-              <p class="text-[11px] text-slate-300 mt-1" id="simpleSpecialShares">예상 0주 즉시 매도 가능</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Detailed View (펼치기 모드 - 기본 숨김) -->
-      <div id="compDetailedView" class="hidden mt-6 space-y-6">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-            <div class="flex items-center justify-between text-xs text-slate-500 font-semibold mb-2">
-              <span>① 계약 연봉</span>
-              <span class="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded text-[10px]">기본급</span>
-            </div>
-            <div class="text-xl font-bold text-slate-900" id="cardBaseSalary">-</div>
-            <div class="text-xs text-slate-500 mt-1 flex justify-between">
-              <span>세후 예상:</span>
-              <span class="font-bold text-slate-700" id="cardBaseSalaryPost">-</span>
-            </div>
-          </div>
-
-          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-            <div class="flex items-center justify-between text-xs text-slate-500 font-semibold mb-2">
-              <span>② TAI (목표달성장려금)</span>
-              <span class="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-[10px]">연 10% 고정</span>
-            </div>
-            <div class="text-xl font-bold text-blue-700" id="cardTaiPre">-</div>
-            <div class="text-xs text-slate-500 mt-1 flex justify-between">
-              <span>세후 예상:</span>
-              <span class="font-bold text-slate-700" id="cardTaiPost">-</span>
-            </div>
-          </div>
-
-          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-            <div class="flex items-center justify-between text-xs text-slate-500 font-semibold mb-2">
-              <span>③ OPI (성과인센티브)</span>
-              <span class="bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded text-[10px]">상한 50%</span>
-            </div>
-            <div class="text-xl font-bold text-purple-700" id="cardOpiPre">-</div>
-            <div class="text-xs text-slate-500 mt-1 flex justify-between">
-              <span>세후 예상:</span>
-              <span class="font-bold text-slate-700" id="cardOpiPost">-</span>
-            </div>
-          </div>
-
-          <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-4">
-            <div class="flex items-center justify-between text-xs text-blue-800 font-semibold mb-2">
-              <span>현금 보상 합계 (①+②+③)</span>
-              <span class="bg-blue-600 text-white px-1.5 py-0.5 rounded text-[10px]">계좌 입금</span>
-            </div>
-            <div class="text-xl font-bold text-blue-900" id="cardCashTotalPre">-</div>
-            <div class="text-xs text-blue-800 mt-1 flex justify-between">
-              <span>세후 총 현금:</span>
-              <span class="font-bold text-blue-900" id="cardCashTotalPost">-</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 text-white rounded-2xl p-6 border border-blue-800/40 relative shadow-xl">
-          <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-white/10 gap-3">
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-400 text-slate-900">NEW 2026</span>
-                <h3 class="text-lg font-bold">DS 특별 성과급 세부 명세</h3>
-              </div>
-              <p class="text-xs text-slate-300 mt-1">26년 영업이익에 따라 27년 3월 세후 전액 자사주로 입고되는 주식 성과급</p>
-            </div>
-            <div class="text-right">
-              <span class="text-xs text-slate-400 block">원천징수 기준세율</span>
-              <span class="text-sm font-bold text-amber-300">54.476% (소득·지방세 49.5% + 건보·고용 4.976%)</span>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-            <div class="bg-white/5 border border-white/10 rounded-xl p-4">
-              <span class="text-xs text-slate-300 block mb-1">원천징수 전 (세전 가치)</span>
-              <div class="text-xl sm:text-2xl font-bold text-white" id="specPreDetail">-</div>
-              <span class="text-[11px] text-slate-400 mt-1 block">영업이익 10.5% 부문 환산액</span>
-            </div>
-            <div class="bg-white/5 border border-white/10 rounded-xl p-4">
-              <span class="text-xs text-rose-300 block mb-1">원천징수 세액 (54.476%)</span>
-              <div class="text-xl sm:text-2xl font-bold text-rose-400" id="specTaxDetail">-</div>
-              <span class="text-[11px] text-slate-400 mt-1 block">최고구간 원천징수 합계</span>
-            </div>
-            <div class="bg-emerald-500/10 border border-emerald-400/30 rounded-xl p-4">
-              <span class="text-xs text-emerald-300 block mb-1">세후 자사주 환산금액</span>
-              <div class="text-xl sm:text-2xl font-bold text-emerald-400" id="specPostDetail">-</div>
-              <span class="text-[11px] text-emerald-300/90 mt-1 block font-semibold" id="specSharesDetail">총 0 주 수령</span>
-            </div>
-            <div class="bg-amber-400/10 border border-amber-400/30 rounded-xl p-4">
-              <span class="text-xs text-amber-300 block mb-1">1/3 즉시 매도 가능액</span>
-              <div class="text-xl sm:text-2xl font-bold text-amber-300" id="specImmDetail">-</div>
-              <span class="text-[11px] text-amber-200 mt-1 block font-semibold" id="specImmSharesDetail">0 주 즉시 매도 가능</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-5 flex flex-col justify-between">
-            <div>
-              <div class="flex items-center justify-between mb-2">
-                <h4 class="font-bold text-amber-950 flex items-center gap-2">
-                  <i class="fa-solid fa-piggy-bank text-amber-600"></i> 연말정산 예상 환급액
-                </h4>
-                <span class="text-xs bg-amber-200/70 text-amber-900 px-2 py-0.5 rounded font-bold">13월의 월급</span>
-              </div>
-              <p class="text-xs text-amber-800 leading-relaxed mb-4">
-                특별성과급 지급 시 소득세 최고세율(49.5%)로 일괄 원천징수되므로, 종합소득 누진공제 반영 시 실제 결정세액과의 차액만큼 익년도 종합과세/연말정산 시 대규모 환급이 발생합니다.
-              </p>
-            </div>
-            <div class="bg-white rounded-xl p-4 border border-amber-200 flex items-center justify-between">
-              <div>
-                <span class="text-xs text-slate-500 block">예상 환급 세액 (소득세+지방세)</span>
-                <span class="text-2xl font-extrabold text-amber-600" id="refundEstimate">-</span>
-              </div>
-              <div class="text-right text-xs text-slate-500">
-                <span class="block">원천징수 총세액: <strong id="totalWithheldTax" class="text-slate-800">-</strong></span>
-                <span class="block">실제 결정세액: <strong id="finalCalculatedTax" class="text-slate-800">-</strong></span>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-slate-900 text-white rounded-2xl p-5 flex flex-col justify-between shadow-md">
-            <div>
-              <div class="flex items-center justify-between mb-2">
-                <h4 class="font-bold text-white flex items-center gap-2">
-                  <i class="fa-solid fa-calculator text-blue-400"></i> 올해 총 보상 종합 (Grand Total)
-                </h4>
-                <span class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded font-bold">현금 + 자사주</span>
-              </div>
-              <p class="text-xs text-slate-400 mb-4">계약연봉 + TAI + OPI + DS 특별 성과급의 총 가치입니다.</p>
-            </div>
-            <div class="grid grid-cols-2 gap-3 bg-slate-800 rounded-xl p-4 border border-slate-700">
-              <div>
-                <span class="text-xs text-slate-400 block mb-0.5">총 보상 (세전)</span>
-                <span class="text-xl sm:text-2xl font-extrabold text-white" id="grandTotalPre">-</span>
-              </div>
-              <div>
-                <span class="text-xs text-emerald-400 block mb-0.5">총 보상 (세후 실지급)</span>
-                <span class="text-xl sm:text-2xl font-extrabold text-emerald-400" id="grandTotalPost">-</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- RESULT 2: 5년간 특별성과금 및 종합보상 (기본: 간소화 상태) -->
-    <section class="bg-white rounded-2xl p-6 border border-slate-200 card-shadow">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800">결과 2</span>
-            <h2 class="text-lg font-bold text-slate-900">5년간 특별성과금 및 종합보상</h2>
-          </div>
-          <p class="text-xs text-slate-500 mt-0.5">자사주 1/3 분할 매도 및 연도별 OPI · TAI · 특별성과금 종합</p>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <button type="button" id="btn-5yr-detail" onclick="toggle5YrDetail()" 
-                  class="px-4 py-2 text-xs font-bold rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-xs">
-            <i class="fa-solid fa-sliders text-indigo-600"></i>
-            <span id="btn5YrText">간소화 보기</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- 5-Year Simplified Summary Cards (간소화 뷰) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-          <span class="text-xs text-slate-500 font-semibold block mb-1">5년간 총 특별성과금 (공제 전)</span>
-          <div class="text-2xl font-extrabold text-slate-900" id="fiveYrTotalPre">-</div>
-          <span class="text-[11px] text-slate-400 mt-1 block">5개년 합산 세전 총액</span>
-        </div>
-        <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-4">
-          <span class="text-xs text-blue-700 font-semibold block mb-1">5년간 총 특별성과금 (공제 후)</span>
-          <div class="text-2xl font-extrabold text-blue-800" id="fiveYrTotalPost">-</div>
-          <span class="text-[11px] text-blue-600 mt-1 block">원천징수 후 순수 자사주 가치</span>
-        </div>
-        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-          <span class="text-xs text-emerald-700 font-semibold block mb-1">5년간 총 매도 가능 해제액</span>
-          <div class="text-2xl font-extrabold text-emerald-700" id="fiveYrUnlockedSum">-</div>
-          <span class="text-[11px] text-emerald-600 mt-1 block">2027~2031년 기간 내 해제액</span>
-        </div>
-        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
-          <span class="text-xs text-amber-800 font-semibold block mb-1">31년 이후 잔여 락업 자사주</span>
-          <div class="text-2xl font-extrabold text-amber-700" id="fiveYrRemainingLocked">-</div>
-          <span class="text-[11px] text-amber-600 mt-1 block">2032~2033년에 해제될 잔액</span>
-        </div>
-      </div>
-
-      <!-- Detail Input & Comprehensive 5-Year Table Section (기본 펼침) -->
-      <div id="fiveYrInputSection" class="mt-6 space-y-6">
-        
-        <!-- Table 1: 연도별 OPI, TAI, 특별성과금, 세전, 세후, 연말정산 환급액 종합 명세표 -->
-        <div class="p-5 rounded-2xl bg-indigo-50/50 border border-indigo-200 transition-all">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-2">
-            <div>
-              <h4 class="text-sm font-bold text-indigo-950 flex items-center gap-1.5">
-                <i class="fa-solid fa-table-cells text-indigo-600"></i> 5개년 연도별 OPI · TAI · 특별성과금 종합 보상표 (세전 / 세후 / 연말정산 환급액)
-              </h4>
-              <p class="text-xs text-slate-500 mt-0.5">※ OPI 50% 상한, TAI 연 10%, 특별성과급 및 당해 소득세율 반영 종합 보상 명세서</p>
-            </div>
-            <!-- 5개년 환급액 총합계 배지 -->
-            <div class="flex items-center gap-2">
-              <span class="text-xs bg-amber-100 border border-amber-300 text-amber-900 px-3 py-1 rounded-lg font-bold shadow-xs" id="fiveYrRefundSumBadge">
-                5개년 환급 합계: -
-              </span>
-              <span class="text-[11px] bg-indigo-200/60 text-indigo-900 px-2.5 py-1 rounded-lg font-bold">단위: 만원</span>
-            </div>
-          </div>
-
-          <div class="overflow-x-auto">
-            <table class="min-w-full text-xs text-right border-collapse bg-white rounded-xl shadow-xs overflow-hidden">
-              <thead>
-                <tr class="bg-indigo-900 text-white font-semibold">
-                  <th class="py-2.5 px-3 text-left">실적연도 (지급연도)</th>
-                  <th class="py-2.5 px-3">계약연봉</th>
-                  <th class="py-2.5 px-3">TAI (10%)</th>
-                  <th class="py-2.5 px-3">OPI (50%)</th>
-                  <th class="py-2.5 px-3 text-amber-300">특별성과금(세전)</th>
-                  <th class="py-2.5 px-3 text-indigo-200 font-bold">총 보상 (세전)</th>
-                  <th class="py-2.5 px-3 text-emerald-300 font-extrabold bg-indigo-950">총 보상 (세후)</th>
-                  <th class="py-2.5 px-3 text-amber-300 font-extrabold bg-indigo-950">연말정산 환급 예상액</th>
-                </tr>
-              </thead>
-              <tbody id="fiveYearCompTableBody" class="divide-y divide-slate-200 text-slate-700">
-                <!-- Dynamic Rows -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Table 2: 연도별 파견/소속, 영업이익, 연봉 설정 편집표 -->
-        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 transition-all">
-          <div class="flex items-center justify-between mb-3">
-            <div>
-              <h4 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                <i class="fa-solid fa-pen-to-square text-indigo-600"></i> 연도별 소속 사업부(파견), 영업이익, 계약연봉 세부 편집
-              </h4>
-              <p class="text-xs text-slate-500 mt-0.5">※ 상단 메인 탭 선택 시 5년 전체가 자동 동기화되며, 필요한 연도만 개별 수정 가능합니다.</p>
-            </div>
-            <button onclick="reset5YrDefaults()" class="text-xs text-indigo-600 hover:underline font-bold">
-              기본값 리셋
-            </button>
-          </div>
-
-          <div class="overflow-x-auto">
-            <table class="min-w-full text-xs text-center border-collapse">
-              <thead>
-                <tr class="bg-slate-200/80 text-slate-700 font-semibold border-b border-slate-300">
-                  <th class="py-2.5 px-3 text-left w-36">항목</th>
-                  <th class="py-2.5 px-3">2026년 (27지급)</th>
-                  <th class="py-2.5 px-3">2027년 (28지급)</th>
-                  <th class="py-2.5 px-3">2028년 (29지급)</th>
-                  <th class="py-2.5 px-3">2029년 (30지급)</th>
-                  <th class="py-2.5 px-3">2030년 (31지급)</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-200 bg-white">
-                
-                <tr class="bg-indigo-50/40">
-                  <td class="py-2.5 px-3 font-bold text-indigo-900 text-left bg-indigo-100/40">
-                    <i class="fa-solid fa-arrows-split-up-and-left mr-1"></i> 소속 사업부 (파견)
-                  </td>
-                  <td class="p-1.5">
-                    <select id="div_2026" onchange="recalculateAll()" class="w-full py-1.5 px-1 text-xs border rounded-lg bg-white font-bold text-slate-800">
-                      <option value="memory" selected>메모리 (100%)</option>
-                      <option value="common">DS 공통 (70%)</option>
-                      <option value="nonmemory_surplus">비메모리 (흑자 100%)</option>
-                      <option value="nonmemory_deficit">비메모리 (적자 60%)</option>
-                    </select>
-                  </td>
-                  <td class="p-1.5">
-                    <select id="div_2027" onchange="recalculateAll()" class="w-full py-1.5 px-1 text-xs border rounded-lg bg-white font-bold text-slate-800">
-                      <option value="memory" selected>메모리 (100%)</option>
-                      <option value="common">DS 공통 (70%)</option>
-                      <option value="nonmemory_surplus">비메모리 (흑자 100%)</option>
-                      <option value="nonmemory_deficit">비메모리 (적자 60%)</option>
-                    </select>
-                  </td>
-                  <td class="p-1.5">
-                    <select id="div_2028" onchange="recalculateAll()" class="w-full py-1.5 px-1 text-xs border rounded-lg bg-white font-bold text-slate-800">
-                      <option value="memory" selected>메모리 (100%)</option>
-                      <option value="common">DS 공통 (70%)</option>
-                      <option value="nonmemory_surplus">비메모리 (흑자 100%)</option>
-                      <option value="nonmemory_deficit">비메모리 (적자 60%)</option>
-                    </select>
-                  </td>
-                  <td class="p-1.5">
-                    <select id="div_2029" onchange="recalculateAll()" class="w-full py-1.5 px-1 text-xs border rounded-lg bg-white font-bold text-slate-800">
-                      <option value="memory" selected>메모리 (100%)</option>
-                      <option value="common">DS 공통 (70%)</option>
-                      <option value="nonmemory_surplus">비메모리 (흑자 100%)</option>
-                      <option value="nonmemory_deficit">비메모리 (적자 60%)</option>
-                    </select>
-                  </td>
-                  <td class="p-1.5">
-                    <select id="div_2030" onchange="recalculateAll()" class="w-full py-1.5 px-1 text-xs border rounded-lg bg-white font-bold text-slate-800">
-                      <option value="memory" selected>메모리 (100%)</option>
-                      <option value="common">DS 공통 (70%)</option>
-                      <option value="nonmemory_surplus">비메모리 (흑자 100%)</option>
-                      <option value="nonmemory_deficit">비메모리 (적자 60%)</option>
-                    </select>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td class="py-2.5 px-3 font-bold text-slate-700 text-left bg-slate-50">
-                    DS 영업이익 (조원)
-                    <span class="block text-[10px] text-slate-400 font-normal">문턱: 26~28년 200조 / 이후 100조</span>
-                  </td>
-                  <td class="p-1.5"><input type="number" id="p_2026" value="394" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
-                  <td class="p-1.5"><input type="number" id="p_2027" value="567" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
-                  <td class="p-1.5"><input type="number" id="p_2028" value="576" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
-                  <td class="p-1.5"><input type="number" id="p_2029" value="518" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
-                  <td class="p-1.5"><input type="number" id="p_2030" value="466" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
-                </tr>
-
-                <tr>
-                  <td class="py-2.5 px-3 font-bold text-slate-700 text-left bg-slate-50">
-                    계약연봉 (만원)
-                    <span class="block text-[10px] text-slate-400 font-normal">연 4% 증가 자동반영</span>
-                  </td>
-                  <td class="p-1.5"><input type="number" id="s_2026" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900"></td>
-                  <td class="p-1.5"><input type="number" id="s_2027" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900"></td>
-                  <td class="p-1.5"><input type="number" id="s_2028" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900"></td>
-                  <td class="p-1.5"><input type="number" id="s_2029" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900"></td>
-                  <td class="p-1.5"><input type="number" id="s_2030" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900"></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Chart and Breakdown Table -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6 items-center">
-        <!-- Chart Area (Stacked Bar with Cohort Text Label Inside Stacks) -->
-        <div class="lg:col-span-7 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200">
-          <div class="flex items-center justify-between mb-3">
-            <h4 class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1.5">
-              <i class="fa-solid fa-chart-column text-blue-600"></i> 지급연도별 누적 현황
-            </h4>
-            <span class="text-[11px] text-slate-500">단위: 억원</span>
-          </div>
-          <div class="h-72 sm:h-84 w-full relative">
-            <canvas id="vestingChart"></canvas>
-          </div>
-          <p class="text-[11px] text-slate-500 mt-2 text-center">
-            * <strong>[실적년도] [금액(억)]</strong> (녹색: 당해 매도가능 / 주황·회색: 당해 락업잔여)
-          </p>
-        </div>
-
-        <!-- Table Breakdown Area -->
-        <div class="lg:col-span-5 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200 flex flex-col justify-between h-full">
+      <!-- Top Controller: Global Division Tabs & Primary Inputs -->
+      <div class="bg-white rounded-2xl p-6 border border-slate-200 card-shadow">
+        <!-- Business Unit Tabs -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-5 border-b border-slate-100 gap-4">
           <div>
-            <h4 class="text-xs sm:text-sm font-bold text-slate-800 mb-2 flex items-center gap-1.5">
-              <i class="fa-solid fa-table-list text-indigo-600"></i> 연도별 신규 수령 및 매도 해제 명세
-            </h4>
-            <div class="overflow-x-auto text-xs">
-              <table class="w-full text-right border-collapse">
+            <span class="text-xs font-bold uppercase tracking-wider text-blue-600 block mb-0.5">Primary Division</span>
+            <h2 class="text-lg font-bold text-slate-900">소속사업부 선택</h2>
+          </div>
+          <div class="flex p-1.5 bg-slate-100 rounded-xl w-full sm:w-auto" id="divisionTabs">
+            <button type="button" onclick="setGlobalDivision('memory')" id="tab-memory" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 tab-active flex items-center justify-center gap-2">
+              <i class="fa-solid fa-memory"></i> 메모리
+            </button>
+            <button type="button" onclick="setGlobalDivision('common')" id="tab-common" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-lg font-semibold text-sm text-slate-600 hover:text-slate-900 transition-all duration-200 flex items-center justify-center gap-2">
+              <i class="fa-solid fa-network-wired"></i> 공통
+            </button>
+            <button type="button" onclick="setGlobalDivision('nonmemory')" id="tab-nonmemory" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-lg font-semibold text-sm text-slate-600 hover:text-slate-900 transition-all duration-200 flex items-center justify-center gap-2">
+              <i class="fa-solid fa-microchip"></i> 르팡
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Preset & Condition Indicator -->
+        <div id="divisionAlert" class="mt-4 p-3.5 rounded-xl text-xs sm:text-sm bg-blue-50 border border-blue-200 text-blue-900 flex items-start justify-between gap-3">
+          <div class="flex items-start gap-2.5">
+            <i class="fa-solid fa-circle-info text-blue-600 mt-0.5 text-base"></i>
+            <div id="divisionAlertText">
+              결과2에서 <strong>연도별</strong> 사업부 <strong>반영 가능</strong> 
+            </div>
+          </div>
+        </div>
+
+        <!-- Inputs Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          
+          <!-- Input 1: Company Performance -->
+          <div class="bg-slate-50/90 p-4 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="companyProfit" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                <i class="fa-solid fa-chart-line text-blue-600"></i> 올해 회사 성과
+              </label>
+              <span class="text-[11px] text-slate-400 font-medium">문턱: 200조</span>
+            </div>
+            <div class="relative flex items-center">
+              <input type="number" id="companyProfit" value="394" min="0" step="1" 
+                     class="w-full bg-white text-slate-900 text-xl font-bold rounded-lg border border-slate-300 px-3 py-2 text-right pr-12 focus:outline-none focus:border-blue-500">
+              <span class="absolute right-3 text-slate-500 font-semibold text-sm pointer-events-none">조 원</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-2 flex justify-between">
+              <span>2026 컨센서스: 394조</span>
+              <button onclick="setProfit(394)" class="text-blue-600 font-semibold hover:underline">394조 복원</button>
+            </p>
+          </div>
+
+          <!-- Input 2: My Base Salary -->
+          <div class="bg-slate-50/90 p-4 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="baseSalary" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                <i class="fa-solid fa-won-sign text-blue-600"></i> 내 계약 연봉
+              </label>
+              <span class="text-[11px] text-slate-400 font-medium">성과급 제외</span>
+            </div>
+            <div class="relative flex items-center">
+              <input type="number" id="baseSalary" value="8000" min="1000" step="10" 
+                     class="w-full bg-white text-slate-900 text-xl font-bold rounded-lg border border-slate-300 px-3 py-2 text-right pr-14 focus:outline-none focus:border-blue-500">
+              <span class="absolute right-3 text-slate-500 font-semibold text-sm pointer-events-none">만 원</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-2">
+              세전 기본 월급: <strong id="quickMonthlyGross" class="text-slate-800 font-bold">-</strong>
+            </p>
+          </div>
+
+          <!-- Input 3: Prior Year Withholding Tax Income -->
+          <div class="bg-slate-50/90 p-4 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="prevYearIncome" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                <i class="fa-solid fa-file-invoice-dollar text-blue-600"></i> 전년도 원천징수 소득
+              </label>
+              <span class="text-[11px] text-blue-600 font-semibold cursor-pointer hover:underline" onclick="togglePrevYearAuto()" id="prevAutoLabel">자동 입력(*1.5)</span>
+            </div>
+            <div class="relative flex items-center">
+              <input type="number" id="prevYearIncome" value="" min="1000" step="100" 
+                     class="w-full bg-white text-slate-900 text-xl font-bold rounded-lg border border-slate-300 px-3 py-2 text-right pr-14 focus:outline-none focus:border-blue-500">
+              <span class="absolute right-3 text-slate-500 font-semibold text-sm pointer-events-none">만 원</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-2">
+              건보료 보수월액 산정 기준
+            </p>
+          </div>
+
+          <!-- Input 4: Samsung Stock Price -->
+          <div class="bg-gradient-to-br from-blue-50/80 to-indigo-50/80 p-4 rounded-xl border-2 border-blue-300/80 focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-200 transition-all shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="samsungStockPrice" class="text-xs font-extrabold text-blue-950 flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-trend-up text-blue-600"></i> 삼성전자 기준주가
+              </label>
+              <button type="button" onclick="fetchSamsungStockPrice()" id="btnFetchStock" 
+                      class="text-[11px] bg-white border border-blue-300 hover:bg-blue-600 hover:text-white text-blue-700 px-2 py-0.5 rounded font-bold transition-all shadow-xs flex items-center gap-1">
+                <i class="fa-solid fa-rotate text-[10px]"></i> 실시간 계산
+              </button>
+            </div>
+            <div class="relative flex items-center">
+              <input type="number" id="samsungStockPrice" value="270000" step="1000" 
+                     class="w-full bg-white text-blue-950 text-2xl font-black rounded-lg border border-blue-400 px-3 py-2 text-right pr-10 focus:outline-none focus:border-blue-600 tracking-tight shadow-inner">
+              <span class="absolute right-3 text-blue-900 font-bold text-sm pointer-events-none">원</span>
+            </div>
+            <div class="text-[11px] text-blue-800 mt-2" id="stockStatusContainer">
+              <div id="stockStatusText" class="flex items-center justify-between">
+                <span>1주/1달/2달 VWAP 산술평균</span>
+                <span class="text-slate-500 text-[10px]">수정 가능</span>
+              </div>
+              <div id="stockCalcDateText" class="text-[10px] text-slate-500 mt-0.5 hidden"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- RESULT 1: 올해 총 보상 -->
+      <section class="bg-white rounded-2xl p-6 border border-slate-200 card-shadow transition-all">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">결과 1</span>
+              <h2 class="text-lg font-bold text-slate-900">올해 총 보상 산정 (26년 실적분)</h2>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">OPI, TAI, DS특별성과급, 환급금</p>
+          </div>
+
+          <div class="flex items-center bg-slate-100 p-1 rounded-xl">
+            <button type="button" id="btn-comp-simple" onclick="toggleCompMode(true)" 
+                    class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all bg-white text-blue-700 shadow-sm">
+              <i class="fa-solid fa-compress-arrows-alt mr-1"></i> 간소화
+            </button>
+            <button type="button" id="btn-comp-detail" onclick="toggleCompMode(false)" 
+                    class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-600">
+              <i class="fa-solid fa-expand-arrows-alt mr-1"></i> 펼치기 (상세)
+            </button>
+          </div>
+        </div>
+
+        <!-- Simplified View -->
+        <div id="compSimplifiedView" class="mt-6">
+          <div class="p-6 rounded-2xl bg-gradient-to-br from-blue-900 via-indigo-950 to-slate-900 text-white relative overflow-hidden shadow-lg">
+            <div class="absolute right-0 top-0 translate-x-10 -translate-y-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs uppercase tracking-wider text-blue-300 font-semibold flex items-center gap-1.5">
+                <i class="fa-solid fa-award"></i> DS 특별 성과급 핵심 요약
+              </span>
+              <span class="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full font-medium">전액 자사주 지급</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+                <span class="text-xs text-slate-300 block mb-1">특별성과급 공제 전</span>
+                <p class="text-2xl sm:text-3xl font-extrabold text-white" id="simpleSpecialPre">-</p>
+                <p class="text-[11px] text-slate-400 mt-1">DS 사업성과 10.5% 기반 1인 환산</p>
+              </div>
+              <div class="bg-blue-600/20 border border-blue-400/30 rounded-xl p-4">
+                <span class="text-xs text-blue-200 block mb-1">특별성과급 공제 후</span>
+                <p class="text-2xl sm:text-3xl font-extrabold text-emerald-400" id="simpleSpecialPost">-</p>
+                <p class="text-[11px] text-blue-200 mt-1">원천징수(54.476%) 차감 후 확정액</p>
+              </div>
+              <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+                <span class="text-xs text-amber-200 block mb-1">1/3 즉시 매도 가능 금액</span>
+                <p class="text-2xl sm:text-3xl font-extrabold text-amber-300" id="simpleSpecialImmediate">-</p>
+                <p class="text-[11px] text-slate-300 mt-1" id="simpleSpecialShares">예상 0주 즉시 매도 가능</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed View -->
+        <div id="compDetailedView" class="hidden mt-6 space-y-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+              <div class="flex items-center justify-between text-xs text-slate-500 font-semibold mb-2">
+                <span>① 계약 연봉</span>
+                <span class="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded text-[10px]">기본급</span>
+              </div>
+              <div class="text-xl font-bold text-slate-900" id="cardBaseSalary">-</div>
+              <div class="text-xs text-slate-500 mt-1 flex justify-between">
+                <span>세후 예상:</span>
+                <span class="font-bold text-slate-700" id="cardBaseSalaryPost">-</span>
+              </div>
+            </div>
+
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+              <div class="flex items-center justify-between text-xs text-slate-500 font-semibold mb-2">
+                <span>② TAI (목표달성장려금)</span>
+                <span class="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-[10px]">연 10% 고정</span>
+              </div>
+              <div class="text-xl font-bold text-blue-700" id="cardTaiPre">-</div>
+              <div class="text-xs text-slate-500 mt-1 flex justify-between">
+                <span>세후 예상:</span>
+                <span class="font-bold text-slate-700" id="cardTaiPost">-</span>
+              </div>
+            </div>
+
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+              <div class="flex items-center justify-between text-xs text-slate-500 font-semibold mb-2">
+                <span>③ OPI (성과인센티브)</span>
+                <span class="bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded text-[10px]">상한 50%</span>
+              </div>
+              <div class="text-xl font-bold text-purple-700" id="cardOpiPre">-</div>
+              <div class="text-xs text-slate-500 mt-1 flex justify-between">
+                <span>세후 예상:</span>
+                <span class="font-bold text-slate-700" id="cardOpiPost">-</span>
+              </div>
+            </div>
+
+            <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-4">
+              <div class="flex items-center justify-between text-xs text-blue-800 font-semibold mb-2">
+                <span>현금 보상 합계 (①+②+③)</span>
+                <span class="bg-blue-600 text-white px-1.5 py-0.5 rounded text-[10px]">계좌 입금</span>
+              </div>
+              <div class="text-xl font-bold text-blue-900" id="cardCashTotalPre">-</div>
+              <div class="text-xs text-blue-800 mt-1 flex justify-between">
+                <span>세후 총 현금:</span>
+                <span class="font-bold text-blue-900" id="cardCashTotalPost">-</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 text-white rounded-2xl p-6 border border-blue-800/40 relative shadow-xl">
+            <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-white/10 gap-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-400 text-slate-900">NEW 2026</span>
+                  <h3 class="text-lg font-bold">DS 특별 성과급 세부 명세</h3>
+                </div>
+                <p class="text-xs text-slate-300 mt-1">26년 영업이익에 따라 27년 3월 세후 전액 자사주로 입고되는 주식 성과급</p>
+              </div>
+              <div class="text-right">
+                <span class="text-xs text-slate-400 block">원천징수 기준세율</span>
+                <span class="text-sm font-bold text-amber-300">54.476% (소득·지방세 49.5% + 건보·고용 4.976%)</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+              <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+                <span class="text-xs text-slate-300 block mb-1">원천징수 전 (세전 가치)</span>
+                <div class="text-xl sm:text-2xl font-bold text-white" id="specPreDetail">-</div>
+                <span class="text-[11px] text-slate-400 mt-1 block">영업이익 10.5% 부문 환산액</span>
+              </div>
+              <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+                <span class="text-xs text-rose-300 block mb-1">원천징수 세액 (54.476%)</span>
+                <div class="text-xl sm:text-2xl font-bold text-rose-400" id="specTaxDetail">-</div>
+                <span class="text-[11px] text-slate-400 mt-1 block">최고구간 원천징수 합계</span>
+              </div>
+              <div class="bg-emerald-500/10 border border-emerald-400/30 rounded-xl p-4">
+                <span class="text-xs text-emerald-300 block mb-1">세후 자사주 환산금액</span>
+                <div class="text-xl sm:text-2xl font-bold text-emerald-400" id="specPostDetail">-</div>
+                <span class="text-[11px] text-emerald-300/90 mt-1 block font-semibold" id="specSharesDetail">총 0 주 수령</span>
+              </div>
+              <div class="bg-amber-400/10 border border-amber-400/30 rounded-xl p-4">
+                <span class="text-xs text-amber-300 block mb-1">1/3 즉시 매도 가능액</span>
+                <div class="text-xl sm:text-2xl font-bold text-amber-300" id="specImmDetail">-</div>
+                <span class="text-[11px] text-amber-200 mt-1 block font-semibold" id="specImmSharesDetail">0 주 즉시 매도 가능</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-5 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <h4 class="font-bold text-amber-950 flex items-center gap-2">
+                    <i class="fa-solid fa-piggy-bank text-amber-600"></i> 연말정산 예상 환급액
+                  </h4>
+                  <span class="text-xs bg-amber-200/70 text-amber-900 px-2 py-0.5 rounded font-bold">13월의 월급</span>
+                </div>
+                <p class="text-xs text-amber-800 leading-relaxed mb-4">
+                  특별성과급 지급 시 소득세 최고세율(49.5%)로 일괄 원천징수되므로, 종합소득 누진공제 반영 시 실제 결정세액과의 차액만큼 익년도 종합과세/연말정산 시 대규모 환급이 발생합니다.
+                </p>
+              </div>
+              <div class="bg-white rounded-xl p-4 border border-amber-200 flex items-center justify-between">
+                <div>
+                  <span class="text-xs text-slate-500 block">예상 환급 세액 (소득세+지방세)</span>
+                  <span class="text-2xl font-extrabold text-amber-600" id="refundEstimate">-</span>
+                </div>
+                <div class="text-right text-xs text-slate-500">
+                  <span class="block">원천징수 총세액: <strong id="totalWithheldTax" class="text-slate-800">-</strong></span>
+                  <span class="block">실제 결정세액: <strong id="finalCalculatedTax" class="text-slate-800">-</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-slate-900 text-white rounded-2xl p-5 flex flex-col justify-between shadow-md">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <h4 class="font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-calculator text-blue-400"></i> 올해 총 보상 종합 (Grand Total)
+                  </h4>
+                  <span class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded font-bold">현금 + 자사주</span>
+                </div>
+                <p class="text-xs text-slate-400 mb-4">계약연봉 + TAI + OPI + DS 특별 성과급의 총 가치입니다.</p>
+              </div>
+              <div class="grid grid-cols-2 gap-3 bg-slate-800 rounded-xl p-4 border border-slate-700">
+                <div>
+                  <span class="text-xs text-slate-400 block mb-0.5">총 보상 (세전)</span>
+                  <span class="text-xl sm:text-2xl font-extrabold text-white" id="grandTotalPre">-</span>
+                </div>
+                <div>
+                  <span class="text-xs text-emerald-400 block mb-0.5">총 보상 (세후 실지급)</span>
+                  <span class="text-xl sm:text-2xl font-extrabold text-emerald-400" id="grandTotalPost">-</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RESULT 2: 5년간 특별성과금 및 종합보상 -->
+      <section class="bg-white rounded-2xl p-6 border border-slate-200 card-shadow">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800">결과 2</span>
+              <h2 class="text-lg font-bold text-slate-900">5년간 특별성과금 및 종합보상</h2>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">자사주 1/3 분할 매도 및 연도별 OPI · TAI · 특별성과금 종합</p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button type="button" id="btn-5yr-detail" onclick="toggle5YrDetail()" 
+                    class="px-4 py-2 text-xs font-bold rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-xs">
+              <i class="fa-solid fa-sliders text-indigo-600"></i>
+              <span id="btn5YrText">자세히 보기, 소속변경</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+            <span class="text-xs text-slate-500 font-semibold block mb-1">5년간 총 특별성과금 (공제 전)</span>
+            <div class="text-2xl font-extrabold text-slate-900" id="fiveYrTotalPre">-</div>
+            <span class="text-[11px] text-slate-400 mt-1 block">5개년 합산 세전 총액</span>
+          </div>
+          <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-4">
+            <span class="text-xs text-blue-700 font-semibold block mb-1">5년간 총 특별성과금 (공제 후)</span>
+            <div class="text-2xl font-extrabold text-blue-800" id="fiveYrTotalPost">-</div>
+            <span class="text-[11px] text-blue-600 mt-1 block">원천징수 후 순수 자사주 가치</span>
+          </div>
+          <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+            <span class="text-xs text-emerald-700 font-semibold block mb-1">5년간 총 매도 가능 해제액</span>
+            <div class="text-2xl font-extrabold text-emerald-700" id="fiveYrUnlockedSum">-</div>
+            <span class="text-[11px] text-emerald-600 mt-1 block">2027~2031년 기간 내 해제액</span>
+          </div>
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <span class="text-xs text-amber-800 font-semibold block mb-1">31년 이후 잔여 락업 자사주</span>
+            <div class="text-2xl font-extrabold text-amber-700" id="fiveYrRemainingLocked">-</div>
+            <span class="text-[11px] text-amber-600 mt-1 block">2032~2033년에 해제될 잔액</span>
+          </div>
+        </div>
+
+        <!-- Detail Input & Comprehensive 5-Year Table Section -->
+        <div id="fiveYrInputSection" class="hidden mt-6 space-y-6">
+          <div class="p-5 rounded-2xl bg-indigo-50/50 border border-indigo-200 transition-all">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-2">
+              <div>
+                <h4 class="text-sm font-bold text-indigo-950 flex items-center gap-1.5">
+                  <i class="fa-solid fa-table-cells text-indigo-600"></i> 5개년 연도별 OPI · TAI · 특별성과금 종합 보상표
+                </h4>
+                <p class="text-xs text-slate-500 mt-0.5">※ OPI 50% 상한, TAI 연 10%, 특별성과급 및 당해 소득세율 반영 종합 보상 명세서</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs bg-amber-100 border border-amber-300 text-amber-900 px-3 py-1 rounded-lg font-bold shadow-xs" id="fiveYrRefundSumBadge">
+                  5개년 환급 합계: -
+                </span>
+                <span class="text-[11px] bg-indigo-200/60 text-indigo-900 px-2.5 py-1 rounded-lg font-bold">단위: 만원</span>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-xs text-right border-collapse bg-white rounded-xl shadow-xs overflow-hidden">
                 <thead>
-                  <tr class="border-b border-slate-300 text-slate-500 text-[11px]">
-                    <th class="py-2 text-left">지급연도</th>
-                    <th class="py-2">신규입고(세후)</th>
-                    <th class="py-2 text-emerald-600 font-bold">당해 매도가능</th>
-                    <th class="py-2 text-amber-600">당해 락업잔여</th>
+                  <tr class="bg-indigo-900 text-white font-semibold">
+                    <th class="py-2.5 px-3 text-left">실적연도 (지급연도)</th>
+                    <th class="py-2.5 px-3">계약연봉</th>
+                    <th class="py-2.5 px-3">TAI (10%)</th>
+                    <th class="py-2.5 px-3">OPI (50%)</th>
+                    <th class="py-2.5 px-3 text-amber-300">특별성과금(세전)</th>
+                    <th class="py-2.5 px-3 text-indigo-200 font-bold">총 보상 (세전)</th>
+                    <th class="py-2.5 px-3 text-emerald-300 font-extrabold bg-indigo-950">총 보상 (세후)</th>
+                    <th class="py-2.5 px-3 text-amber-300 font-extrabold bg-indigo-950">연말정산 환급 예상액</th>
                   </tr>
                 </thead>
-                <tbody id="vestingTableBody" class="divide-y divide-slate-200 text-slate-700">
-                  <!-- Dynamic JS rows -->
+                <tbody id="fiveYearCompTableBody" class="divide-y divide-slate-200 text-slate-700"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 transition-all">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <h4 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                  <i class="fa-solid fa-pen-to-square text-indigo-600"></i> 연도별 소속 사업부(파견), 영업이익, 계약연봉 세부 편집
+                </h4>
+                <p class="text-xs text-slate-500 mt-0.5">※ 상단 메인 탭 선택 시 5년 전체가 자동 동기화되며, 필요한 연도만 개별 수정 가능합니다.</p>
+              </div>
+              <button onclick="reset5YrDefaults()" class="text-xs text-indigo-600 hover:underline font-bold">기본값 리셋</button>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-xs text-center border-collapse">
+                <thead>
+                  <tr class="bg-slate-200/80 text-slate-700 font-semibold border-b border-slate-300">
+                    <th class="py-2.5 px-3 text-left w-36">항목</th>
+                    <th class="py-2.5 px-3">2026년 (27지급)</th>
+                    <th class="py-2.5 px-3">2027년 (28지급)</th>
+                    <th class="py-2.5 px-3">2028년 (29지급)</th>
+                    <th class="py-2.5 px-3">2029년 (30지급)</th>
+                    <th class="py-2.5 px-3">2030년 (31지급)</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 bg-white">
+                  <tr class="bg-indigo-50/40">
+                    <td class="py-2.5 px-3 font-bold text-indigo-900 text-left bg-indigo-100/40">소속 사업부 (파견)</td>
+                    <td class="p-1.5">
+                      <select id="div_2026" onchange="recalculateAll()" class="w-full py-1.5 px-1 text-xs border rounded-lg bg-white font-bold text-slate-800">
+                        <option value="memory" selected>메모리 (100%)</option>
+                        <option value="common">DS 공통 (70%)</option>
+                        <option value="nonmemory_surplus">비메모리 (흑자 100%)</option>
+                        <option value="nonmemory_deficit">비메모리 (적자 60%)</option>
+                      </select>
+                    </td>
+                    <td class="p-1.5">
+                      <select id="div_2027" onchange="recalculateAll()" class="w-full py-1.5 px-1 text-xs border rounded-lg bg-white font-bold text-slate-800">
+                        <option value="memory" selected>메모리 (100%)</option>
+                        <option value="common">DS 공통 (70%)</option>
+                        <option value="nonmemory_surplus">비메모리 (흑자 100%)</option>
+                        <option value="nonmemory_deficit">비메모리 (적자 60%)</option>
+                      </select>
+                    </td>
+                    <td class="p-1.5">
+                      <select id="div_2028" onchange="recalculateAll()" class="w-full py-1.5 px-1 text-xs border rounded-lg bg-white font-bold text-slate-800">
+                        <option value="memory" selected>메모리 (100%)</option>
+                        <option value="common">DS 공통 (70%)</option>
+                        <option value="nonmemory_surplus">비메모리 (흑자 100%)</option>
+                        <option value="nonmemory_deficit">비메모리 (적자 60%)</option>
+                      </select>
+                    </td>
+                    <td class="p-1.5">
+                      <select id="div_2029" onchange="recalculateAll()" class="w-full py-1.5 px-1 text-xs border rounded-lg bg-white font-bold text-slate-800">
+                        <option value="memory" selected>메모리 (100%)</option>
+                        <option value="common">DS 공통 (70%)</option>
+                        <option value="nonmemory_surplus">비메모리 (흑자 100%)</option>
+                        <option value="nonmemory_deficit">비메모리 (적자 60%)</option>
+                      </select>
+                    </td>
+                    <td class="p-1.5">
+                      <select id="div_2030" onchange="recalculateAll()" class="w-full py-1.5 px-1 text-xs border rounded-lg bg-white font-bold text-slate-800">
+                        <option value="memory" selected>메모리 (100%)</option>
+                        <option value="common">DS 공통 (70%)</option>
+                        <option value="nonmemory_surplus">비메모리 (흑자 100%)</option>
+                        <option value="nonmemory_deficit">비메모리 (적자 60%)</option>
+                      </select>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td class="py-2.5 px-3 font-bold text-slate-700 text-left bg-slate-50">
+                      DS 영업이익 (조원)
+                      <span class="block text-[10px] text-slate-400 font-normal">문턱: 26~28년 200조 / 이후 100조</span>
+                    </td>
+                    <td class="p-1.5"><input type="number" id="p_2026" value="394" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
+                    <td class="p-1.5"><input type="number" id="p_2027" value="567" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
+                    <td class="p-1.5"><input type="number" id="p_2028" value="576" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
+                    <td class="p-1.5"><input type="number" id="p_2029" value="518" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
+                    <td class="p-1.5"><input type="number" id="p_2030" value="466" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
+                  </tr>
+
+                  <tr>
+                    <td class="py-2.5 px-3 font-bold text-slate-700 text-left bg-slate-50">
+                      계약연봉 (만원)
+                      <span class="block text-[10px] text-slate-400 font-normal">연 4% 증가 자동반영</span>
+                    </td>
+                    <td class="p-1.5"><input type="number" id="s_2026" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900"></td>
+                    <td class="p-1.5"><input type="number" id="s_2027" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900"></td>
+                    <td class="p-1.5"><input type="number" id="s_2028" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900"></td>
+                    <td class="p-1.5"><input type="number" id="s_2029" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900"></td>
+                    <td class="p-1.5"><input type="number" id="s_2030" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900"></td>
+                  </tr>
                 </tbody>
               </table>
             </div>
           </div>
-          <div class="mt-4 p-3 rounded-lg bg-blue-100/70 text-blue-950 text-[11px] leading-relaxed">
-            <i class="fa-solid fa-info-circle mr-1 text-blue-700"></i>
-            매년 3월 세후 자사주가 계좌에 입고되며, 입고 즉시 1/3, 1년 뒤 1/3, 2년 뒤 마지막 1/3이 순차 매도 가능해집니다.
+        </div>
+
+        <!-- Chart and Breakdown Table -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6 items-center">
+          <div class="lg:col-span-7 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200">
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-chart-column text-blue-600"></i> 지급연도별 누적 현황
+              </h4>
+              <span class="text-[11px] text-slate-500">단위: 억원</span>
+            </div>
+            <div class="h-72 sm:h-84 w-full relative">
+              <canvas id="vestingChart"></canvas>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200 flex flex-col justify-between h-full">
+            <div>
+              <h4 class="text-xs sm:text-sm font-bold text-slate-800 mb-2 flex items-center gap-1.5">
+                <i class="fa-solid fa-table-list text-indigo-600"></i> 연도별 신규 수령 및 매도 해제 명세
+              </h4>
+              <div class="overflow-x-auto text-xs">
+                <table class="w-full text-right border-collapse">
+                  <thead>
+                    <tr class="border-b border-slate-300 text-slate-500 text-[11px]">
+                      <th class="py-2 text-left">지급연도</th>
+                      <th class="py-2">신규입고(세후)</th>
+                      <th class="py-2 text-emerald-600 font-bold">당해 매도가능</th>
+                      <th class="py-2 text-amber-600">당해 락업잔여</th>
+                    </tr>
+                  </thead>
+                  <tbody id="vestingTableBody" class="divide-y divide-slate-200 text-slate-700"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="mt-4 p-3 rounded-lg bg-blue-100/70 text-blue-950 text-[11px] leading-relaxed">
+              <i class="fa-solid fa-info-circle mr-1 text-blue-700"></i>
+              매년 3월 세후 자사주가 계좌에 입고되며, 입고 즉시 1/3, 1년 뒤 1/3, 2년 뒤 마지막 1/3이 순차 매도 가능해집니다.
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- RESULT 3: 향후 5년간 예상 월급 -->
-    <section class="bg-white rounded-2xl p-6 border border-slate-200 card-shadow">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">결과 3</span>
-            <h2 class="text-lg font-bold text-slate-900">향후 5년간 예상 월급 (매월 21일 실수령액 명세)</h2>
-          </div>
-          <p class="text-xs text-slate-500 mt-0.5">전년도 원천소득(보수총액) 기반 건보료 및 국세청 간이세액표를 정밀 반영한 실수령액</p>
-        </div>
-        <div class="text-xs text-slate-500 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
-          <span>* 성과급 제외한 순수 기본급여 명세서</span>
-        </div>
-      </div>
-
-      <!-- 5-Year Monthly Salary Table -->
-      <div class="mt-6 overflow-x-auto">
-        <table class="min-w-full text-xs text-right border-collapse">
-          <thead>
-            <tr class="bg-slate-100 text-slate-700 font-bold border-y border-slate-200">
-              <th class="py-3 px-3 text-left">연도</th>
-              <th class="py-3 px-3">계약연봉</th>
-              <th class="py-3 px-3">세전 월급</th>
-              <th class="py-3 px-3 text-slate-500">국민연금</th>
-              <th class="py-3 px-3 text-slate-500">건보+장기요양</th>
-              <th class="py-3 px-3 text-slate-500">고용보험</th>
-              <th class="py-3 px-3 text-slate-500">소득세+지방세</th>
-              <th class="py-3 px-3 text-rose-600 font-bold">공제 합계</th>
-              <th class="py-3 px-3 text-emerald-700 text-sm font-extrabold bg-emerald-50/50">예상 실수령 월급</th>
-            </tr>
-          </thead>
-          <tbody id="monthlySalaryTableBody" class="divide-y divide-slate-200 text-slate-700 bg-white">
-            <!-- Dynamic Rows -->
-          </tbody>
-        </table>
-      </div>
-
-      <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-200 leading-relaxed">
-        <div class="flex items-start gap-2">
-          <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
-          <div>
-            <strong>건보료 산정 기준:</strong> 당해 연봉이 아닌 <strong>전년도 원천소득(보수총액)</strong>을 12로 나눈 보수월액 기준으로 매월 원천공제됩니다.
-          </div>
-        </div>
-        <div class="flex items-start gap-2">
-          <i class="fa-solid fa-calculator text-blue-600 mt-0.5"></i>
-          <div>
-            <strong>소득세 산정 기준:</strong> 국세청 <strong>근로소득 간이세액표(소득세법 시행령 별표2)</strong>에 따라 당월 기본급 기준으로 원천징수되며, 성과급 발생 시점의 고율 세금과 분리 계산됩니다.
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-
-<!-- 2. 휴식 탭: 2048 게임 화면 (기본 숨김: hidden) -->
-    <section id="gameView" class="hidden w-full max-w-lg mx-auto py-2">
-      <div class="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 card-shadow">
-        
-        <!-- 게임 상단: 타이틀 & 점수판 -->
-        <div class="flex items-center justify-between gap-3 mb-5">
+      <!-- RESULT 3: 향후 5년간 예상 월급 -->
+      <section class="bg-white rounded-2xl p-6 border border-slate-200 card-shadow">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
           <div>
             <div class="flex items-center gap-2">
-              <span class="text-3xl font-black tracking-tight text-slate-900">2048</span>
-              <span class="text-xs bg-amber-500/10 text-amber-700 font-bold px-2 py-0.5 rounded-full border border-amber-300">Relax</span>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">결과 3</span>
+              <h2 class="text-lg font-bold text-slate-900">향후 5년간 예상 월급 (매월 21일 실수령액 명세)</h2>
             </div>
-            <p class="text-[11px] text-slate-400 mt-0.5">타일을 합쳐 <strong>2048</strong>을 만드세요! 모바일도 플레이 가능!</p>
-          </div>
-
-          <!-- 현재 점수 & 최고 점수 -->
-          <div class="flex gap-2">
-            <div class="bg-slate-100 px-3 py-1.5 rounded-xl text-center min-w-[70px] border border-slate-200">
-              <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">SCORE</span>
-              <span class="text-base sm:text-lg font-black text-slate-800" id="gameScore">0</span>
-            </div>
-            <div class="bg-amber-50 px-3 py-1.5 rounded-xl text-center min-w-[70px] border border-amber-200">
-              <span class="block text-[10px] font-bold text-amber-600 uppercase tracking-wider">BEST</span>
-              <span class="text-base sm:text-lg font-black text-amber-900" id="gameBestScore">0</span>
-            </div>
+            <p class="text-xs text-slate-500 mt-0.5">전년도 원천소득 기반 건보료 및 간이세액표 반영</p>
           </div>
         </div>
 
-        <!-- 버튼 바 (새 게임 & 되돌리기) -->
+        <div class="mt-6 overflow-x-auto">
+          <table class="min-w-full text-xs text-right border-collapse">
+            <thead>
+              <tr class="bg-slate-100 text-slate-700 font-bold border-y border-slate-200">
+                <th class="py-3 px-3 text-left">연도</th>
+                <th class="py-3 px-3">계약연봉</th>
+                <th class="py-3 px-3">세전 월급</th>
+                <th class="py-3 px-3 text-slate-500">국민연금</th>
+                <th class="py-3 px-3 text-slate-500">건보+장기요양</th>
+                <th class="py-3 px-3 text-slate-500">고용보험</th>
+                <th class="py-3 px-3 text-slate-500">소득세+지방세</th>
+                <th class="py-3 px-3 text-rose-600 font-bold">공제 합계</th>
+                <th class="py-3 px-3 text-emerald-700 text-sm font-extrabold bg-emerald-50/50">예상 실수령 월급</th>
+              </tr>
+            </thead>
+            <tbody id="monthlySalaryTableBody" class="divide-y divide-slate-200 text-slate-700 bg-white"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+
+
+    <!-- ==================== TAB 2: 휴식 (2048) ==================== -->
+    <div id="section-game2048" class="hidden flex flex-col items-center justify-center w-full py-2">
+      <div class="bg-white rounded-3xl p-6 border border-slate-200 card-shadow max-w-md w-full text-center">
         <div class="flex items-center justify-between mb-4">
-          <div class="text-[11px] text-slate-500 hidden sm:flex items-center gap-1.5">
-            <i class="fa-solid fa-keyboard text-slate-400"></i> 방향키(↑ ↓ ← →) 또는 화면터치
-          </div>
-          <div class="text-[11px] text-slate-500 sm:hidden flex items-center gap-1.5">
-            <i class="fa-solid fa-hand-pointer text-slate-400"></i> 화면을 상하좌우로 스와이프
+          <div>
+            <h3 class="text-2xl font-black text-slate-900 flex items-center gap-2">
+              <span class="text-amber-500">2048</span> 숫자 퍼즐
+            </h3>
+            <p class="text-xs text-slate-500 text-left mt-0.5">머리를 식히는 클래식 숫자 합치기</p>
           </div>
           <div class="flex gap-2">
-            <button type="button" onclick="undoGameMove()" id="btnUndo"
-                    class="px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 transition flex items-center gap-1 shadow-2xs disabled:opacity-40 disabled:cursor-not-allowed">
-              <i class="fa-solid fa-rotate-left"></i> 되돌리기
-            </button>
-            <button type="button" onclick="startNewGame()" 
-                    class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white transition flex items-center gap-1 shadow-sm">
-              <i class="fa-solid fa-arrows-rotate"></i> 새 게임
-            </button>
+            <div class="bg-slate-100 px-3 py-1.5 rounded-xl text-center">
+              <span class="text-[10px] text-slate-500 block font-bold">SCORE</span>
+              <span id="score2048" class="text-sm font-black text-slate-800">0</span>
+            </div>
+            <div class="bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl text-center">
+              <span class="text-[10px] text-amber-700 block font-bold">BEST</span>
+              <span id="best2048" class="text-sm font-black text-amber-600">0</span>
+            </div>
           </div>
         </div>
 
-        <!-- 2048 게임 보드 프레임 (상대 위치 & 오버레이 포함) -->
-        <div class="relative w-full aspect-square bg-[#bbada0] rounded-2xl p-3 shadow-inner">
-          <!-- 16개 배경 격자 -->
-          <div id="game-board-container" class="w-full h-full grid grid-cols-4 grid-rows-4 gap-2.5 sm:gap-3">
-            <!-- 16개의 셀이 JS에서 동적으로 렌더링됩니다 -->
+        <div class="flex justify-end mb-3">
+          <button onclick="init2048()" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1 shadow-sm">
+            <i class="fa-solid fa-rotate-right text-[11px]"></i> 새 게임
+          </button>
+        </div>
+
+        <!-- 2048 Board Container -->
+        <div id="boardContainer2048" class="relative bg-slate-800/90 p-3 rounded-2xl mx-auto shadow-inner select-none touch-none inline-block">
+          <div id="grid2048" class="grid grid-cols-4 gap-2.5">
+            <!-- 16 Tiles generated dynamically -->
           </div>
 
-          <!-- 게임 오버 / 승리 오버레이 -->
-          <div id="gameOverOverlay" class="absolute inset-0 bg-slate-900/85 backdrop-blur-xs rounded-2xl flex flex-col items-center justify-center p-6 text-white text-center transition-all opacity-0 pointer-events-none z-20">
-            <div id="overlayIcon" class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-3xl mb-3">
-              <i class="fa-solid fa-skull"></i>
-            </div>
-            <h3 id="overlayTitle" class="text-2xl font-black mb-1">Game Over</h3>
-            <p id="overlaySubtitle" class="text-xs text-slate-300 mb-5">더 이상 합칠 수 있는 타일이 없습니다.</p>
-            <button type="button" onclick="startNewGame()" 
-                    class="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-sm transition shadow-lg shadow-amber-500/30">
+          <!-- Game Over Overlay -->
+          <div id="game2048Over" class="absolute inset-0 bg-slate-950/85 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center p-4 hidden">
+            <span class="text-3xl mb-1">🎮</span>
+            <h4 class="text-xl font-black text-white mb-1">GAME OVER</h4>
+            <p class="text-xs text-slate-300 mb-4">더 이상 움직일 수 있는 타일이 없습니다!</p>
+            <button onclick="init2048()" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-sm transition-all shadow-md">
               다시 도전하기
             </button>
           </div>
         </div>
 
+        <p class="text-xs text-slate-400 mt-4">
+          조작법: <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-[11px] font-semibold text-slate-700">방향키 (← ↑ → ↓)</kbd> 또는 화면을 <span class="font-semibold text-blue-600">스와이프</span>
+        </p>
       </div>
-    </section>
-    
+    </div>
+
+
+    <!-- ==================== TAB 3: 휴식 (jump) ==================== -->
+    <div id="section-jump" class="hidden flex flex-col items-center justify-center w-full py-1">
+      <!-- Jump Game Cabinet Container -->
+      <div id="game-container" class="relative w-full h-[76vh] min-h-[580px] max-h-[820px] max-w-[500px] overflow-hidden shadow-2xl bg-black rounded-3xl border border-slate-800 select-none font-arcade">
+        <!-- Canvas -->
+        <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+
+        <!-- Red Alert Vignette -->
+        <div id="dangerOverlay" class="absolute inset-0 pointer-events-none transition-opacity duration-300 opacity-0"></div>
+
+        <!-- Top UI Header -->
+        <header class="absolute top-0 left-0 right-0 p-4 pt-4 flex flex-col items-center pointer-events-none z-10">
+          <div class="w-full flex items-center justify-between mb-2.5 px-2">
+            <div class="flex items-center gap-2 glass-panel px-3.5 py-1.5 rounded-2xl shadow-lg border-emerald-500/30">
+              <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">SCORE</span>
+              <span id="scoreDisplay" class="text-2xl font-extrabold text-white tracking-wide drop-shadow-md">0</span>
+            </div>
+
+            <button id="soundToggleBtn" class="pointer-events-auto glass-panel p-2 rounded-2xl border-white/20 active:scale-90 transition-transform shadow-md text-amber-300">
+              <svg id="soundOnIcon" class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-2.5-1.23L6.5 6.5H2v11h4.5l5 4.5V2z"/></svg>
+              <svg id="soundOffIcon" class="w-5 h-5 fill-current hidden" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+            </button>
+
+            <div class="flex items-center gap-2 glass-panel px-3.5 py-1.5 rounded-2xl shadow-lg border-amber-500/30">
+              <svg class="w-4 h-4 text-amber-400 fill-current drop-shadow" viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0 0 11 15.9V19H7v2h10v-2h-4v-3.1a5.01 5.01 0 0 0 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
+              <div class="flex flex-col items-end">
+                <span class="text-[9px] text-amber-300/80 font-bold uppercase tracking-wider">BEST</span>
+                <span id="bestScoreDisplay" class="text-base font-black text-amber-300 drop-shadow">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timer Gauge Capsule Frame -->
+          <div class="w-[90%] h-5 glass-panel rounded-full p-1 border-2 border-white/20 shadow-2xl relative overflow-hidden backdrop-blur-md">
+            <div id="gaugeProgress" class="h-full rounded-full transition-all duration-75 relative overflow-hidden flex items-center justify-end" style="width: 100%; background: linear-gradient(90deg, #10b981, #06b6d4);">
+              <div class="w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_8px_#ffffff] mr-0.5 opacity-90 animate-pulse"></div>
+            </div>
+          </div>
+
+          <div id="themeBanner" class="mt-2 text-[11px] font-semibold px-3 py-0.5 rounded-full glass-panel text-slate-300 border-white/10 opacity-90">
+            STAGE 1 • 벽돌집 루프탑
+          </div>
+        </header>
+
+        <!-- Floating Streak Combo Banner -->
+        <div id="comboBanner" class="absolute top-24 left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-300 opacity-0 transform scale-50 z-20">
+          <div class="px-4 py-1 rounded-full bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-500 font-extrabold text-white text-sm shadow-[0_0_20px_rgba(244,63,94,0.7)] border border-white/40">
+            <span id="comboText">FEVER!</span>
+          </div>
+        </div>
+
+        <!-- On-Screen Mobile Touch Controls -->
+        <div class="absolute bottom-5 left-0 right-0 px-6 flex justify-between items-end pointer-events-none z-20">
+          <button id="turnBtn" aria-label="방향 전환 후 오르기" class="touch-btn pointer-events-auto w-20 h-20 sm:w-22 sm:h-22 rounded-full flex flex-col items-center justify-center shadow-[0_8px_25px_rgba(244,63,94,0.45)] border-4 border-rose-300/40 bg-gradient-to-br from-rose-500 to-pink-600 active:scale-90 select-none">
+            <svg class="w-9 h-9 text-white fill-current filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" viewBox="0 0 24 24">
+              <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+            </svg>
+            <span class="text-[10px] font-black text-rose-100 tracking-tight mt-0.5 drop-shadow">방향전환</span>
+          </button>
+
+          <button id="climbBtn" aria-label="그대로 오르기" class="touch-btn pointer-events-auto w-20 h-20 sm:w-22 sm:h-22 rounded-full flex flex-col items-center justify-center shadow-[0_8px_25px_rgba(16,185,129,0.45)] border-4 border-emerald-300/40 bg-gradient-to-br from-emerald-500 to-teal-600 active:scale-90 select-none">
+            <svg class="w-10 h-10 text-white fill-current filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" viewBox="0 0 24 24">
+              <path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/>
+            </svg>
+            <span class="text-[10px] font-black text-emerald-100 tracking-tight mt-0.5 drop-shadow">오르기</span>
+          </button>
+        </div>
+
+        <!-- Start Game Splash Overlay -->
+        <div id="startScreen" class="absolute inset-0 flex flex-col items-center justify-center glass-panel bg-slate-950/85 p-6 z-30 transition-opacity duration-300">
+          <div class="relative mb-5 text-center">
+            <h2 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-emerald-400 to-cyan-400 drop-shadow-[0_4px_12px_rgba(16,185,129,0.5)]">
+              올라라 계단
+            </h2>
+            <p class="text-slate-300 text-xs mt-1.5 font-medium tracking-wide">하늘과 우주를 향해 끝없이 계단을 정복하라!</p>
+          </div>
+
+          <div class="glass-panel p-4 rounded-2xl max-w-xs w-full border-white/20 mb-6 space-y-2.5 text-xs text-slate-200">
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-full bg-emerald-500/30 border border-emerald-400/50 flex items-center justify-center text-emerald-300 font-bold shrink-0">→</div>
+              <div><strong class="text-white text-xs">오르기 (키보드 → 또는 우측 버튼)</strong><br><span class="text-slate-400 text-[11px]">바라보는 방향으로 한 칸 전진</span></div>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-full bg-rose-500/30 border border-rose-400/50 flex items-center justify-center text-rose-300 font-bold shrink-0">←</div>
+              <div><strong class="text-white text-xs">방향 전환 (키보드 ← 또는 좌측 버튼)</strong><br><span class="text-slate-400 text-[11px]">반대로 돌며 한 칸 전진</span></div>
+            </div>
+          </div>
+
+          <button id="startGameBtn" class="px-8 py-3 rounded-2xl font-black text-lg text-slate-900 bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-300 shadow-[0_0_25px_rgba(52,211,153,0.6)] active:scale-95 transition-all hover:brightness-110">
+            게임 시작
+          </button>
+          <span class="text-slate-400 text-[11px] mt-2.5">스페이스바 또는 화면 터치로 즉시 시작</span>
+        </div>
+
+        <!-- Game Over Modal -->
+        <div id="gameOverModal" class="absolute inset-0 flex flex-col items-center justify-center glass-panel bg-slate-950/85 p-6 z-40 hidden transition-opacity duration-300">
+          <div class="relative w-full max-w-xs glass-panel p-5 rounded-3xl border-rose-500/30 shadow-[0_0_40px_rgba(244,63,94,0.3)] text-center">
+            <div class="w-12 h-12 rounded-full bg-rose-500/20 border-2 border-rose-500 mx-auto flex items-center justify-center mb-2 shadow-[0_0_15px_rgba(244,63,94,0.5)]">
+              <span class="text-xl">⚡</span>
+            </div>
+            <h3 id="gameOverTitle" class="text-2xl font-black text-rose-400 tracking-tight">GAME OVER</h3>
+            <p id="gameOverReason" class="text-slate-400 text-xs mt-0.5 mb-4">발을 헛디뎌 추락했습니다!</p>
+
+            <div class="bg-slate-900/80 rounded-2xl p-3 border border-white/10 mb-5 space-y-2">
+              <div class="flex justify-between items-center">
+                <span class="text-xs text-slate-400 font-bold uppercase">최종 오른 계단</span>
+                <span id="finalScoreVal" class="text-2xl font-black text-emerald-400">0</span>
+              </div>
+              <div class="h-[1px] bg-white/10 w-full"></div>
+              <div class="flex justify-between items-center">
+                <span class="text-xs text-amber-400 font-bold uppercase flex items-center gap-1">
+                  <span>🏆</span> 최고 기록
+                </span>
+                <span id="finalBestVal" class="text-xl font-black text-amber-300">0</span>
+              </div>
+              <div id="newRecordBadge" class="hidden py-1 px-2 rounded-full bg-amber-500/20 text-amber-300 text-[11px] font-bold border border-amber-400/40 animate-pulse">
+                ✨ 최고 기록 경신! ✨
+              </div>
+            </div>
+
+            <button id="restartGameBtn" class="w-full py-3 rounded-2xl font-black text-base text-slate-900 bg-gradient-to-r from-emerald-400 to-teal-300 shadow-[0_0_20px_rgba(52,211,153,0.5)] active:scale-95 transition-all hover:brightness-110">
+              다시 도전하기
+            </button>
+            <span class="text-slate-400 text-[10px] block mt-2.5">스페이스바 또는 엔터로 재시작</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-xs text-slate-400 mt-3 text-center">
+        키보드 조작: <kbd class="px-1.5 py-0.5 bg-slate-200 text-slate-700 rounded text-[11px] font-bold">←</kbd> 방향전환 &nbsp;|&nbsp; 
+        <kbd class="px-1.5 py-0.5 bg-slate-200 text-slate-700 rounded text-[11px] font-bold">→</kbd> 오르기 &nbsp;|&nbsp; 
+        <kbd class="px-1.5 py-0.5 bg-slate-200 text-slate-700 rounded text-[11px] font-bold">Space</kbd> 시작/재시작
+      </p>
+    </div>
+
   </main>
 
   <!-- Footer -->
   <footer class="bg-slate-900 text-slate-400 text-xs py-8 border-t border-slate-800 mt-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="space-y-1 text-center md:text-left">
-        <p class="font-bold text-slate-200">삼성전자 DS 성과급 시뮬레이터 (26년 10월 9일 업데이트) </p>
+        <p class="font-bold text-slate-200">삼성전자 DS 성과급 시뮬레이터 (26년 10월 9일 업데이트)</p>
         <p class="text-slate-500">※ 본 계산기는 사내 공개 자료 및 언론 보도에 기반한 시뮬레이션입니다.</p>
       </div>
       <div class="text-slate-500 text-center md:text-right">
@@ -802,368 +907,60 @@
     </div>
   </footer>
 
-  <!-- Calculator Script with LocalStorage Persistence & Precise Tax Logic -->
+  <!-- ==================== SCRIPT SECTIONS ==================== -->
   <script>
+    // ----------------------------------------------------
+    // 1. MAIN TAB SWITCHER
+    // ----------------------------------------------------
+    let currentMainTab = 'calc';
+    let isJumpInitialized = false;
+
+    function switchMainTab(tab) {
+      if (currentMainTab === tab) return;
+      currentMainTab = tab;
+
+      const tabs = ['calc', 'game2048', 'jump'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`mainTab-${t}`);
+        const sec = document.getElementById(`section-${t}`);
+        if (t === tab) {
+          btn.className = 'flex-1 md:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 tab-active shadow-md';
+          sec.classList.remove('hidden');
+        } else {
+          btn.className = 'flex-1 md:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-300 hover:text-white hover:bg-slate-700/60';
+          sec.classList.add('hidden');
+        }
+      });
+
+      if (tab === 'calc') {
+        if (chartInstance) chartInstance.resize();
+      } else if (tab === 'game2048') {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        if (board2048.every(row => row.every(cell => cell === 0))) {
+          init2048();
+        }
+      } else if (tab === 'jump') {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        setTimeout(() => {
+          resizeCanvas();
+          if (!isJumpInitialized) {
+            initGame();
+            isJumpInitialized = true;
+          }
+          startJumpLoop();
+        }, 50);
+      }
+    }
+
+    // ----------------------------------------------------
+    // 2. CALCULATOR ENGINE
+    // ----------------------------------------------------
     let globalDivision = 'memory';
     let isSimplifiedMode = true;
-    let is5YrDetailOpen = true;
+    let is5YrDetailOpen = false;
     let isPrevAuto = true;
     let chartInstance = null;
 
-    /* ========================================================
-       2048 게임 엔진 & 키보드 스크롤 방지 로직
-    ======================================================== */
-    let currentActiveTab = 'calc'; // 현재 활성화된 메인 탭
-
-    // 1. 탭 전환 제어
-    function switchNavTab(tab) {
-      currentActiveTab = tab;
-      const calcView = document.getElementById('calcView');
-      const gameView = document.getElementById('gameView');
-      const tabCalc = document.getElementById('nav-tab-calc');
-      const tabGame = document.getElementById('nav-tab-game');
-
-      if (tab === 'calc') {
-        calcView.classList.remove('hidden');
-        gameView.classList.add('hidden');
-        tabCalc.className = 'px-5 py-2.5 rounded-t-xl font-bold text-sm bg-white text-slate-900 transition-all flex items-center gap-2 shadow-sm';
-        tabGame.className = 'px-5 py-2.5 rounded-t-xl font-bold text-sm text-slate-400 hover:text-white transition-all flex items-center gap-2';
-      } else {
-        calcView.classList.add('hidden');
-        gameView.classList.remove('hidden');
-        tabGame.className = 'px-5 py-2.5 rounded-t-xl font-bold text-sm bg-white text-slate-900 transition-all flex items-center gap-2 shadow-sm';
-        tabCalc.className = 'px-5 py-2.5 rounded-t-xl font-bold text-sm text-slate-400 hover:text-white transition-all flex items-center gap-2';
-        
-        // 휴식 탭 처음 진입 시 게임 미시작 상태라면 시작
-        if (!gameState.board || gameState.board.flat().every(v => v === 0)) {
-          startNewGame();
-        }
-      }
-    }
-
-    // 2. 키보드 방향키 기본 스크롤 동작 완벽 차단!
-    window.addEventListener('keydown', (e) => {
-      // 휴식(게임) 탭에 있을 때만 방향키 스크롤 방지 & 이동 실행
-      if (currentActiveTab === 'game') {
-        const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Up', 'Down', 'Left', 'Right'];
-        if (arrowKeys.includes(e.key)) {
-          e.preventDefault(); // ★ 브라우저 스크롤 방지 ★
-          
-          if (gameState.isOver) return;
-
-          switch (e.key) {
-            case 'ArrowUp':
-            case 'Up':
-              moveBoard('up');
-              break;
-            case 'ArrowDown':
-            case 'Down':
-              moveBoard('down');
-              break;
-            case 'ArrowLeft':
-            case 'Left':
-              moveBoard('left');
-              break;
-            case 'ArrowRight':
-            case 'Right':
-              moveBoard('right');
-              break;
-          }
-        }
-      }
-    }, { passive: false });
-
-    // 3. 2048 상태 관리
-    const gameState = {
-      board: [
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0]
-      ],
-      score: 0,
-      bestScore: parseInt(localStorage.getItem('2048_best_score') || '0', 10),
-      isOver: false,
-      hasWon: false,
-      previousState: null // 되돌리기용 1회 버퍼
-    };
-
-    // 타일별 디자인 팔레트 (DS 테마에 맞춘 깔끔하고 세련된 색상)
-    const TILE_STYLES = {
-      0:    { bg: 'bg-[#cdc1b4]', text: 'text-transparent' },
-      2:    { bg: 'bg-[#eee4da]', text: 'text-[#776e65]' },
-      4:    { bg: 'bg-[#ede0c8]', text: 'text-[#776e65]' },
-      8:    { bg: 'bg-[#f2b179]', text: 'text-white' },
-      16:   { bg: 'bg-[#f59563]', text: 'text-white' },
-      32:   { bg: 'bg-[#f67c5f]', text: 'text-white' },
-      64:   { bg: 'bg-[#f65e3b]', text: 'text-white' },
-      128:  { bg: 'bg-[#edcf72]', text: 'text-white shadow-md' },
-      256:  { bg: 'bg-[#edcc61]', text: 'text-white shadow-md ring-2 ring-amber-300' },
-      512:  { bg: 'bg-[#edc850]', text: 'text-white shadow-lg ring-2 ring-amber-400' },
-      1024: { bg: 'bg-[#edc53f]', text: 'text-white shadow-lg ring-2 ring-yellow-400' },
-      2048: { bg: 'bg-[#edc22e]', text: 'text-white shadow-xl ring-4 ring-yellow-300' }
-    };
-
-    function startNewGame() {
-      gameState.board = [
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0]
-      ];
-      gameState.score = 0;
-      gameState.isOver = false;
-      gameState.hasWon = false;
-      gameState.previousState = null;
-
-      hideOverlay();
-      spawnRandomTile();
-      spawnRandomTile();
-      renderBoard();
-      updateScoreUI();
-    }
-
-    function spawnRandomTile() {
-      const emptyCells = [];
-      for (let r = 0; r < 4; r++) {
-        for (let c = 0; c < 4; c++) {
-          if (gameState.board[r][c] === 0) emptyCells.push({ r, c });
-        }
-      }
-      if (emptyCells.length === 0) return null;
-      const { r, c } = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-      // 90% 확률로 2, 10% 확률로 4 생성
-      gameState.board[r][c] = Math.random() < 0.9 ? 2 : 4;
-      return { r, c };
-    }
-
-    function moveBoard(direction) {
-      if (gameState.isOver) return;
-
-      // 되돌리기를 위해 현재 상태 저장
-      const prevBoard = JSON.parse(JSON.stringify(gameState.board));
-      const prevScore = gameState.score;
-
-      let moved = false;
-      let earnedPoints = 0;
-
-      const rotateLeft = (grid) => {
-        const res = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
-        for (let r = 0; r < 4; r++) {
-          for (let c = 0; c < 4; c++) {
-            res[3 - c][r] = grid[r][c];
-          }
-        }
-        return res;
-      };
-
-      const slideLeft = (row) => {
-        let nonZero = row.filter(val => val !== 0);
-        const newRow = [];
-        let rScore = 0;
-        let skip = false;
-
-        for (let i = 0; i < nonZero.length; i++) {
-          if (skip) {
-            skip = false;
-            continue;
-          }
-          if (i + 1 < nonZero.length && nonZero[i] === nonZero[i + 1]) {
-            const merged = nonZero[i] * 2;
-            newRow.push(merged);
-            rScore += merged;
-            skip = true;
-          } else {
-            newRow.push(nonZero[i]);
-          }
-        }
-        while (newRow.length < 4) newRow.push(0);
-        return { newRow, rScore };
-      };
-
-      let working = JSON.parse(JSON.stringify(gameState.board));
-      let rotations = 0;
-
-      if (direction === 'up') rotations = 1;
-      else if (direction === 'right') rotations = 2;
-      else if (direction === 'down') rotations = 3;
-
-      for (let i = 0; i < rotations; i++) {
-        working = rotateLeft(working);
-      }
-
-      for (let r = 0; r < 4; r++) {
-        const { newRow, rScore } = slideLeft(working[r]);
-        if (newRow.join(',') !== working[r].join(',')) {
-          moved = true;
-        }
-        working[r] = newRow;
-        earnedPoints += rScore;
-      }
-
-      const backRotations = (4 - rotations) % 4;
-      for (let i = 0; i < backRotations; i++) {
-        working = rotateLeft(working);
-      }
-
-      if (moved) {
-        gameState.previousState = { board: prevBoard, score: prevScore };
-        gameState.board = working;
-        gameState.score += earnedPoints;
-
-        if (gameState.score > gameState.bestScore) {
-          gameState.bestScore = gameState.score;
-          localStorage.setItem('2048_best_score', gameState.bestScore);
-        }
-
-        const spawned = spawnRandomTile();
-        renderBoard(spawned);
-        updateScoreUI();
-
-        // 2048 타일 첫 달성 축하
-        if (!gameState.hasWon && gameState.board.flat().includes(2048)) {
-          gameState.hasWon = true;
-          showOverlay(true);
-        } else if (checkGameOver()) {
-          gameState.isOver = true;
-          showOverlay(false);
-        }
-      }
-    }
-
-    function checkGameOver() {
-      // 빈 칸이 남아있으면 게임오버 아님
-      for (let r = 0; r < 4; r++) {
-        for (let c = 0; c < 4; c++) {
-          if (gameState.board[r][c] === 0) return false;
-        }
-      }
-      // 인접한 칸에 합칠 수 있는 타일이 있는지 확인
-      for (let r = 0; r < 4; r++) {
-        for (let c = 0; c < 4; c++) {
-          const val = gameState.board[r][c];
-          if (c + 1 < 4 && val === gameState.board[r][c + 1]) return false;
-          if (r + 1 < 4 && val === gameState.board[r + 1][c]) return false;
-        }
-      }
-      return true;
-    }
-
-    function undoGameMove() {
-      if (!gameState.previousState) return;
-      gameState.board = gameState.previousState.board;
-      gameState.score = gameState.previousState.score;
-      gameState.previousState = null;
-      gameState.isOver = false;
-      hideOverlay();
-      renderBoard();
-      updateScoreUI();
-    }
-
-    function renderBoard(justSpawnedCoord = null) {
-      const container = document.getElementById('game-board-container');
-      container.innerHTML = '';
-
-      for (let r = 0; r < 4; r++) {
-        for (let c = 0; c < 4; c++) {
-          const val = gameState.board[r][c];
-          const style = TILE_STYLES[val] || { bg: 'bg-[#3c3a32]', text: 'text-white ring-2 ring-amber-500' };
-
-          const cell = document.createElement('div');
-          cell.className = `w-full h-full rounded-xl sm:rounded-2xl flex items-center justify-center font-black select-none transition-all duration-100 ${style.bg} ${style.text}`;
-
-          // 글자 크기 조정
-          if (val >= 1024) cell.classList.add('text-lg', 'sm:text-2xl');
-          else if (val >= 128) cell.classList.add('text-xl', 'sm:text-3xl');
-          else cell.classList.add('text-2xl', 'sm:text-4xl');
-
-          if (val > 0) {
-            cell.innerText = val;
-            if (justSpawnedCoord && justSpawnedCoord.r === r && justSpawnedCoord.c === c) {
-              cell.classList.add('tile-new');
-            }
-          }
-          container.appendChild(cell);
-        }
-      }
-
-      // 되돌리기 버튼 활성/비활성 제어
-      const btnUndo = document.getElementById('btnUndo');
-      if (btnUndo) {
-        btnUndo.disabled = !gameState.previousState;
-      }
-    }
-
-    function updateScoreUI() {
-      document.getElementById('gameScore').innerText = gameState.score.toLocaleString();
-      document.getElementById('gameBestScore').innerText = gameState.bestScore.toLocaleString();
-    }
-
-    function showOverlay(isWin) {
-      const overlay = document.getElementById('gameOverOverlay');
-      const title = document.getElementById('overlayTitle');
-      const sub = document.getElementById('overlaySubtitle');
-      const icon = document.getElementById('overlayIcon');
-
-      if (isWin) {
-        icon.innerHTML = '<i class="fa-solid fa-trophy text-amber-400"></i>';
-        title.innerText = '2048 달성!';
-        sub.innerText = '축하합니다! 계속 진행하여 더 높은 점수에 도전하세요.';
-      } else {
-        icon.innerHTML = '<i class="fa-solid fa-skull text-slate-400"></i>';
-        title.innerText = 'Game Over';
-        sub.innerText = '합칠 수 있는 타일이 없습니다.';
-      }
-
-      overlay.classList.remove('opacity-0', 'pointer-events-none');
-      overlay.classList.add('opacity-100', 'pointer-events-auto');
-    }
-
-    function hideOverlay() {
-      const overlay = document.getElementById('gameOverOverlay');
-      overlay.classList.add('opacity-0', 'pointer-events-none');
-      overlay.classList.remove('opacity-100', 'pointer-events-auto');
-    }
-
-    // 4. 모바일 스와이프 제어 (터치 제스처 & 스크롤 방지)
-    let touchStartX = 0;
-    let touchStartY = 0;
-
-    const boardEl = document.getElementById('game-board-container');
-    if (boardEl) {
-      boardEl.addEventListener('touchstart', (e) => {
-        if (e.touches.length === 1) {
-          touchStartX = e.touches[0].clientX;
-          touchStartY = e.touches[0].clientY;
-        }
-      }, { passive: true });
-
-      // 모바일 보드 내부에서 터치 이동 시 브라우저 스크롤 차단
-      boardEl.addEventListener('touchmove', (e) => {
-        if (currentActiveTab === 'game') {
-          e.preventDefault();
-        }
-      }, { passive: false });
-
-      boardEl.addEventListener('touchend', (e) => {
-        if (e.changedTouches.length === 1 && !gameState.isOver) {
-          const deltaX = e.changedTouches[0].clientX - touchStartX;
-          const deltaY = e.changedTouches[0].clientY - touchStartY;
-          const absX = Math.abs(deltaX);
-          const absY = Math.abs(deltaY);
-
-          // 최소 30px 이상 스와이프해야 작동 (오터치 방지)
-          if (Math.max(absX, absY) > 30) {
-            if (absX > absY) {
-              moveBoard(deltaX > 0 ? 'right' : 'left');
-            } else {
-              moveBoard(deltaY > 0 ? 'down' : 'up');
-            }
-          }
-        }
-      }, { passive: true });
-    }
-    
     function formatKRW(val) {
       if (isNaN(val) || val === null) return '0원';
       const roundVal = Math.round(val);
@@ -1287,7 +1084,7 @@
     function updateDivisionAlertText(div) {
       const alertText = document.getElementById('divisionAlertText');
       if (div === 'memory') {
-        alertText.innerHTML = `결과2에서 <strong>연도별 </strong><strong>소속 변경가능</strong> `;
+        alertText.innerHTML = `결과2에서 <strong>연도별 </strong><strong>소속 변경가능</strong>`;
       } else if (div === 'common') {
         alertText.innerHTML = `<strong>공통:</strong> <strong> 0.7 </strong> *메모리 적용됩니다.`;
       } else if (div === 'nonmemory') {
@@ -1402,7 +1199,6 @@
       
       try {
         let calculatedPrice = null;
-
         try {
           const apiRes = await fetch('/api/stock');
           if (apiRes.ok) {
@@ -1411,9 +1207,7 @@
               calculatedPrice = apiData.basePrice;
             }
           }
-        } catch (e) {
-          // fallback
-        }
+        } catch (e) {}
 
         if (!calculatedPrice) {
           const proxyUrl = encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/005930.KS?range=3mo&interval=1d');
@@ -1453,7 +1247,6 @@
 
         if (calculatedPrice && calculatedPrice > 0) {
           document.getElementById('samsungStockPrice').value = calculatedPrice;
-          
           const now = new Date();
           const yyyy = now.getFullYear();
           const mm = String(now.getMonth() + 1).padStart(2, '0');
@@ -1511,7 +1304,6 @@
 
     function getStandardMonthlyIncomeTax(monthlyGrossWon) {
       if (monthlyGrossWon <= 1060000) return 0;
-
       let baseTax = 0;
       if (monthlyGrossWon > 14000000) {
         baseTax = 3643640 + (monthlyGrossWon - 14000000) * 0.42;
@@ -1526,7 +1318,6 @@
       } else {
         baseTax = (monthlyGrossWon - 1060000) * 0.06;
       }
-
       const incomeTax = Math.floor(baseTax);
       const localTax = Math.floor(incomeTax * 0.1);
       return incomeTax + localTax;
@@ -1535,43 +1326,25 @@
     function calcMonthlyDeductions(monthlyGrossWon, prevYearWon) {
       const npsBase = Math.min(monthlyGrossWon, 6170000);
       const nps = Math.floor(npsBase * 0.045);
-
       const nhiMonthlyBase = Math.max(monthlyGrossWon, (prevYearWon / 12));
       const nhi = Math.floor(nhiMonthlyBase * 0.03545);
       const ltc = Math.floor(nhi * 0.1295);
-
       const ei = Math.floor(monthlyGrossWon * 0.009);
-
       const incTax = getStandardMonthlyIncomeTax(monthlyGrossWon);
-
       const totalDeduction = nps + nhi + ltc + ei + incTax;
       const netMonthly = monthlyGrossWon - totalDeduction;
 
-      return {
-        gross: monthlyGrossWon,
-        nps,
-        nhiPlusLtc: nhi + ltc,
-        ei,
-        incTax,
-        totalDeduction,
-        netMonthly
-      };
+      return { gross: monthlyGrossWon, nps, nhiPlusLtc: nhi + ltc, ei, incTax, totalDeduction, netMonthly };
     }
 
     function getSpecialBonus(pProfit, salaryManwon, divCode, yr) {
       const threshold = (yr <= 2028) ? 200 : 100;
       if (pProfit < threshold) return 0;
-
       let baseBonus = 0;
-      if (divCode === 'memory') {
-        baseBonus = 57690;
-      } else if (divCode === 'common') {
-        baseBonus = 57690 * 0.7;
-      } else if (divCode === 'nonmemory_deficit') {
-        baseBonus = 9600;
-      } else if (divCode === 'nonmemory_surplus') {
-        baseBonus = 16000;
-      }
+      if (divCode === 'memory') baseBonus = 57690;
+      else if (divCode === 'common') baseBonus = 57690 * 0.7;
+      else if (divCode === 'nonmemory_deficit') baseBonus = 9600;
+      else if (divCode === 'nonmemory_surplus') baseBonus = 16000;
 
       return baseBonus * (pProfit / 300) * (salaryManwon / 8500);
     }
@@ -1652,10 +1425,7 @@
       document.getElementById('grandTotalPre').innerText = formatKRW(grandTotalPre * 10000);
       document.getElementById('grandTotalPost').innerText = formatKRW(grandTotalPost * 10000);
 
-      // 2. 5개년 특별성과금 및 종합보상 분석 (연말정산 환급액 포함)
       calc5YearVesting();
-
-      // 3. 5개년 예상 월급 렌더링
       renderMonthlySalaryTable(currentSalary, prevIncome * 10000);
     }
 
@@ -1691,7 +1461,6 @@
         const bPre = getSpecialBonus(profits[i], s, divCodes[i], yr);
         const bPost = bPre * (1 - 0.54476);
         
-        // 연도별 종합소득세 및 연말정산 환급액 계산
         const totalGrossWon = (cashPre + bPre) * 10000;
         const finalAnnualTaxWon = calcIncomeTax(totalGrossWon);
         const specIncomeTaxWon = (bPre * 0.495) * 10000;
@@ -1699,7 +1468,6 @@
         const totalWithheldWon = specIncomeTaxWon + cashWithheldTaxWon;
         const taxRefundWon = Math.max(0, totalWithheldWon - finalAnnualTaxWon);
 
-        // 세후 총보상 (현금 세후 + 자사주 세후)
         const cashPost = cashPre * (1 - (finalAnnualTaxWon / totalGrossWon));
 
         yearlyBonusPre.push(bPre);
@@ -1712,14 +1480,12 @@
         yearlyRefundWon.push(taxRefundWon);
       }
 
-      // 5개년 누적 연말정산 환급 합계
       const total5RefundWon = yearlyRefundWon.reduce((a, b) => a + b, 0);
       const refundBadge = document.getElementById('fiveYrRefundSumBadge');
       if (refundBadge) {
         refundBadge.innerHTML = `5개년 환급 합계: <strong class="text-amber-700">+${formatKRW(total5RefundWon)}</strong>`;
       }
 
-      // 5개년 종합 보상 테이블 (연말정산 환급액 열 포함 렌더링)
       const compTbody = document.getElementById('fiveYearCompTableBody');
       compTbody.innerHTML = '';
       for (let i = 0; i < 5; i++) {
@@ -1771,9 +1537,6 @@
             lck = bonus - (oneThird * 2);
           } else if (calYr === payYr + 2) {
             unl = oneThird;
-            lck = 0;
-          } else {
-            unl = 0;
             lck = 0;
           }
 
@@ -1919,18 +1682,11 @@
             }
           },
           scales: {
-            x: {
-              stacked: true,
-              grid: { display: false }
-            },
+            x: { stacked: true, grid: { display: false } },
             y: {
               stacked: true,
               grid: { color: '#f1f5f9' },
-              ticks: {
-                callback: function(val) {
-                  return (val / 10000).toLocaleString() + '억';
-                }
-              }
+              ticks: { callback: function(val) { return (val / 10000).toLocaleString() + '억'; } }
             }
           }
         }
@@ -1965,6 +1721,1147 @@
       }
     }
 
+    // ----------------------------------------------------
+    // 3. 2048 PUZZLE GAME ENGINE
+    // ----------------------------------------------------
+    let board2048 = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+    let score2048 = 0;
+    let bestScore2048 = parseInt(localStorage.getItem('ds_2048_best') || '0', 10);
+    let isGameOver2048 = false;
+
+    function init2048() {
+      board2048 = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+      score2048 = 0;
+      isGameOver2048 = false;
+      document.getElementById('score2048').innerText = '0';
+      document.getElementById('best2048').innerText = bestScore2048.toLocaleString();
+      document.getElementById('game2048Over').classList.add('hidden');
+      addRandomTile2048();
+      addRandomTile2048();
+      renderBoard2048();
+    }
+
+    function addRandomTile2048() {
+      const empty = [];
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          if (board2048[r][c] === 0) empty.push({ r, c });
+        }
+      }
+      if (empty.length === 0) return;
+      const { r, c } = empty[Math.floor(Math.random() * empty.length)];
+      board2048[r][c] = Math.random() < 0.9 ? 2 : 4;
+    }
+
+    function slideRow(row) {
+      let arr = row.filter(val => val !== 0);
+      for (let i = 0; i < arr.length - 1; i++) {
+        if (arr[i] === arr[i + 1]) {
+          arr[i] *= 2;
+          score2048 += arr[i];
+          arr.splice(i + 1, 1);
+        }
+      }
+      while (arr.length < 4) arr.push(0);
+      return arr;
+    }
+
+    function move2048(direction) {
+      if (isGameOver2048) return;
+      let prevBoard = JSON.stringify(board2048);
+
+      if (direction === 'left') {
+        for (let r = 0; r < 4; r++) board2048[r] = slideRow(board2048[r]);
+      } else if (direction === 'right') {
+        for (let r = 0; r < 4; r++) {
+          let rev = board2048[r].slice().reverse();
+          rev = slideRow(rev);
+          board2048[r] = rev.reverse();
+        }
+      } else if (direction === 'up') {
+        for (let c = 0; c < 4; c++) {
+          let col = [board2048[0][c], board2048[1][c], board2048[2][c], board2048[3][c]];
+          col = slideRow(col);
+          for (let r = 0; r < 4; r++) board2048[r][c] = col[r];
+        }
+      } else if (direction === 'down') {
+        for (let c = 0; c < 4; c++) {
+          let col = [board2048[0][c], board2048[1][c], board2048[2][c], board2048[3][c]].reverse();
+          col = slideRow(col);
+          col.reverse();
+          for (let r = 0; r < 4; r++) board2048[r][c] = col[r];
+        }
+      }
+
+      if (JSON.stringify(board2048) !== prevBoard) {
+        addRandomTile2048();
+        renderBoard2048();
+        checkGameOver2048();
+      }
+    }
+
+    function checkGameOver2048() {
+      if (score2048 > bestScore2048) {
+        bestScore2048 = score2048;
+        localStorage.setItem('ds_2048_best', bestScore2048);
+        document.getElementById('best2048').innerText = bestScore2048.toLocaleString();
+      }
+      document.getElementById('score2048').innerText = score2048.toLocaleString();
+
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          if (board2048[r][c] === 0) return;
+          if (c < 3 && board2048[r][c] === board2048[r][c + 1]) return;
+          if (r < 3 && board2048[r][c] === board2048[r + 1][c]) return;
+        }
+      }
+      isGameOver2048 = true;
+      document.getElementById('game2048Over').classList.remove('hidden');
+    }
+
+    function getTileColor(val) {
+      const map = {
+        0: 'bg-slate-700/50 text-transparent',
+        2: 'bg-amber-100 text-slate-800 font-extrabold',
+        4: 'bg-amber-200 text-slate-800 font-extrabold',
+        8: 'bg-orange-400 text-white font-extrabold',
+        16: 'bg-orange-500 text-white font-extrabold',
+        32: 'bg-rose-500 text-white font-extrabold',
+        64: 'bg-rose-600 text-white font-extrabold',
+        128: 'bg-yellow-400 text-white font-black',
+        256: 'bg-yellow-500 text-white font-black',
+        512: 'bg-emerald-500 text-white font-black',
+        1024: 'bg-cyan-500 text-white font-black',
+        2048: 'bg-indigo-600 text-white font-black animate-pulse'
+      };
+      return map[val] || 'bg-purple-700 text-white font-black';
+    }
+
+    function renderBoard2048() {
+      const grid = document.getElementById('grid2048');
+      grid.innerHTML = '';
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          const val = board2048[r][c];
+          const tile = document.createElement('div');
+          tile.className = `w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center text-lg sm:text-xl font-bold select-none ${getTileColor(val)}`;
+          tile.innerText = val > 0 ? val : '';
+          grid.appendChild(tile);
+        }
+      }
+    }
+
+    // 2048 Touch Swipe Handling (화면 스크롤 방지 포함)
+    let touchStartX2048 = 0;
+    let touchStartY2048 = 0;
+    const boardEl2048 = document.getElementById('boardContainer2048');
+    if (boardEl2048) {
+      boardEl2048.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          touchStartX2048 = e.touches[0].clientX;
+          touchStartY2048 = e.touches[0].clientY;
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      boardEl2048.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+      }, { passive: false });
+
+      boardEl2048.addEventListener('touchend', (e) => {
+        if (e.changedTouches.length === 1) {
+          const dx = e.changedTouches[0].clientX - touchStartX2048;
+          const dy = e.changedTouches[0].clientY - touchStartY2048;
+          const absDx = Math.abs(dx);
+          const absDy = Math.abs(dy);
+          if (Math.max(absDx, absDy) > 20) {
+            if (absDx > absDy) {
+              if (dx > 0) move2048('right');
+              else move2048('left');
+            } else {
+              if (dy > 0) move2048('down');
+              else move2048('up');
+            }
+          }
+          e.preventDefault();
+        }
+      }, { passive: false });
+    }
+
+    // ----------------------------------------------------
+    // 4. JUMP GAME ENGINE (올라라 계단)
+    // ----------------------------------------------------
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      playJump() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(320, now);
+          osc.frequency.exponentialRampToValueAtTime(620, now + 0.08);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.09);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.09);
+        } catch (e) {}
+      }
+      playTurn() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(450, now);
+          osc.frequency.linearRampToValueAtTime(750, now + 0.04);
+          osc.frequency.linearRampToValueAtTime(520, now + 0.09);
+          gain.gain.setValueAtTime(0.35, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.1);
+        } catch (e) {}
+      }
+      playFall() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(380, now);
+          osc.frequency.exponentialRampToValueAtTime(60, now + 0.45);
+          gain.gain.setValueAtTime(0.4, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.5);
+        } catch (e) {}
+      }
+      playTimeOut() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.setValueAtTime(160, now + 0.12);
+          gain.gain.setValueAtTime(0.35, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.35);
+        } catch (e) {}
+      }
+      playHighScore() {
+        if (this.muted || !this.ctx) return;
+        try {
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((freq, idx) => {
+            const now = this.ctx.currentTime + idx * 0.1;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.25);
+          });
+        } catch (e) {}
+      }
+    }
+
+    const sound = new SoundEngine();
+    const jumpCanvas = document.getElementById('gameCanvas');
+    const jumpCtx = jumpCanvas.getContext('2d');
+    const jumpContainer = document.getElementById('game-container');
+
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const bestScoreDisplay = document.getElementById('bestScoreDisplay');
+    const gaugeProgress = document.getElementById('gaugeProgress');
+    const dangerOverlay = document.getElementById('dangerOverlay');
+    const themeBanner = document.getElementById('themeBanner');
+    const comboBanner = document.getElementById('comboBanner');
+    const comboText = document.getElementById('comboText');
+
+    const startScreen = document.getElementById('startScreen');
+    const startGameBtn = document.getElementById('startGameBtn');
+    const gameOverModal = document.getElementById('gameOverModal');
+    const restartGameBtn = document.getElementById('restartGameBtn');
+    const finalScoreVal = document.getElementById('finalScoreVal');
+    const finalBestVal = document.getElementById('finalBestVal');
+    const newRecordBadge = document.getElementById('newRecordBadge');
+    const gameOverTitle = document.getElementById('gameOverTitle');
+    const gameOverReason = document.getElementById('gameOverReason');
+
+    const climbBtn = document.getElementById('climbBtn');
+    const turnBtn = document.getElementById('turnBtn');
+    const soundToggleBtn = document.getElementById('soundToggleBtn');
+    const soundOnIcon = document.getElementById('soundOnIcon');
+    const soundOffIcon = document.getElementById('soundOffIcon');
+
+    const STAIR_WIDTH = 64;
+    const STAIR_HEIGHT = 16;
+    const STEP_DX = 46;
+    const STEP_DY = 36;
+    const JUMP_DURATION = 0.10;
+
+    const STORAGE_KEY = 'climb_stairs_best_score_v1';
+    let bestScore = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
+    bestScoreDisplay.textContent = bestScore;
+
+    const STAIR_PATTERNS = [
+      ['L', 'L', 'L', 'L'], ['R', 'R', 'R', 'R'],
+      ['L', 'R', 'L', 'L'], ['L', 'R', 'R', 'L'],
+      ['L', 'R', 'R', 'R'], ['R', 'L', 'R', 'R'],
+      ['R', 'L', 'L', 'R'], ['R', 'L', 'L', 'L']
+    ];
+
+    let stairs = [];
+    let character = null;
+    let particles = [];
+    let backgroundParticles = [];
+    let shootingStars = [];
+
+    let currentScore = 0;
+    let timerGauge = 3.0;
+    let maxGauge = 3.0;
+    let lastTimestamp = 0;
+    let gameState = 'START';
+    let streakCount = 0;
+    let streakTimeout = null;
+    let isJumpLoopRunning = false;
+
+    let dpr = window.devicePixelRatio || 1;
+    let viewW = 0;
+    let viewH = 0;
+
+    function resizeCanvas() {
+      if (!jumpContainer || !jumpCanvas) return;
+      const rect = jumpContainer.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      viewW = rect.width;
+      viewH = rect.height;
+      dpr = window.devicePixelRatio || 1;
+
+      jumpCanvas.width = viewW * dpr;
+      jumpCanvas.height = viewH * dpr;
+      jumpCtx.resetTransform();
+      jumpCtx.scale(dpr, dpr);
+    }
+
+    window.addEventListener('resize', () => {
+      if (currentMainTab === 'jump') resizeCanvas();
+    });
+
+    class Particle {
+      constructor(x, y, color, vx, vy, size, life) {
+        this.x = x; this.y = y; this.color = color;
+        this.vx = vx; this.vy = vy; this.size = size;
+        this.life = life; this.maxLife = life;
+      }
+      update(dt) {
+        this.x += this.vx * dt * 60;
+        this.y += this.vy * dt * 60;
+        this.vy += 0.15;
+        this.life -= dt;
+      }
+      draw(context, camX, camY) {
+        if (this.life <= 0) return;
+        const screenX = viewW / 2 + (this.x - camX);
+        const screenY = viewH / 2 + (this.y - camY);
+        context.save();
+        context.globalAlpha = Math.max(0, this.life / this.maxLife);
+        context.fillStyle = this.color;
+        context.beginPath();
+        context.arc(screenX, screenY, this.size, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+      }
+    }
+
+    class AmbientParticle {
+      constructor(type) {
+        this.type = type;
+        this.reset(true);
+      }
+      reset(initial = false) {
+        this.x = (Math.random() - 0.5) * viewW * 1.5;
+        this.y = initial ? (Math.random() - 0.5) * viewH * 2 : viewH * 0.8 + Math.random() * 200;
+        this.vx = (Math.random() - 0.5) * 0.8;
+        this.vy = -0.5 - Math.random() * 0.8;
+        this.size = 2 + Math.random() * 4;
+        this.alpha = 0.2 + Math.random() * 0.5;
+        this.rot = Math.random() * Math.PI * 2;
+        this.rotSpeed = (Math.random() - 0.5) * 0.05;
+      }
+      update(dt, scrollDY) {
+        this.x += this.vx * dt * 60;
+        this.y += this.vy * dt * 60 - scrollDY * 0.2;
+        this.rot += this.rotSpeed;
+        if (this.y < -viewH * 1.2 || Math.abs(this.x) > viewW * 1.5) this.reset();
+      }
+      draw(context, themeIdx) {
+        context.save();
+        context.globalAlpha = this.alpha;
+        context.translate(viewW / 2 + this.x, viewH / 2 + this.y);
+        context.rotate(this.rot);
+        if (themeIdx === 0) {
+          context.fillStyle = '#cbd5e1';
+          context.beginPath();
+          context.arc(0, 0, this.size * 1.5, 0, Math.PI * 2);
+          context.fill();
+        } else if (themeIdx === 1) {
+          context.fillStyle = '#4ade80';
+          context.beginPath();
+          context.ellipse(0, 0, this.size * 2, this.size, 0, 0, Math.PI * 2);
+          context.fill();
+        } else if (themeIdx === 2) {
+          context.fillStyle = '#fde68a';
+          context.beginPath();
+          context.ellipse(0, 0, this.size * 2.2, this.size * 0.8, Math.PI / 4, 0, Math.PI * 2);
+          context.fill();
+        } else {
+          context.fillStyle = '#c084fc';
+          context.beginPath();
+          context.arc(0, 0, this.size * 0.8, 0, Math.PI * 2);
+          context.fill();
+        }
+        context.restore();
+      }
+    }
+
+    class ShootingStar {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = (Math.random() - 0.2) * viewW;
+        this.y = -50;
+        this.len = 60 + Math.random() * 90;
+        this.speed = 12 + Math.random() * 10;
+        this.active = false;
+        this.timer = Math.random() * 8 + 3;
+      }
+      update(dt) {
+        if (!this.active) {
+          this.timer -= dt;
+          if (this.timer <= 0) this.active = true;
+        } else {
+          this.x += this.speed * 0.7;
+          this.y += this.speed;
+          if (this.y > viewH + 100 || this.x > viewW + 100) this.reset();
+        }
+      }
+      draw(context) {
+        if (!this.active) return;
+        context.save();
+        const grad = context.createLinearGradient(this.x, this.y, this.x - this.len * 0.7, this.y - this.len);
+        grad.addColorStop(0, '#ffffff');
+        grad.addColorStop(0.3, '#38bdf8');
+        grad.addColorStop(1, 'transparent');
+        context.strokeStyle = grad;
+        context.lineWidth = 2.5;
+        context.beginPath();
+        context.moveTo(this.x, this.y);
+        context.lineTo(this.x - this.len * 0.7, this.y - this.len);
+        context.stroke();
+        context.restore();
+      }
+    }
+
+    class Character {
+      constructor() {
+        this.index = 0;
+        this.facing = 'R';
+        this.x = 0;
+        this.y = 0;
+        this.isJumping = false;
+        this.jumpTimer = 0;
+        this.startX = 0;
+        this.startY = 0;
+        this.targetX = 0;
+        this.targetY = 0;
+        this.isFalling = false;
+        this.fallTime = 0;
+        this.fallX = 0;
+        this.fallY = 0;
+        this.fallRot = 0;
+        this.fallVx = 0;
+        this.fallVy = 0;
+        this.scarfPoints = [{ x: 0, y: 0 }, { x: -5, y: 3 }, { x: -10, y: 7 }, { x: -16, y: 12 }];
+        this.blinkTimer = 2.0;
+        this.isBlinking = false;
+      }
+      update(dt) {
+        this.blinkTimer -= dt;
+        if (this.blinkTimer <= 0) {
+          this.isBlinking = !this.isBlinking;
+          this.blinkTimer = this.isBlinking ? 0.12 : (2.5 + Math.random() * 2);
+        }
+        if (this.isJumping) {
+          this.jumpTimer += dt;
+          const progress = Math.min(1, this.jumpTimer / JUMP_DURATION);
+          this.x = this.startX + (this.targetX - this.startX) * progress;
+          this.y = this.startY + (this.targetY - this.startY) * progress;
+          if (progress >= 1) {
+            this.isJumping = false;
+            this.x = this.targetX;
+            this.y = this.targetY;
+            if (stairs[this.index]) stairs[this.index].bounce = 5;
+          }
+        }
+        if (this.isFalling) {
+          this.fallTime += dt;
+          this.fallX += this.fallVx * dt * 60;
+          this.fallY += this.fallVy * dt * 60;
+          this.fallVy += 1.2;
+          this.fallRot += (this.facing === 'R' ? 0.25 : -0.25);
+          this.x = this.fallX;
+          this.y = this.fallY;
+        }
+
+        const neckX = this.x + (this.facing === 'R' ? -8 : 8);
+        const neckY = this.y - 18;
+        this.scarfPoints[0] = { x: neckX, y: neckY };
+        const dirFactor = (this.facing === 'R' ? -1 : 1);
+        for (let i = 1; i < this.scarfPoints.length; i++) {
+          const prev = this.scarfPoints[i - 1];
+          const curr = this.scarfPoints[i];
+          const targetX = prev.x + dirFactor * (6 + i * 2) + Math.sin(Date.now() * 0.01 + i) * 2;
+          const targetY = prev.y + (3 + i * 1.5) + (this.isJumping ? -4 : 0);
+          curr.x += (targetX - curr.x) * 0.35;
+          curr.y += (targetY - curr.y) * 0.35;
+        }
+      }
+      startJump(targetX, targetY, targetIndex, targetFacing) {
+        this.isJumping = true;
+        this.jumpTimer = 0;
+        this.startX = this.x;
+        this.startY = this.y;
+        this.targetX = targetX;
+        this.targetY = targetY;
+        this.index = targetIndex;
+        this.facing = targetFacing;
+        spawnDustRing(this.x, this.y, 6);
+      }
+      triggerFall(targetFacing) {
+        this.isFalling = true;
+        this.fallTime = 0;
+        this.facing = targetFacing;
+        this.fallX = this.x;
+        this.fallY = this.y;
+        this.fallVx = (targetFacing === 'R' ? 4 : -4);
+        this.fallVy = -6;
+      }
+      draw(context, camX, camY) {
+        const screenX = viewW / 2 + (this.x - camX);
+        const screenY = viewH / 2 + (this.y - camY);
+        context.save();
+        context.translate(screenX, screenY);
+
+        if (this.isFalling) context.rotate(this.fallRot);
+
+        let scaleX = 1, scaleY = 1, jumpOffset = 0;
+        if (this.isJumping) {
+          const t = this.jumpTimer / JUMP_DURATION;
+          jumpOffset = -Math.sin(t * Math.PI) * 18;
+          scaleX = 0.85 + 0.15 * Math.sin(t * Math.PI);
+          scaleY = 1.15 - 0.15 * Math.sin(t * Math.PI);
+        }
+
+        if (!this.isFalling) {
+          context.save();
+          context.scale(scaleX, 1);
+          context.fillStyle = 'rgba(0, 0, 0, 0.45)';
+          context.beginPath();
+          context.ellipse(0, 2, 14, 5, 0, 0, Math.PI * 2);
+          context.fill();
+          context.restore();
+        }
+
+        context.translate(0, jumpOffset);
+        context.scale(scaleX, scaleY);
+
+        // Scarf
+        context.save();
+        context.lineWidth = 4.5;
+        context.lineCap = 'round';
+        context.lineJoin = 'round';
+        context.strokeStyle = '#f43f5e';
+        context.beginPath();
+        context.moveTo(this.scarfPoints[0].x - this.x, this.scarfPoints[0].y - this.y);
+        for (let i = 1; i < this.scarfPoints.length; i++) {
+          context.lineTo(this.scarfPoints[i].x - this.x, this.scarfPoints[i].y - this.y);
+        }
+        context.stroke();
+        const tip = this.scarfPoints[this.scarfPoints.length - 1];
+        context.fillStyle = '#fbbf24';
+        context.beginPath();
+        context.arc(tip.x - this.x, tip.y - this.y, 2.5, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+
+        const isRight = (this.facing === 'R');
+        const flip = isRight ? 1 : -1;
+
+        // Shoes & Jacket
+        context.fillStyle = '#334155';
+        context.beginPath();
+        context.roundRect(-8 * flip - 4, -4, 8, 5, 2);
+        context.roundRect(2 * flip - 4, -4, 8, 5, 2);
+        context.fill();
+
+        context.fillStyle = '#0284c7';
+        context.beginPath();
+        context.roundRect(-10, -22, 20, 19, [6, 6, 2, 2]);
+        context.fill();
+
+        context.fillStyle = '#475569';
+        context.fillRect(-10, -8, 20, 3.5);
+        context.fillStyle = '#fbbf24';
+        context.fillRect(-3, -9, 6, 5);
+
+        // Head & Eyes
+        context.fillStyle = '#fed7aa';
+        context.beginPath();
+        context.arc(0, -28, 12, 0, Math.PI * 2);
+        context.fill();
+
+        if (this.isFalling) {
+          context.strokeStyle = '#1e293b';
+          context.lineWidth = 2;
+          [-4, 4].forEach(ex => {
+            context.beginPath();
+            context.moveTo(ex * flip - 2, -30);
+            context.lineTo(ex * flip + 2, -26);
+            context.moveTo(ex * flip + 2, -30);
+            context.lineTo(ex * flip - 2, -26);
+            context.stroke();
+          });
+          context.fillStyle = '#e11d48';
+          context.beginPath();
+          context.arc(2 * flip, -23, 4, 0, Math.PI);
+          context.fill();
+        } else {
+          if (this.isBlinking) {
+            context.strokeStyle = '#1e293b';
+            context.lineWidth = 2;
+            context.beginPath();
+            context.moveTo(1 * flip, -28);
+            context.lineTo(6 * flip, -28);
+            context.stroke();
+          } else {
+            context.fillStyle = '#0f172a';
+            context.beginPath();
+            context.arc(4 * flip, -28, 2.8, 0, Math.PI * 2);
+            context.fill();
+            context.fillStyle = '#ffffff';
+            context.beginPath();
+            context.arc(4.8 * flip, -29, 1, 0, Math.PI * 2);
+            context.fill();
+          }
+          context.fillStyle = 'rgba(244, 63, 94, 0.45)';
+          context.beginPath();
+          context.arc(5 * flip, -24, 2.5, 0, Math.PI * 2);
+          context.fill();
+        }
+
+        // Cap & Goggles
+        context.fillStyle = '#d97706';
+        context.beginPath();
+        context.arc(0, -32, 12.5, Math.PI, 0);
+        context.fill();
+        context.fillStyle = '#b45309';
+        context.beginPath();
+        context.ellipse(6 * flip, -32, 8, 3, 0.2 * flip, 0, Math.PI * 2);
+        context.fill();
+        context.fillStyle = '#78350f';
+        context.fillRect(-10, -35, 20, 3.5);
+        context.fillStyle = '#38bdf8';
+        context.strokeStyle = '#fbbf24';
+        context.lineWidth = 1.5;
+        context.beginPath();
+        context.arc(4 * flip, -34, 4.5, 0, Math.PI * 2);
+        context.fill();
+        context.stroke();
+
+        context.restore();
+      }
+    }
+
+    class Stair {
+      constructor(index, x, y, dir) {
+        this.index = index; this.x = x; this.y = y; this.dir = dir; this.bounce = 0;
+      }
+      update(dt) {
+        if (this.bounce > 0) {
+          this.bounce -= dt * 25;
+          if (this.bounce < 0) this.bounce = 0;
+        }
+      }
+      draw(context, camX, camY, themeIdx) {
+        const screenX = viewW / 2 + (this.x - camX);
+        const screenY = viewH / 2 + (this.y - camY) + Math.sin(this.bounce * 1.5) * this.bounce;
+
+        context.save();
+        context.translate(screenX, screenY);
+        const w = STAIR_WIDTH; const h = STAIR_HEIGHT; const halfW = w / 2;
+
+        context.fillStyle = 'rgba(0, 0, 0, 0.35)';
+        context.beginPath();
+        context.ellipse(0, h + 4, halfW * 0.95, 6, 0, 0, Math.PI * 2);
+        context.fill();
+
+        if (themeIdx === 0) {
+          context.fillStyle = '#7f1d1d';
+          context.beginPath();
+          context.roundRect(-halfW, 0, w, h, [0, 0, 6, 6]);
+          context.fill();
+          context.fillStyle = '#b91c1c';
+          context.beginPath();
+          context.roundRect(-halfW, -4, w, h - 2, 4);
+          context.fill();
+          context.fillStyle = '#f87171';
+          context.fillRect(-halfW + 4, -4, w - 8, 2);
+        } else if (themeIdx === 1) {
+          context.fillStyle = '#271b12';
+          context.beginPath();
+          context.roundRect(-halfW, 0, w, h, [0, 0, 5, 5]);
+          context.fill();
+          context.fillStyle = '#78350f';
+          context.beginPath();
+          context.roundRect(-halfW, -4, w, h - 2, 4);
+          context.fill();
+          context.fillStyle = '#4ade80';
+          context.fillRect(-6, -2, 12, 2);
+        } else if (themeIdx === 2) {
+          context.fillStyle = '#1e3a8a';
+          context.beginPath();
+          context.roundRect(-halfW, 0, w, h, [0, 0, 6, 6]);
+          context.fill();
+          context.fillStyle = '#f8fafc';
+          context.beginPath();
+          context.roundRect(-halfW, -4, w, h - 2, 4);
+          context.fill();
+          context.fillStyle = '#f59e0b';
+          context.fillRect(-halfW + 2, h - 6, w - 4, 2);
+        } else {
+          context.fillStyle = '#4c1d95';
+          context.beginPath();
+          context.roundRect(-halfW, 0, w, h, [0, 0, 8, 8]);
+          context.fill();
+          context.fillStyle = '#06b6d4';
+          context.beginPath();
+          context.roundRect(-halfW, -4, w, h - 2, 4);
+          context.fill();
+        }
+
+        if (this.index > 0 && this.index % 25 === 0) {
+          context.fillStyle = 'rgba(255, 255, 255, 0.7)';
+          context.font = 'bold 9px Fredoka, sans-serif';
+          context.textAlign = 'center';
+          context.fillText(`${this.index}F`, 0, -8);
+        }
+        context.restore();
+      }
+    }
+
+    function appendStairPattern() {
+      const chosen = STAIR_PATTERNS[Math.floor(Math.random() * STAIR_PATTERNS.length)];
+      for (const dir of chosen) {
+        const lastStair = stairs[stairs.length - 1];
+        const nextIdx = lastStair.index + 1;
+        const dx = (dir === 'L') ? -STEP_DX : STEP_DX;
+        stairs.push(new Stair(nextIdx, lastStair.x + dx, lastStair.y - STEP_DY, dir));
+      }
+    }
+
+    function spawnDustRing(x, y, count) {
+      for (let i = 0; i < count; i++) {
+        const angle = (i / count) * Math.PI * 2;
+        const speed = 1.2 + Math.random() * 1.5;
+        particles.push(new Particle(
+          x, y, 'rgba(255, 255, 255, 0.85)',
+          Math.cos(angle) * speed, Math.sin(angle) * speed * 0.4 - 0.5,
+          2 + Math.random() * 2, 0.3 + Math.random() * 0.2
+        ));
+      }
+    }
+
+    function drawDynamicBackground(context, camX, camY) {
+      let themeIdx = 0;
+      let stageName = 'STAGE 1 • 벽돌집 루프탑';
+      if (currentScore > 300) { themeIdx = 3; stageName = 'STAGE 4 • 은하계 우주정복'; }
+      else if (currentScore > 200) { themeIdx = 2; stageName = 'STAGE 3 • 천공의 구름바다'; }
+      else if (currentScore > 100) { themeIdx = 1; stageName = 'STAGE 2 • 거대 세계수 줄기'; }
+
+      themeBanner.textContent = stageName;
+      const parallaxY = (-camY * 0.35) % viewH;
+
+      if (themeIdx === 0) {
+        const grad = context.createLinearGradient(0, 0, 0, viewH);
+        grad.addColorStop(0, '#1e1b4b'); grad.addColorStop(0.5, '#431407'); grad.addColorStop(1, '#1c1917');
+        context.fillStyle = grad; context.fillRect(0, 0, viewW, viewH);
+
+        context.save();
+        context.translate(0, parallaxY);
+        for (let wrap = -1; wrap <= 1; wrap++) {
+          const base = wrap * viewH;
+          context.fillStyle = '#292524';
+          context.fillRect(20, base + 120, 110, 240);
+          context.fillStyle = '#fef08a';
+          context.beginPath();
+          context.arc(75, base + 180, 16, Math.PI, 0);
+          context.rect(59, base + 180, 32, 28);
+          context.fill();
+        }
+        context.restore();
+      } else if (themeIdx === 1) {
+        const grad = context.createLinearGradient(0, 0, 0, viewH);
+        grad.addColorStop(0, '#064e3b'); grad.addColorStop(0.6, '#022c22'); grad.addColorStop(1, '#0f172a');
+        context.fillStyle = grad; context.fillRect(0, 0, viewW, viewH);
+      } else if (themeIdx === 2) {
+        const grad = context.createLinearGradient(0, 0, 0, viewH);
+        grad.addColorStop(0, '#f97316'); grad.addColorStop(0.4, '#db2777'); grad.addColorStop(1, '#1e1b4b');
+        context.fillStyle = grad; context.fillRect(0, 0, viewW, viewH);
+      } else {
+        const grad = context.createLinearGradient(0, 0, 0, viewH);
+        grad.addColorStop(0, '#030712'); grad.addColorStop(0.5, '#0f172a'); grad.addColorStop(1, '#020617');
+        context.fillStyle = grad; context.fillRect(0, 0, viewW, viewH);
+
+        shootingStars.forEach(star => { star.update(0.016); star.draw(context); });
+      }
+
+      backgroundParticles.forEach(bp => {
+        bp.update(0.016, (gameState === 'PLAYING' && character && character.isJumping) ? 1.5 : 0);
+        bp.draw(context, themeIdx);
+      });
+      return themeIdx;
+    }
+
+    function getGaugeConfig(score) {
+      if (score <= 100) return { max: 3.0, boost: 1.0 };
+      if (score <= 200) return { max: 2.0, boost: 0.8 };
+      if (score <= 300) return { max: 1.0, boost: 0.5 };
+      if (score <= 400) return { max: 1.0, boost: 0.6 };
+      return { max: 1.0, boost: 0.4 };
+    }
+
+    function addGaugeBoost() {
+      const cfg = getGaugeConfig(currentScore);
+      maxGauge = cfg.max;
+      timerGauge = Math.min(maxGauge, timerGauge + cfg.boost);
+    }
+
+    function initGame() {
+      stairs = [];
+      particles = [];
+      currentScore = 0;
+      scoreDisplay.textContent = '0';
+      const initialCfg = getGaugeConfig(0);
+      maxGauge = initialCfg.max;
+      timerGauge = maxGauge;
+
+      stairs.push(new Stair(0, 0, 0, 'R'));
+      for (let i = 0; i < 25; i++) appendStairPattern();
+
+      character = new Character();
+      character.x = stairs[0].x;
+      character.y = stairs[0].y;
+      character.facing = stairs[1].dir;
+
+      backgroundParticles = [];
+      for (let i = 0; i < 35; i++) backgroundParticles.push(new AmbientParticle(0));
+      shootingStars = [new ShootingStar(), new ShootingStar()];
+
+      dangerOverlay.classList.remove('vignette-danger');
+      dangerOverlay.style.opacity = '0';
+    }
+
+    function handlePlayerAction(actionType) {
+      if (gameState !== 'PLAYING') return;
+      sound.init();
+
+      let targetFacing = character.facing;
+      if (actionType === 'TURN') {
+        targetFacing = (character.facing === 'L' ? 'R' : 'L');
+        sound.playTurn();
+      } else {
+        sound.playJump();
+      }
+
+      const nextIndex = character.index + 1;
+      const nextStair = stairs[nextIndex];
+
+      if (nextStair && nextStair.dir === targetFacing) {
+        currentScore++;
+        scoreDisplay.textContent = currentScore;
+        scoreDisplay.style.transform = 'scale(1.35)';
+        setTimeout(() => { scoreDisplay.style.transform = 'scale(1.0)'; }, 120);
+
+        addGaugeBoost();
+        character.startJump(nextStair.x, nextStair.y, nextIndex, targetFacing);
+
+        if (stairs.length - character.index < 40) {
+          appendStairPattern();
+          appendStairPattern();
+        }
+        trackStreak();
+
+        if (currentScore > bestScore) {
+          bestScore = currentScore;
+          bestScoreDisplay.textContent = bestScore;
+          localStorage.setItem(STORAGE_KEY, bestScore.toString());
+        }
+      } else {
+        gameState = 'FALLING';
+        character.triggerFall(targetFacing);
+        sound.playFall();
+        setTimeout(() => { triggerGameOver('발을 헛디뎌 추락했습니다!'); }, 800);
+      }
+    }
+
+    function trackStreak() {
+      streakCount++;
+      if (streakTimeout) clearTimeout(streakTimeout);
+      if (streakCount >= 20 && streakCount % 10 === 0) {
+        comboText.textContent = streakCount >= 50 ? '🔥 ULTRA FEVER!' : '⚡ SUPER FAST!';
+        comboBanner.style.opacity = '1';
+        comboBanner.style.transform = 'scale(1.1) translateX(-50%)';
+      }
+      streakTimeout = setTimeout(() => {
+        streakCount = 0;
+        comboBanner.style.opacity = '0';
+        comboBanner.style.transform = 'scale(0.5) translateX(-50%)';
+      }, 900);
+    }
+
+    function triggerGameOver(reasonText) {
+      gameState = 'OVER';
+      gameOverReason.textContent = reasonText;
+      finalScoreVal.textContent = currentScore;
+      finalBestVal.textContent = bestScore;
+
+      if (currentScore >= bestScore && currentScore > 0) {
+        newRecordBadge.classList.remove('hidden');
+        sound.playHighScore();
+      } else {
+        newRecordBadge.classList.add('hidden');
+      }
+
+      gameOverModal.classList.remove('hidden');
+      dangerOverlay.classList.remove('vignette-danger');
+      dangerOverlay.style.opacity = '0';
+    }
+
+    function gameLoop(timestamp) {
+      if (currentMainTab !== 'jump') {
+        isJumpLoopRunning = false;
+        return;
+      }
+      isJumpLoopRunning = true;
+
+      if (!lastTimestamp) lastTimestamp = timestamp;
+      const dt = Math.min(0.06, (timestamp - lastTimestamp) / 1000);
+      lastTimestamp = timestamp;
+
+      if (gameState === 'PLAYING') {
+        timerGauge -= dt;
+        const gaugeRatio = Math.max(0, timerGauge / maxGauge);
+        if (gaugeRatio < 0.28) {
+          dangerOverlay.classList.add('vignette-danger');
+          dangerOverlay.style.opacity = (1 - (gaugeRatio / 0.28)).toFixed(2);
+        } else {
+          dangerOverlay.classList.remove('vignette-danger');
+          dangerOverlay.style.opacity = '0';
+        }
+
+        gaugeProgress.style.width = `${(gaugeRatio * 100).toFixed(1)}%`;
+        if (gaugeRatio > 0.5) {
+          gaugeProgress.style.background = 'linear-gradient(90deg, #10b981, #06b6d4)';
+        } else if (gaugeRatio > 0.25) {
+          gaugeProgress.style.background = 'linear-gradient(90deg, #f59e0b, #fbbf24)';
+        } else {
+          gaugeProgress.style.background = 'linear-gradient(90deg, #ef4444, #f43f5e)';
+        }
+
+        if (timerGauge <= 0) {
+          gameState = 'OVER';
+          sound.playTimeOut();
+          triggerGameOver('제한 시간이 초과되었습니다!');
+        }
+      }
+
+      const camX = character ? character.x : 0;
+      const camY = character ? character.y : 0;
+
+      jumpCtx.clearRect(0, 0, viewW, viewH);
+      const themeIdx = drawDynamicBackground(jumpCtx, camX, camY);
+
+      stairs.forEach(stair => {
+        stair.update(dt);
+        const screenY = viewH / 2 + (stair.y - camY);
+        if (screenY >= -100 && screenY <= viewH + 120) {
+          stair.draw(jumpCtx, camX, camY, themeIdx);
+        }
+      });
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.update(dt);
+        p.draw(jumpCtx, camX, camY);
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+
+      if (character) {
+        character.update(dt);
+        character.draw(jumpCtx, camX, camY);
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    function startJumpLoop() {
+      if (!isJumpLoopRunning && currentMainTab === 'jump') {
+        lastTimestamp = performance.now();
+        requestAnimationFrame(gameLoop);
+      }
+    }
+
+    // ----------------------------------------------------
+    // 5. KEYBOARD & TOUCH SCROLL PREVENTION (핵심 안전 조치)
+    // ----------------------------------------------------
+    window.addEventListener('keydown', (e) => {
+      if (currentMainTab === 'jump') {
+        // Jump 조작 키는 화면 스크롤을 무조건 방지
+        const blockKeys = ['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'Space', 'Enter', 'KeyD', 'KeyA'];
+        if (blockKeys.includes(e.code)) {
+          e.preventDefault();
+        }
+
+        sound.init();
+
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+          climbBtn.classList.add('active-key');
+          if (gameState === 'PLAYING') handlePlayerAction('CLIMB');
+        } else if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+          turnBtn.classList.add('active-key');
+          if (gameState === 'PLAYING') handlePlayerAction('TURN');
+        } else if (e.code === 'Space' || e.code === 'Enter') {
+          if (gameState === 'START') startGame();
+          else if (gameState === 'OVER') restartGame();
+        }
+      } else if (currentMainTab === 'game2048') {
+        const keys2048 = ['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'KeyW', 'KeyA', 'KeyS', 'KeyD'];
+        if (keys2048.includes(e.code)) {
+          e.preventDefault();
+          if (e.code === 'ArrowLeft' || e.code === 'KeyA') move2048('left');
+          else if (e.code === 'ArrowRight' || e.code === 'KeyD') move2048('right');
+          else if (e.code === 'ArrowUp' || e.code === 'KeyW') move2048('up');
+          else if (e.code === 'ArrowDown' || e.code === 'KeyS') move2048('down');
+        }
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (currentMainTab === 'jump') {
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') climbBtn.classList.remove('active-key');
+        else if (e.code === 'ArrowLeft' || e.code === 'KeyA') turnBtn.classList.remove('active-key');
+      }
+    });
+
+    // Jump Container 터치 스크롤 방지
+    if (jumpContainer) {
+      jumpContainer.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+      }, { passive: false });
+    }
+
+    function bindTouchAction(buttonEl, actionType) {
+      const trigger = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        buttonEl.classList.add('active-key');
+        handlePlayerAction(actionType);
+      };
+      const release = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        buttonEl.classList.remove('active-key');
+      };
+
+      buttonEl.addEventListener('pointerdown', trigger, { passive: false });
+      buttonEl.addEventListener('pointerup', release, { passive: false });
+      buttonEl.addEventListener('pointercancel', release, { passive: false });
+      buttonEl.addEventListener('pointerleave', release, { passive: false });
+      buttonEl.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+    }
+
+    bindTouchAction(climbBtn, 'CLIMB');
+    bindTouchAction(turnBtn, 'TURN');
+
+    function startGame() {
+      sound.init();
+      initGame();
+      startScreen.classList.add('hidden');
+      gameState = 'PLAYING';
+    }
+
+    function restartGame() {
+      sound.init();
+      initGame();
+      gameOverModal.classList.add('hidden');
+      gameState = 'PLAYING';
+    }
+
+    startGameBtn.addEventListener('click', startGame);
+    restartGameBtn.addEventListener('click', restartGame);
+    startScreen.addEventListener('pointerdown', (e) => {
+      if (gameState === 'START') {
+        e.preventDefault();
+        startGame();
+      }
+    });
+
+    soundToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sound.init();
+      sound.muted = !sound.muted;
+      if (sound.muted) {
+        soundOnIcon.classList.add('hidden');
+        soundOffIcon.classList.remove('hidden');
+      } else {
+        soundOnIcon.classList.remove('hidden');
+        soundOffIcon.classList.add('hidden');
+      }
+    });
+
+    // ----------------------------------------------------
+    // 6. INITIALIZATION ON DOM READY
+    // ----------------------------------------------------
     document.addEventListener('DOMContentLoaded', () => {
       const baseSalaryInput = document.getElementById('baseSalary');
       const companyProfitInput = document.getElementById('companyProfit');
@@ -1973,9 +2870,7 @@
 
       baseSalaryInput.addEventListener('input', () => {
         const val = parseFloat(baseSalaryInput.value) || 8000;
-        if (isPrevAuto) {
-          prevYearIncomeInput.value = Math.round(val * 1.5);
-        }
+        if (isPrevAuto) prevYearIncomeInput.value = Math.round(val * 1.5);
         update5YrSalaries(val);
         recalculateAll();
         saveToLocalStorage();
@@ -2001,7 +2896,6 @@
       if (!restored) {
         update5YrSalaries(8000);
         setGlobalDivision('memory');
-        // 기본 연봉(8000)의 1.5배 자동 입력
         document.getElementById('prevYearIncome').value = Math.round(8000 * 1.5);
       }
 
