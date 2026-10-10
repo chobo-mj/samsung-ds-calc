@@ -2940,8 +2940,8 @@
     
       const camX = character ? character.x : 0;
 
-      // 수정 후 (캐릭터 위치를 아래로 60px 낮춤)
-      const camY = character ? character.y - 60: 0;
+      // 수정 후 (캐릭터 위치를 아래로 100px 낮춤)
+      const camY = character ? character.y - 100: 0;
 
       jumpCtx.clearRect(0, 0, viewW, viewH);
       const themeIdx = drawDynamicBackground(jumpCtx, camX, camY);
