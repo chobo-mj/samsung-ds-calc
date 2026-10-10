@@ -132,7 +132,11 @@
         <span>지급시기 : <strong> 27년 3말~4초</strong></span>
       </div>
 
-    
+    <!-- 누적 방문자 수 표시 배지 -->
+    <div class="flex items-center gap-1.5 text-xs bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700 shadow-inner">
+      <i class="fa-solid fa-users text-blue-400"></i>
+      <span class="text-slate-300">누적 방문자: <strong id="visitorCount" class="text-emerald-400 font-bold">-</strong>명</span>
+    </div>
       
     </div>
   </header>
@@ -2862,6 +2866,26 @@
       }
     });
 
+    async function updateVisitorCount() {
+      const visitorEl = document.getElementById('visitorCount');
+      if (!visitorEl) return;
+    
+      try {
+        // API 호출 (Vercel Serverless Function)
+        const res = await fetch('/api/visit');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.count) {
+            visitorEl.innerText = data.count.toLocaleString();
+          }
+        }
+      } catch (err) {
+        console.warn('방문자 카운트 조회 실패:', err);
+        visitorEl.innerText = '-';
+      }
+    }
+
+    
     // ----------------------------------------------------
     // 6. INITIALIZATION ON DOM READY
     // ----------------------------------------------------
@@ -2903,6 +2927,7 @@
       }
 
       recalculateAll();
+      updateVisitorCount();
     });
 
 
