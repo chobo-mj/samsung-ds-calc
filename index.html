@@ -897,6 +897,13 @@
               </div>
             </div>
 
+            <!-- [추가] 게임오버창 모드 변경 버튼 -->
+            <button id="toggleModeInGameOverBtn" class="w-full mb-3 py-3 rounded-2xl font-bold text-sm text-white glass-panel border border-white/20 hover:border-amber-400/50 active:scale-95 transition-all flex items-center justify-center gap-2">
+              <span>🎮 게임 모드:</span>
+              <span id="gameOverModeText" class="text-amber-300 font-black">👴 늙크크 모드</span>
+            </button>
+
+            <!-- Restart Button -->
             <button id="restartGameBtn" class="w-full py-3 rounded-2xl font-black text-base text-slate-900 bg-gradient-to-r from-emerald-400 to-teal-300 shadow-[0_0_20px_rgba(52,211,153,0.5)] active:scale-95 transition-all hover:brightness-110">
               다시 도전하기
             </button>
@@ -2035,6 +2042,8 @@
     const startGameBtn = document.getElementById('startGameBtn');
     const gameOverModal = document.getElementById('gameOverModal');
     const restartGameBtn = document.getElementById('restartGameBtn');
+    const toggleModeInGameOverBtn = document.getElementById('toggleModeInGameOverBtn');
+    const gameOverModeText = document.getElementById('gameOverModeText');
     const finalScoreVal = document.getElementById('finalScoreVal');
     const finalBestVal = document.getElementById('finalBestVal');
     const newRecordBadge = document.getElementById('newRecordBadge');
@@ -2110,6 +2119,10 @@
           <div>• 복잡한거 어려우니까 쉽게 쉽게 갑니다 </div>
           <div>• 층수 증가에 따라 서서히 난이도가 조절됩니다.</div>
         `;
+        if (gameOverModeText) {
+          gameOverModeText.textContent = '👴 늙크크 모드';
+          gameOverModeText.className = 'text-amber-300 font-black';
+        }
       } else {
         modeYoungBtn.className = 'flex-1 py-2.5 rounded-xl font-black text-xs transition-all flex flex-col items-center justify-center mode-tab-active border border-white/30';
         modeOldBtn.className = 'flex-1 py-2.5 rounded-xl font-black text-xs transition-all flex flex-col items-center justify-center bg-slate-800/80 text-slate-300 hover:text-white border border-transparent';
@@ -2122,6 +2135,11 @@
           <div>• 200층도 못 뚫는다면 당신은 늙크크</div>
           <div>• 극강의 반사신경과 속도감으로 젊음을 만끽하세요!</div>
         `;
+        
+          if (gameOverModeText) {
+                gameOverModeText.textContent = '👶 영크크 모드';
+                gameOverModeText.className = 'text-emerald-300 font-black';
+          }        
       }
       bestScoreDisplay.textContent = bestScores[selectedMode];
     }
@@ -3060,6 +3078,26 @@
 
     startGameBtn.addEventListener('click', startGame);
     restartGameBtn.addEventListener('click', restartGame);
+
+    // 게임오버창에서 모드 변경 버튼 클릭 시
+    toggleModeInGameOverBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sound.init();
+    
+      // 모드 즉시 전환 (OLD <-> YOUNG)
+      selectedMode = (selectedMode === 'OLD') ? 'YOUNG' : 'OLD';
+      updateModeUI();
+    
+      // 변경된 모드에 맞춰 게임오버창의 최고 기록(BEST) 숫자도 즉시 갱신
+      finalBestVal.textContent = bestScores[selectedMode];
+      if (currentScore >= bestScores[selectedMode] && currentScore > 0) {
+        newRecordBadge.classList.remove('hidden');
+      } else {
+        newRecordBadge.classList.add('hidden');
+      }
+      });
+
+    
     startScreen.addEventListener('pointerdown', (e) => {
       if (gameState === 'START' && e.target === startScreen) {
         e.preventDefault();
