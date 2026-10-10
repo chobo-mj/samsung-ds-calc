@@ -51,7 +51,7 @@
       margin: 0;
     }
 
-    /* Jump Game Styles  */
+    /* Jump Game Styles */
     @keyframes dangerPulse {
       0%, 100% { opacity: 0; }
       50% { opacity: 0.75; }
@@ -62,10 +62,10 @@
       box-shadow: inset 0 0 100px 30px rgba(239, 68, 68, 0.7);
     }
     .glass-panel {
-      background: rgba(15, 23, 42, 0.65);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
     }
     .touch-btn {
       transition: transform 0.08s ease, filter 0.08s ease, box-shadow 0.08s ease;
@@ -74,7 +74,13 @@
     .touch-btn:active, .touch-btn.active-key {
       transform: scale(0.90) translateY(4px);
       filter: brightness(1.25);
-      box-shadow: 0 4px 15px rgba(255, 255, 255, 0.4);
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.4);
+    }
+    .mode-tab-active {
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      color: #ffffff;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
+      border-color: rgba(255, 255, 255, 0.6);
     }
     #game-container {
       touch-action: none !important;
@@ -112,12 +118,8 @@
           <i class="fa-solid fa-users text-blue-400"></i>
           <span class="text-slate-300">누적 방문자: <strong id="visitorCount" class="text-emerald-400 font-bold">-</strong>명</span>
         </div>
-          
       </div>
 
-
-
-      
       <!-- Main Navigation Tabs (계산기 / 휴식 2048 / 휴식 jump) -->
       <div class="flex items-center p-1 bg-slate-800/90 rounded-xl border border-slate-700/80 shadow-inner w-full md:w-auto justify-center">
         <button type="button" onclick="switchMainTab('calc')" id="mainTab-calc"
@@ -141,7 +143,6 @@
         <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
         <span>지급시기 : <strong> 27년 3말~4초</strong></span>
       </div>
-
     </div>
   </header>
 
@@ -153,7 +154,6 @@
 
       <!-- Top Controller: Global Division Tabs & Primary Inputs -->
       <div class="bg-white rounded-2xl p-6 border border-slate-200 card-shadow">
-        <!-- Business Unit Tabs -->
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-5 border-b border-slate-100 gap-4">
           <div>
             <span class="text-xs font-bold uppercase tracking-wider text-blue-600 block mb-0.5">Primary Division</span>
@@ -172,7 +172,6 @@
           </div>
         </div>
 
-        <!-- Quick Preset & Condition Indicator -->
         <div id="divisionAlert" class="mt-4 p-3.5 rounded-xl text-xs sm:text-sm bg-blue-50 border border-blue-200 text-blue-900 flex items-start justify-between gap-3">
           <div class="flex items-start gap-2.5">
             <i class="fa-solid fa-circle-info text-blue-600 mt-0.5 text-base"></i>
@@ -182,10 +181,7 @@
           </div>
         </div>
 
-        <!-- Inputs Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-          
-          <!-- Input 1: Company Performance -->
           <div class="bg-slate-50/90 p-4 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
             <div class="flex items-center justify-between mb-1.5">
               <label for="companyProfit" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
@@ -204,7 +200,6 @@
             </p>
           </div>
 
-          <!-- Input 2: My Base Salary -->
           <div class="bg-slate-50/90 p-4 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
             <div class="flex items-center justify-between mb-1.5">
               <label for="baseSalary" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
@@ -222,7 +217,6 @@
             </p>
           </div>
 
-          <!-- Input 3: Prior Year Withholding Tax Income -->
           <div class="bg-slate-50/90 p-4 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
             <div class="flex items-center justify-between mb-1.5">
               <label for="prevYearIncome" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
@@ -240,7 +234,6 @@
             </p>
           </div>
 
-          <!-- Input 4: Samsung Stock Price -->
           <div class="bg-gradient-to-br from-blue-50/80 to-indigo-50/80 p-4 rounded-xl border-2 border-blue-300/80 focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-200 transition-all shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <label for="samsungStockPrice" class="text-xs font-extrabold text-blue-950 flex items-center gap-1.5">
@@ -264,7 +257,6 @@
               <div id="stockCalcDateText" class="text-[10px] text-slate-500 mt-0.5 hidden"></div>
             </div>
           </div>
-
         </div>
       </div>
 
@@ -291,7 +283,6 @@
           </div>
         </div>
 
-        <!-- Simplified View -->
         <div id="compSimplifiedView" class="mt-6">
           <div class="p-6 rounded-2xl bg-gradient-to-br from-blue-900 via-indigo-950 to-slate-900 text-white relative overflow-hidden shadow-lg">
             <div class="absolute right-0 top-0 translate-x-10 -translate-y-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -322,7 +313,6 @@
           </div>
         </div>
 
-        <!-- Detailed View -->
         <div id="compDetailedView" class="hidden mt-6 space-y-6">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
@@ -640,7 +630,6 @@
           </div>
         </div>
 
-        <!-- Chart and Breakdown Table -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6 items-center">
           <div class="lg:col-span-7 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200">
             <div class="flex items-center justify-between mb-3">
@@ -744,13 +733,9 @@
           </button>
         </div>
 
-        <!-- 2048 Board Container -->
         <div id="boardContainer2048" class="relative bg-slate-800/90 p-3 rounded-2xl mx-auto shadow-inner select-none touch-none inline-block">
-          <div id="grid2048" class="grid grid-cols-4 gap-2.5">
-            <!-- 16 Tiles generated dynamically -->
-          </div>
+          <div id="grid2048" class="grid grid-cols-4 gap-2.5"></div>
 
-          <!-- Game Over Overlay -->
           <div id="game2048Over" class="absolute inset-0 bg-slate-950/85 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center p-4 hidden">
             <span class="text-3xl mb-1">🎮</span>
             <h4 class="text-xl font-black text-white mb-1">GAME OVER</h4>
@@ -781,16 +766,24 @@
         <!-- Top UI Header -->
         <header class="absolute top-0 left-0 right-0 p-4 pt-4 flex flex-col items-center pointer-events-none z-10">
           <div class="w-full flex items-center justify-between mb-2.5 px-2">
+            <!-- Current Score Display -->
             <div class="flex items-center gap-2 glass-panel px-3.5 py-1.5 rounded-2xl shadow-lg border-emerald-500/30">
               <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">SCORE</span>
               <span id="scoreDisplay" class="text-2xl font-extrabold text-white tracking-wide drop-shadow-md">0</span>
             </div>
 
-            <button id="soundToggleBtn" class="pointer-events-auto glass-panel p-2 rounded-2xl border-white/20 active:scale-90 transition-transform shadow-md text-amber-300">
-              <svg id="soundOnIcon" class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-2.5-1.23L6.5 6.5H2v11h4.5l5 4.5V2z"/></svg>
-              <svg id="soundOffIcon" class="w-5 h-5 fill-current hidden" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
-            </button>
+            <!-- Mode Badge & Sound Toggle Container -->
+            <div class="flex items-center gap-2">
+              <span id="currentModeBadge" class="pointer-events-none px-2.5 py-1 rounded-xl text-xs font-black glass-panel text-amber-300 border-amber-400/30">
+                👴 늙크크
+              </span>
+              <button id="soundToggleBtn" class="pointer-events-auto glass-panel p-2 rounded-2xl border-white/20 active:scale-90 transition-transform shadow-md text-amber-300">
+                <svg id="soundOnIcon" class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-2.5-1.23L6.5 6.5H2v11h4.5l5 4.5V2z"/></svg>
+                <svg id="soundOffIcon" class="w-5 h-5 fill-current hidden" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+              </button>
+            </div>
 
+            <!-- Best Score Display -->
             <div class="flex items-center gap-2 glass-panel px-3.5 py-1.5 rounded-2xl shadow-lg border-amber-500/30">
               <svg class="w-4 h-4 text-amber-400 fill-current drop-shadow" viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0 0 11 15.9V19H7v2h10v-2h-4v-3.1a5.01 5.01 0 0 0 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
               <div class="flex flex-col items-end">
@@ -800,39 +793,50 @@
             </div>
           </div>
 
-          <!-- Timer Gauge Capsule Frame -->
-          <div class="w-[90%] h-5 glass-panel rounded-full p-1 border-2 border-white/20 shadow-2xl relative overflow-hidden backdrop-blur-md">
-            <div id="gaugeProgress" class="h-full rounded-full transition-all duration-75 relative overflow-hidden flex items-center justify-end" style="width: 100%; background: linear-gradient(90deg, #10b981, #06b6d4);">
-              <div class="w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_8px_#ffffff] mr-0.5 opacity-90 animate-pulse"></div>
+          <!-- Timer Gauge Capsule Frame (2배 두꺼워진 게이지 바 & 남은 시간 표시) -->
+          <div class="w-[92%] h-14 glass-panel rounded-2xl p-1.5 border-2 border-white/25 shadow-2xl relative overflow-hidden backdrop-blur-md">
+            <div id="gaugeProgress" class="h-full rounded-xl transition-all duration-75 relative overflow-hidden flex items-center justify-end px-3" style="width: 100%; background: linear-gradient(90deg, #10b981, #06b6d4);">
+              <div class="absolute inset-0 opacity-40 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
+              <div class="w-4 h-4 rounded-full bg-white shadow-[0_0_12px_#ffffff] mr-1 opacity-90 animate-pulse"></div>
+            </div>
+            <div class="absolute inset-0 flex items-center justify-between px-5 pointer-events-none">
+              <span class="text-xs font-black text-white/90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] tracking-wide">TIME</span>
+              <span id="gaugeTimeText" class="text-sm font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">4.0s</span>
             </div>
           </div>
 
-          <div id="themeBanner" class="mt-2 text-[11px] font-semibold px-3 py-0.5 rounded-full glass-panel text-slate-300 border-white/10 opacity-90">
+          <!-- Ready Trigger Banner (첫 조작 대기 팁) -->
+          <div id="readyTipBanner" class="mt-2 text-xs font-bold px-3 py-1 rounded-full bg-amber-500/30 text-amber-200 border border-amber-400/40 animate-bounce">
+            ⚡ 첫 조작을 시작하면 타이머가 줄어듭니다!
+          </div>
+
+          <!-- Stage & Theme Indicator Banner -->
+          <div id="themeBanner" class="mt-1 text-xs font-semibold px-3 py-0.5 rounded-full glass-panel text-slate-300 border-white/10 opacity-90 transition-all duration-500">
             STAGE 1 • 벽돌집 루프탑
           </div>
         </header>
 
         <!-- Floating Streak Combo Banner -->
-        <div id="comboBanner" class="absolute top-24 left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-300 opacity-0 transform scale-50 z-20">
-          <div class="px-4 py-1 rounded-full bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-500 font-extrabold text-white text-sm shadow-[0_0_20px_rgba(244,63,94,0.7)] border border-white/40">
+        <div id="comboBanner" class="absolute top-36 left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-300 opacity-0 transform scale-50 z-20">
+          <div class="px-5 py-1.5 rounded-full bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-500 font-extrabold text-white text-base shadow-[0_0_20px_rgba(244,63,94,0.7)] border border-white/40 tracking-wider">
             <span id="comboText">FEVER!</span>
           </div>
         </div>
 
-        <!-- On-Screen Mobile Touch Controls -->
-        <div class="absolute bottom-5 left-0 right-0 px-6 flex justify-between items-end pointer-events-none z-20">
-          <button id="turnBtn" aria-label="방향 전환 후 오르기" class="touch-btn pointer-events-auto w-20 h-20 sm:w-22 sm:h-22 rounded-full flex flex-col items-center justify-center shadow-[0_8px_25px_rgba(244,63,94,0.45)] border-4 border-rose-300/40 bg-gradient-to-br from-rose-500 to-pink-600 active:scale-90 select-none">
-            <svg class="w-9 h-9 text-white fill-current filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" viewBox="0 0 24 24">
+        <!-- On-Screen Mobile Touch Controls (버튼 크기 확대 및 상향 배치) -->
+        <div class="absolute bottom-[126px] left-0 right-0 px-7 flex justify-between items-end pointer-events-none z-20">
+          <button id="turnBtn" aria-label="방향 전환 후 오르기" class="touch-btn pointer-events-auto w-24 h-24 rounded-full flex flex-col items-center justify-center shadow-[0_8px_25px_rgba(244,63,94,0.5)] border-4 border-rose-300/50 bg-gradient-to-br from-rose-500 to-pink-600 active:scale-90 select-none">
+            <svg class="w-11 h-11 text-white fill-current filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" viewBox="0 0 24 24">
               <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
             </svg>
-            <span class="text-[10px] font-black text-rose-100 tracking-tight mt-0.5 drop-shadow">방향전환</span>
+            <span class="text-[11px] font-black text-rose-100 tracking-tight mt-0.5 drop-shadow">방향전환</span>
           </button>
 
-          <button id="climbBtn" aria-label="그대로 오르기" class="touch-btn pointer-events-auto w-20 h-20 sm:w-22 sm:h-22 rounded-full flex flex-col items-center justify-center shadow-[0_8px_25px_rgba(16,185,129,0.45)] border-4 border-emerald-300/40 bg-gradient-to-br from-emerald-500 to-teal-600 active:scale-90 select-none">
-            <svg class="w-10 h-10 text-white fill-current filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" viewBox="0 0 24 24">
+          <button id="climbBtn" aria-label="그대로 오르기" class="touch-btn pointer-events-auto w-24 h-24 rounded-full flex flex-col items-center justify-center shadow-[0_8px_25px_rgba(16,185,129,0.5)] border-4 border-emerald-300/50 bg-gradient-to-br from-emerald-500 to-teal-600 active:scale-90 select-none">
+            <svg class="w-12 h-12 text-white fill-current filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" viewBox="0 0 24 24">
               <path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/>
             </svg>
-            <span class="text-[10px] font-black text-emerald-100 tracking-tight mt-0.5 drop-shadow">오르기</span>
+            <span class="text-[11px] font-black text-emerald-100 tracking-tight mt-0.5 drop-shadow">오르기</span>
           </button>
         </div>
 
@@ -845,18 +849,23 @@
             <p class="text-slate-300 text-xs mt-1.5 font-medium tracking-wide">하늘과 우주를 향해 끝없이 계단을 정복하라!</p>
           </div>
 
-          <div class="glass-panel p-4 rounded-2xl max-w-xs w-full border-white/20 mb-6 space-y-2.5 text-xs text-slate-200">
-            <div class="flex items-center gap-2.5">
-              <div class="w-7 h-7 rounded-full bg-emerald-500/30 border border-emerald-400/50 flex items-center justify-center text-emerald-300 font-bold shrink-0">→</div>
-              <div><strong class="text-white text-xs">오르기 (키보드 → 또는 우측 버튼)</strong><br><span class="text-slate-400 text-[11px]">바라보는 방향으로 한 칸 전진</span></div>
-            </div>
-            <div class="flex items-center gap-2.5">
-              <div class="w-7 h-7 rounded-full bg-rose-500/30 border border-rose-400/50 flex items-center justify-center text-rose-300 font-bold shrink-0">←</div>
-              <div><strong class="text-white text-xs">방향 전환 (키보드 ← 또는 좌측 버튼)</strong><br><span class="text-slate-400 text-[11px]">반대로 돌며 한 칸 전진</span></div>
-            </div>
+          <!-- 모드 선택 탭 (영크크 모드 vs 늙크크 모드) -->
+          <div class="w-full max-w-sm mb-4 glass-panel p-1.5 rounded-2xl border-white/20 flex gap-2">
+            <button id="modeOldBtn" class="flex-1 py-2.5 rounded-xl font-black text-xs transition-all flex flex-col items-center justify-center mode-tab-active border border-white/30">
+              <span class="text-sm">👴 늙크크 모드</span>
+              <span class="text-[10px] opacity-90 mt-0.5">긴 시간 & 직진 보너스</span>
+            </button>
+            <button id="modeYoungBtn" class="flex-1 py-2.5 rounded-xl font-black text-xs transition-all flex flex-col items-center justify-center bg-slate-800/80 text-slate-300 hover:text-white border border-transparent">
+              <span class="text-sm">👶 영크크 모드</span>
+              <span class="text-[10px] opacity-75 mt-0.5">정통 스피드 챌린지</span>
+            </button>
           </div>
 
-          <button id="startGameBtn" class="px-8 py-3 rounded-2xl font-black text-lg text-slate-900 bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-300 shadow-[0_0_25px_rgba(52,211,153,0.6)] active:scale-95 transition-all hover:brightness-110">
+          <!-- Mode Detail Description Card -->
+          <div id="modeDescriptionCard" class="glass-panel p-4 rounded-2xl max-w-sm w-full border-white/20 mb-5 space-y-2 text-xs text-slate-200">
+          </div>
+
+          <button id="startGameBtn" class="w-full max-w-sm py-3.5 rounded-2xl font-black text-lg text-slate-900 bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-300 shadow-[0_0_25px_rgba(52,211,153,0.6)] active:scale-95 transition-all hover:brightness-110">
             게임 시작
           </button>
           <span class="text-slate-400 text-[11px] mt-2.5">스페이스바 또는 화면 터치로 즉시 시작</span>
@@ -879,7 +888,7 @@
               <div class="h-[1px] bg-white/10 w-full"></div>
               <div class="flex justify-between items-center">
                 <span class="text-xs text-amber-400 font-bold uppercase flex items-center gap-1">
-                  <span>🏆</span> 최고 기록
+                  <span>🏆</span> 모드 최고 기록
                 </span>
                 <span id="finalBestVal" class="text-xl font-black text-amber-300">0</span>
               </div>
@@ -955,6 +964,7 @@
         setTimeout(() => {
           resizeCanvas();
           if (!isJumpInitialized) {
+            updateModeUI();
             initGame();
             isJumpInitialized = true;
           }
@@ -1119,7 +1129,7 @@
         if (sel) {
           if (div === 'memory') sel.value = 'memory';
           else if (div === 'common') sel.value = 'common';
-          else if (div === 'nonmemory') sel.value = (yr === 2026) ? 'nonmemory_surplus' : 'nonmemory_surplus';
+          else if (div === 'nonmemory') sel.value = 'nonmemory_surplus';
         }
       }
 
@@ -1374,7 +1384,6 @@
       const quickGross = Math.round((currentSalary * 10000) / 12);
       document.getElementById('quickMonthlyGross').innerText = `${nComma(quickGross)}원`;
 
-      // 1. 올해 총보상
       const taiPre = currentSalary * 0.10;
       const opiPre = currentSalary * 0.50;
       const cashTotalPre = currentSalary + taiPre + opiPre;
@@ -1862,7 +1871,7 @@
       }
     }
 
-    // 2048 Touch Swipe Handling (화면 스크롤 방지 포함)
+    // 2048 Touch Swipe Handling
     let touchStartX2048 = 0;
     let touchStartY2048 = 0;
     const boardEl2048 = document.getElementById('boardContainer2048');
@@ -1900,7 +1909,7 @@
     }
 
     // ----------------------------------------------------
-    // 4. JUMP GAME ENGINE (올라라 계단)
+    // 4. JUMP GAME ENGINE (올라라 계단 - 업데이트 버전)
     // ----------------------------------------------------
     class SoundEngine {
       constructor() {
@@ -1959,13 +1968,13 @@
           const gain = this.ctx.createGain();
           osc.type = 'sawtooth';
           osc.frequency.setValueAtTime(380, now);
-          osc.frequency.exponentialRampToValueAtTime(60, now + 0.45);
+          osc.frequency.exponentialRampToValueAtTime(60, now + 0.5);
           gain.gain.setValueAtTime(0.4, now);
-          gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.55);
           osc.connect(gain);
           gain.connect(this.ctx.destination);
           osc.start(now);
-          osc.stop(now + 0.5);
+          osc.stop(now + 0.55);
         } catch (e) {}
       }
       playTimeOut() {
@@ -1975,14 +1984,14 @@
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
           osc.type = 'square';
-          osc.frequency.setValueAtTime(220, now);
-          osc.frequency.setValueAtTime(160, now + 0.12);
+          osc.frequency.setValueAtTime(240, now);
+          osc.frequency.setValueAtTime(150, now + 0.15);
           gain.gain.setValueAtTime(0.35, now);
-          gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
           osc.connect(gain);
           gain.connect(this.ctx.destination);
           osc.start(now);
-          osc.stop(now + 0.35);
+          osc.stop(now + 0.4);
         } catch (e) {}
       }
       playHighScore() {
@@ -2014,10 +2023,13 @@
     const scoreDisplay = document.getElementById('scoreDisplay');
     const bestScoreDisplay = document.getElementById('bestScoreDisplay');
     const gaugeProgress = document.getElementById('gaugeProgress');
+    const gaugeTimeText = document.getElementById('gaugeTimeText');
     const dangerOverlay = document.getElementById('dangerOverlay');
     const themeBanner = document.getElementById('themeBanner');
     const comboBanner = document.getElementById('comboBanner');
     const comboText = document.getElementById('comboText');
+    const currentModeBadge = document.getElementById('currentModeBadge');
+    const readyTipBanner = document.getElementById('readyTipBanner');
 
     const startScreen = document.getElementById('startScreen');
     const startGameBtn = document.getElementById('startGameBtn');
@@ -2028,6 +2040,10 @@
     const newRecordBadge = document.getElementById('newRecordBadge');
     const gameOverTitle = document.getElementById('gameOverTitle');
     const gameOverReason = document.getElementById('gameOverReason');
+
+    const modeOldBtn = document.getElementById('modeOldBtn');
+    const modeYoungBtn = document.getElementById('modeYoungBtn');
+    const modeDescriptionCard = document.getElementById('modeDescriptionCard');
 
     const climbBtn = document.getElementById('climbBtn');
     const turnBtn = document.getElementById('turnBtn');
@@ -2041,15 +2057,23 @@
     const STEP_DY = 36;
     const JUMP_DURATION = 0.10;
 
-    const STORAGE_KEY = 'climb_stairs_best_score_v1';
-    let bestScore = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
-    bestScoreDisplay.textContent = bestScore;
+    // 모드 설정 ('OLD': 늙크크, 'YOUNG': 영크크)
+    let selectedMode = 'OLD';
+    const STORAGE_KEY_PREFIX = 'climb_stairs_best_';
+    let bestScores = {
+      OLD: parseInt(localStorage.getItem(STORAGE_KEY_PREFIX + 'OLD') || '0', 10),
+      YOUNG: parseInt(localStorage.getItem(STORAGE_KEY_PREFIX + 'YOUNG') || '0', 10)
+    };
 
     const STAIR_PATTERNS = [
-      ['L', 'L', 'L', 'L'], ['R', 'R', 'R', 'R'],
-      ['L', 'R', 'L', 'L'], ['L', 'R', 'R', 'L'],
-      ['L', 'R', 'R', 'R'], ['R', 'L', 'R', 'R'],
-      ['R', 'L', 'L', 'R'], ['R', 'L', 'L', 'L']
+      ['L', 'L', 'L', 'L'], // 0
+      ['R', 'R', 'R', 'R'], // 1
+      ['L', 'R', 'L', 'L'], // 2
+      ['L', 'R', 'R', 'L'], // 3
+      ['L', 'R', 'R', 'R'], // 4
+      ['R', 'L', 'R', 'R'], // 5
+      ['R', 'L', 'L', 'R'], // 6
+      ['R', 'L', 'L', 'L']  // 7
     ];
 
     let stairs = [];
@@ -2059,10 +2083,12 @@
     let shootingStars = [];
 
     let currentScore = 0;
-    let timerGauge = 3.0;
-    let maxGauge = 3.0;
+    let timerGauge = 4.0;
+    let maxGauge = 4.0;
     let lastTimestamp = 0;
     let gameState = 'START';
+    let isTimerStarted = false; // 첫 조작 전까지 타이머 일시 정지
+
     let streakCount = 0;
     let streakTimeout = null;
     let isJumpLoopRunning = false;
@@ -2070,6 +2096,45 @@
     let dpr = window.devicePixelRatio || 1;
     let viewW = 0;
     let viewH = 0;
+
+    function updateModeUI() {
+      if (selectedMode === 'OLD') {
+        modeOldBtn.className = 'flex-1 py-2.5 rounded-xl font-black text-xs transition-all flex flex-col items-center justify-center mode-tab-active border border-white/30';
+        modeYoungBtn.className = 'flex-1 py-2.5 rounded-xl font-black text-xs transition-all flex flex-col items-center justify-center bg-slate-800/80 text-slate-300 hover:text-white border border-transparent';
+        currentModeBadge.textContent = '👴 늙크크 모드';
+        currentModeBadge.className = 'pointer-events-none px-2.5 py-1 rounded-xl text-xs font-black glass-panel text-amber-300 border-amber-400/30';
+        
+        modeDescriptionCard.innerHTML = `
+          <div class="text-amber-300 font-bold mb-1">👴 늙크크 모드 특징</div>
+          <div>• 타이머: 최대 4.0초 시작, 충전량 +1.2초 대폭 증가!</div>
+          <div>• 계단 패턴: 100층 이하에서 4연속 직진(LLLL, RRRR) 확률 <strong class="text-white">5배</strong> UP!</div>
+          <div>• 층수 증가에 따라 서서히 난이도가 조절됩니다.</div>
+        `;
+      } else {
+        modeYoungBtn.className = 'flex-1 py-2.5 rounded-xl font-black text-xs transition-all flex flex-col items-center justify-center mode-tab-active border border-white/30';
+        modeOldBtn.className = 'flex-1 py-2.5 rounded-xl font-black text-xs transition-all flex flex-col items-center justify-center bg-slate-800/80 text-slate-300 hover:text-white border border-transparent';
+        currentModeBadge.textContent = '👶 영크크 모드';
+        currentModeBadge.className = 'pointer-events-none px-2.5 py-1 rounded-xl text-xs font-black glass-panel text-emerald-300 border-emerald-400/30';
+
+        modeDescriptionCard.innerHTML = `
+          <div class="text-emerald-300 font-bold mb-1">👶 영크크 모드 특징 (기본)</div>
+          <div>• 타이머: 최대 3.0초 시작, 순발력 중심의 오리지널 밸런스!</div>
+          <div>• 계단 패턴: 8개 패턴이 균등한 확률로 출현합니다.</div>
+          <div>• 극강의 반사신경과 속도감을 시험해보세요!</div>
+        `;
+      }
+      bestScoreDisplay.textContent = bestScores[selectedMode];
+    }
+
+    modeOldBtn.addEventListener('click', () => {
+      selectedMode = 'OLD';
+      updateModeUI();
+    });
+
+    modeYoungBtn.addEventListener('click', () => {
+      selectedMode = 'YOUNG';
+      updateModeUI();
+    });
 
     function resizeCanvas() {
       if (!jumpContainer || !jumpCanvas) return;
@@ -2248,8 +2313,8 @@
           this.fallTime += dt;
           this.fallX += this.fallVx * dt * 60;
           this.fallY += this.fallVy * dt * 60;
-          this.fallVy += 1.2;
-          this.fallRot += (this.facing === 'R' ? 0.25 : -0.25);
+          this.fallVy += 1.4;
+          this.fallRot += (this.facing === 'R' ? 0.35 : -0.35);
           this.x = this.fallX;
           this.y = this.fallY;
         }
@@ -2285,7 +2350,7 @@
         this.fallX = this.x;
         this.fallY = this.y;
         this.fallVx = (targetFacing === 'R' ? 4 : -4);
-        this.fallVy = -6;
+        this.fallVy = -7;
       }
       draw(context, camX, camY) {
         const screenX = viewW / 2 + (this.x - camX);
@@ -2355,7 +2420,7 @@
         context.fillStyle = '#fbbf24';
         context.fillRect(-3, -9, 6, 5);
 
-        // Head & Eyes
+        // Face & Eyes
         context.fillStyle = '#fed7aa';
         context.beginPath();
         context.arc(0, -28, 12, 0, Math.PI * 2);
@@ -2457,6 +2522,9 @@
           context.fill();
           context.fillStyle = '#f87171';
           context.fillRect(-halfW + 4, -4, w - 8, 2);
+          context.fillStyle = '#991b1b';
+          context.fillRect(-halfW + 18, -2, 2, 6);
+          context.fillRect(halfW - 20, -2, 2, 6);
         } else if (themeIdx === 1) {
           context.fillStyle = '#271b12';
           context.beginPath();
@@ -2466,8 +2534,13 @@
           context.beginPath();
           context.roundRect(-halfW, -4, w, h - 2, 4);
           context.fill();
+          context.fillStyle = '#a16207';
+          context.fillRect(-halfW + 3, -3, w - 6, 2);
           context.fillStyle = '#4ade80';
+          context.shadowColor = '#22c55e';
+          context.shadowBlur = 6;
           context.fillRect(-6, -2, 12, 2);
+          context.shadowBlur = 0;
         } else if (themeIdx === 2) {
           context.fillStyle = '#1e3a8a';
           context.beginPath();
@@ -2479,20 +2552,28 @@
           context.fill();
           context.fillStyle = '#f59e0b';
           context.fillRect(-halfW + 2, h - 6, w - 4, 2);
+          context.fillStyle = '#ffffff';
+          context.fillRect(-halfW + 4, -4, w - 8, 2);
         } else {
           context.fillStyle = '#4c1d95';
           context.beginPath();
           context.roundRect(-halfW, 0, w, h, [0, 0, 8, 8]);
           context.fill();
           context.fillStyle = '#06b6d4';
+          context.shadowColor = '#22d3ee';
+          context.shadowBlur = 8;
           context.beginPath();
           context.roundRect(-halfW, -4, w, h - 2, 4);
           context.fill();
+          context.shadowBlur = 0;
+          context.fillStyle = '#ffffff';
+          context.fillRect(-halfW + 6, -3, w - 12, 1.5);
+          context.fillRect(-1, -3, 2, h - 3);
         }
 
         if (this.index > 0 && this.index % 25 === 0) {
-          context.fillStyle = 'rgba(255, 255, 255, 0.7)';
-          context.font = 'bold 9px Fredoka, sans-serif';
+          context.fillStyle = 'rgba(255, 255, 255, 0.75)';
+          context.font = 'bold 9px "Fredoka", sans-serif';
           context.textAlign = 'center';
           context.fillText(`${this.index}F`, 0, -8);
         }
@@ -2500,13 +2581,53 @@
       }
     }
 
+    function getWeightedStairPattern(currentFloor) {
+      if (selectedMode === 'YOUNG') {
+        return STAIR_PATTERNS[Math.floor(Math.random() * STAIR_PATTERNS.length)];
+      }
+
+      let straightWeight = 1;
+      if (currentFloor <= 100) {
+        straightWeight = 5;
+      } else if (currentFloor <= 200) {
+        straightWeight = 4;
+      } else if (currentFloor <= 300) {
+        straightWeight = 3;
+      } else if (currentFloor <= 400) {
+        straightWeight = 2;
+      } else {
+        straightWeight = 1;
+      }
+
+      const weights = [
+        straightWeight, // 0: LLLL
+        straightWeight, // 1: RRRR
+        1, 1, 1, 1, 1, 1
+      ];
+
+      const totalWeight = weights.reduce((acc, w) => acc + w, 0);
+      let rand = Math.random() * totalWeight;
+
+      for (let i = 0; i < weights.length; i++) {
+        if (rand < weights[i]) return STAIR_PATTERNS[i];
+        rand -= weights[i];
+      }
+
+      return STAIR_PATTERNS[0];
+    }
+
     function appendStairPattern() {
-      const chosen = STAIR_PATTERNS[Math.floor(Math.random() * STAIR_PATTERNS.length)];
-      for (const dir of chosen) {
-        const lastStair = stairs[stairs.length - 1];
-        const nextIdx = lastStair.index + 1;
+      const lastStair = stairs[stairs.length - 1];
+      const currentHeight = lastStair ? lastStair.index : 0;
+      const chosenPattern = getWeightedStairPattern(currentHeight);
+
+      for (const dir of chosenPattern) {
+        const topStair = stairs[stairs.length - 1];
+        const nextIdx = topStair.index + 1;
         const dx = (dir === 'L') ? -STEP_DX : STEP_DX;
-        stairs.push(new Stair(nextIdx, lastStair.x + dx, lastStair.y - STEP_DY, dir));
+        const nextX = topStair.x + dx;
+        const nextY = topStair.y - STEP_DY;
+        stairs.push(new Stair(nextIdx, nextX, nextY, dir));
       }
     }
 
@@ -2544,24 +2665,88 @@
           context.fillStyle = '#292524';
           context.fillRect(20, base + 120, 110, 240);
           context.fillStyle = '#fef08a';
+          context.shadowColor = '#f59e0b';
+          context.shadowBlur = 15;
           context.beginPath();
           context.arc(75, base + 180, 16, Math.PI, 0);
           context.rect(59, base + 180, 32, 28);
           context.fill();
+          context.shadowBlur = 0;
+
+          context.strokeStyle = '#44403c';
+          context.lineWidth = 2.5;
+          context.beginPath();
+          context.moveTo(75, base + 164);
+          context.lineTo(75, base + 208);
+          context.moveTo(59, base + 188);
+          context.lineTo(91, base + 188);
+          context.stroke();
+
+          context.fillStyle = '#1c1917';
+          context.fillRect(viewW - 130, base + 240, 100, 280);
+          context.fillStyle = '#451a03';
+          context.fillRect(viewW - 90, base + 195, 30, 45);
         }
         context.restore();
       } else if (themeIdx === 1) {
         const grad = context.createLinearGradient(0, 0, 0, viewH);
         grad.addColorStop(0, '#064e3b'); grad.addColorStop(0.6, '#022c22'); grad.addColorStop(1, '#0f172a');
         context.fillStyle = grad; context.fillRect(0, 0, viewW, viewH);
+
+        context.save();
+        context.translate(0, parallaxY);
+        for (let wrap = -1; wrap <= 1; wrap++) {
+          const baseOffset = wrap * viewH;
+          context.fillStyle = '#1c130c';
+          context.fillRect(viewW * 0.15, baseOffset, viewW * 0.7, viewH);
+          context.strokeStyle = '#2d1f14';
+          context.lineWidth = 6;
+          for (let i = 0; i < 4; i++) {
+            const bx = viewW * 0.25 + i * 42;
+            context.beginPath();
+            context.moveTo(bx, baseOffset);
+            context.bezierCurveTo(bx - 15, baseOffset + viewH * 0.3, bx + 20, baseOffset + viewH * 0.7, bx, baseOffset + viewH);
+            context.stroke();
+          }
+        }
+        context.restore();
       } else if (themeIdx === 2) {
         const grad = context.createLinearGradient(0, 0, 0, viewH);
-        grad.addColorStop(0, '#f97316'); grad.addColorStop(0.4, '#db2777'); grad.addColorStop(1, '#1e1b4b');
+        grad.addColorStop(0, '#f97316'); grad.addColorStop(0.4, '#db2777'); grad.addColorStop(0.8, '#4f46e5'); grad.addColorStop(1, '#1e1b4b');
         context.fillStyle = grad; context.fillRect(0, 0, viewW, viewH);
+
+        context.save();
+        context.translate(0, parallaxY * 0.6);
+        for (let wrap = -1; wrap <= 1; wrap++) {
+          const baseOffset = wrap * viewH;
+          context.fillStyle = 'rgba(255, 255, 255, 0.25)';
+          context.beginPath();
+          context.arc(viewW * 0.2, baseOffset + 180, 60, 0, Math.PI * 2);
+          context.arc(viewW * 0.38, baseOffset + 160, 80, 0, Math.PI * 2);
+          context.arc(viewW * 0.58, baseOffset + 180, 65, 0, Math.PI * 2);
+          context.fill();
+        }
+        context.restore();
       } else {
         const grad = context.createLinearGradient(0, 0, 0, viewH);
         grad.addColorStop(0, '#030712'); grad.addColorStop(0.5, '#0f172a'); grad.addColorStop(1, '#020617');
         context.fillStyle = grad; context.fillRect(0, 0, viewW, viewH);
+
+        context.save();
+        context.translate(viewW * 0.8, viewH * 0.18);
+        context.rotate(-0.35);
+        const planetGrad = context.createLinearGradient(-30, -30, 30, 30);
+        planetGrad.addColorStop(0, '#fbbf24'); planetGrad.addColorStop(1, '#ea580c');
+        context.fillStyle = planetGrad;
+        context.beginPath();
+        context.arc(0, 0, 26, 0, Math.PI * 2);
+        context.fill();
+        context.strokeStyle = 'rgba(253, 230, 138, 0.6)';
+        context.lineWidth = 5;
+        context.beginPath();
+        context.ellipse(0, 0, 52, 14, 0, 0, Math.PI * 2);
+        context.stroke();
+        context.restore();
 
         shootingStars.forEach(star => { star.update(0.016); star.draw(context); });
       }
@@ -2574,11 +2759,19 @@
     }
 
     function getGaugeConfig(score) {
-      if (score <= 100) return { max: 3.0, boost: 1.0 };
-      if (score <= 200) return { max: 2.0, boost: 0.8 };
-      if (score <= 300) return { max: 1.0, boost: 0.5 };
-      if (score <= 400) return { max: 1.0, boost: 0.6 };
-      return { max: 1.0, boost: 0.4 };
+      if (selectedMode === 'OLD') {
+        if (score <= 100) return { max: 4.0, boost: 1.2 };
+        if (score <= 200) return { max: 3.0, boost: 1.0 };
+        if (score <= 300) return { max: 2.5, boost: 0.8 };
+        if (score <= 400) return { max: 2.0, boost: 0.7 };
+        return { max: 1.5, boost: 0.6 };
+      } else {
+        if (score <= 100) return { max: 3.0, boost: 1.0 };
+        if (score <= 200) return { max: 2.0, boost: 0.8 };
+        if (score <= 300) return { max: 1.0, boost: 0.5 };
+        if (score <= 400) return { max: 1.0, boost: 0.6 };
+        return { max: 1.0, boost: 0.4 };
+      }
     }
 
     function addGaugeBoost() {
@@ -2592,9 +2785,14 @@
       particles = [];
       currentScore = 0;
       scoreDisplay.textContent = '0';
+      isTimerStarted = false;
+
       const initialCfg = getGaugeConfig(0);
       maxGauge = initialCfg.max;
       timerGauge = maxGauge;
+
+      gaugeTimeText.textContent = `${maxGauge.toFixed(1)}s`;
+      readyTipBanner.classList.remove('hidden');
 
       stairs.push(new Stair(0, 0, 0, 'R'));
       for (let i = 0; i < 25; i++) appendStairPattern();
@@ -2610,11 +2808,17 @@
 
       dangerOverlay.classList.remove('vignette-danger');
       dangerOverlay.style.opacity = '0';
+      gaugeProgress.style.width = '100%';
     }
 
     function handlePlayerAction(actionType) {
       if (gameState !== 'PLAYING') return;
       sound.init();
+
+      if (!isTimerStarted) {
+        isTimerStarted = true;
+        readyTipBanner.classList.add('hidden');
+      }
 
       let targetFacing = character.facing;
       if (actionType === 'TURN') {
@@ -2642,16 +2846,16 @@
         }
         trackStreak();
 
-        if (currentScore > bestScore) {
-          bestScore = currentScore;
-          bestScoreDisplay.textContent = bestScore;
-          localStorage.setItem(STORAGE_KEY, bestScore.toString());
+        if (currentScore > bestScores[selectedMode]) {
+          bestScores[selectedMode] = currentScore;
+          bestScoreDisplay.textContent = bestScores[selectedMode];
+          localStorage.setItem(STORAGE_KEY_PREFIX + selectedMode, bestScores[selectedMode].toString());
         }
       } else {
         gameState = 'FALLING';
         character.triggerFall(targetFacing);
         sound.playFall();
-        setTimeout(() => { triggerGameOver('발을 헛디뎌 추락했습니다!'); }, 800);
+        setTimeout(() => { triggerGameOver('발을 헛디뎌 추락했습니다!'); }, 1000);
       }
     }
 
@@ -2674,9 +2878,9 @@
       gameState = 'OVER';
       gameOverReason.textContent = reasonText;
       finalScoreVal.textContent = currentScore;
-      finalBestVal.textContent = bestScore;
+      finalBestVal.textContent = bestScores[selectedMode];
 
-      if (currentScore >= bestScore && currentScore > 0) {
+      if (currentScore >= bestScores[selectedMode] && currentScore > 0) {
         newRecordBadge.classList.remove('hidden');
         sound.playHighScore();
       } else {
@@ -2700,9 +2904,14 @@
       lastTimestamp = timestamp;
 
       if (gameState === 'PLAYING') {
-        timerGauge -= dt;
+        if (isTimerStarted) {
+          timerGauge -= dt;
+        }
+
         const gaugeRatio = Math.max(0, timerGauge / maxGauge);
-        if (gaugeRatio < 0.28) {
+        gaugeTimeText.textContent = `${Math.max(0, timerGauge).toFixed(1)}s`;
+
+        if (gaugeRatio < 0.28 && isTimerStarted) {
           dangerOverlay.classList.add('vignette-danger');
           dangerOverlay.style.opacity = (1 - (gaugeRatio / 0.28)).toFixed(2);
         } else {
@@ -2719,10 +2928,13 @@
           gaugeProgress.style.background = 'linear-gradient(90deg, #ef4444, #f43f5e)';
         }
 
-        if (timerGauge <= 0) {
-          gameState = 'OVER';
+        if (timerGauge <= 0 && isTimerStarted) {
+          gameState = 'FALLING';
+          character.triggerFall(character.facing);
           sound.playTimeOut();
-          triggerGameOver('제한 시간이 초과되었습니다!');
+          setTimeout(() => {
+            triggerGameOver('제한 시간이 초과되었습니다!');
+          }, 1000);
         }
       }
 
@@ -2763,15 +2975,12 @@
     }
 
     // ----------------------------------------------------
-    // 5. KEYBOARD & TOUCH SCROLL PREVENTION (핵심 안전 조치)
+    // 5. KEYBOARD & TOUCH CONTROLS
     // ----------------------------------------------------
     window.addEventListener('keydown', (e) => {
       if (currentMainTab === 'jump') {
-        // Jump 조작 키는 화면 스크롤을 무조건 방지
         const blockKeys = ['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'Space', 'Enter', 'KeyD', 'KeyA'];
-        if (blockKeys.includes(e.code)) {
-          e.preventDefault();
-        }
+        if (blockKeys.includes(e.code)) e.preventDefault();
 
         sound.init();
 
@@ -2804,7 +3013,6 @@
       }
     });
 
-    // Jump Container 터치 스크롤 방지
     if (jumpContainer) {
       jumpContainer.addEventListener('touchmove', (e) => {
         e.preventDefault();
@@ -2851,7 +3059,7 @@
     startGameBtn.addEventListener('click', startGame);
     restartGameBtn.addEventListener('click', restartGame);
     startScreen.addEventListener('pointerdown', (e) => {
-      if (gameState === 'START') {
+      if (gameState === 'START' && e.target === startScreen) {
         e.preventDefault();
         startGame();
       }
@@ -2874,11 +3082,8 @@
       const visitorEl = document.getElementById('visitorCount');
       if (!visitorEl) return;
     
-      // 이미 접속한 세션인지 확인
       const hasVisited = sessionStorage.getItem('visited_session');
-    
       try {
-        // 이미 접속한 세션이면 숫자를 올리지 않고 그냥 기존 표시 유지하거나 호출 건너뜀
         if (hasVisited) {
           const cached = sessionStorage.getItem('cached_count');
           if (cached) visitorEl.innerText = Number(cached).toLocaleString();
@@ -2899,7 +3104,6 @@
       }
     }
 
-    
     // ----------------------------------------------------
     // 6. INITIALIZATION ON DOM READY
     // ----------------------------------------------------
@@ -2943,9 +3147,6 @@
       recalculateAll();
       updateVisitorCount();
     });
-
-
-    
   </script>
 </body>
 </html>
