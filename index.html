@@ -823,8 +823,8 @@
           </div>
         </div>
 
-        <!-- On-Screen Mobile Touch Controls (버튼 크기 확대 및 상향 배치) -->
-        <div class="absolute bottom-[126px] left-0 right-0 px-7 flex justify-between items-end pointer-events-none z-20">
+        <!-- On-Screen Mobile Touch Controls (터치 버튼 크기 확대 및 상향 배치) -->
+        <div class="absolute bottom-[75px] left-0 right-0 px-7 flex justify-between items-end pointer-events-none z-20">
           <button id="turnBtn" aria-label="방향 전환 후 오르기" class="touch-btn pointer-events-auto w-24 h-24 rounded-full flex flex-col items-center justify-center shadow-[0_8px_25px_rgba(244,63,94,0.5)] border-4 border-rose-300/50 bg-gradient-to-br from-rose-500 to-pink-600 active:scale-90 select-none">
             <svg class="w-11 h-11 text-white fill-current filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" viewBox="0 0 24 24">
               <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
@@ -2106,8 +2106,8 @@
         
         modeDescriptionCard.innerHTML = `
           <div class="text-amber-300 font-bold mb-1">👴 늙크크 모드 특징</div>
-          <div>• 타이머: 최대 4.0초 시작, 충전량 +1.2초 대폭 증가!</div>
-          <div>• 계단 패턴: 100층 이하에서 4연속 직진(LLLL, RRRR) 확률 <strong class="text-white">5배</strong> UP!</div>
+          <div>• 반사신경을 고려하여 타이머 넉넉히 챙겨드림!</div>
+          <div>• 복잡한거 어려우니까 쉽게 쉽게 갑니다 </div>
           <div>• 층수 증가에 따라 서서히 난이도가 조절됩니다.</div>
         `;
       } else {
@@ -2118,9 +2118,9 @@
 
         modeDescriptionCard.innerHTML = `
           <div class="text-emerald-300 font-bold mb-1">👶 영크크 모드 특징 (기본)</div>
-          <div>• 타이머: 최대 3.0초 시작, 순발력 중심의 오리지널 밸런스!</div>
-          <div>• 계단 패턴: 8개 패턴이 균등한 확률로 출현합니다.</div>
-          <div>• 극강의 반사신경과 속도감을 시험해보세요!</div>
+          <div>• 400층부터가 진짜!</div>
+          <div>• 200층도 못 뚫는다면 당신은 늙크크</div>
+          <div>• 극강의 반사신경과 속도감으로 젊음을 만끽하세요!</div>
         `;
       }
       bestScoreDisplay.textContent = bestScores[selectedMode];
@@ -2937,9 +2937,11 @@
           }, 1000);
         }
       }
-
+    
       const camX = character ? character.x : 0;
-      const camY = character ? character.y : 0;
+
+      // 수정 후 (캐릭터 위치를 아래로 60px 낮춤)
+      const camY = character ? character.y - 60: 0;
 
       jumpCtx.clearRect(0, 0, viewW, viewH);
       const themeIdx = drawDynamicBackground(jumpCtx, camX, camY);
