@@ -131,6 +131,13 @@
         <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
         <span>지급시기 : <strong> 27년 3말~4초</strong></span>
       </div>
+
+      <!-- 헤더 우측 방문자 수 표시 배지 -->
+      <div class="flex items-center gap-2 text-xs bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700 shadow-inner">
+      <i class="fa-solid fa-users text-blue-400"></i>
+      <span class="text-slate-300">누적 방문자: <strong id="visitorCount" class="text-emerald-400 font-bold">-</strong>명</span>
+      </div>
+      
     </div>
   </header>
 
@@ -467,7 +474,7 @@
             <button type="button" id="btn-5yr-detail" onclick="toggle5YrDetail()" 
                     class="px-4 py-2 text-xs font-bold rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-xs">
               <i class="fa-solid fa-sliders text-indigo-600"></i>
-              <span id="btn5YrText">자세히 보기, 소속변경</span>
+              <span id="btn5YrText">간소화 보기</span>
             </button>
           </div>
         </div>
@@ -496,7 +503,7 @@
         </div>
 
         <!-- Detail Input & Comprehensive 5-Year Table Section -->
-        <div id="fiveYrInputSection" class="hidden mt-6 space-y-6">
+        <div id="fiveYrInputSection" class="mt-6 space-y-6">
           <div class="p-5 rounded-2xl bg-indigo-50/50 border border-indigo-200 transition-all">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-2">
               <div>
@@ -957,7 +964,7 @@
     // ----------------------------------------------------
     let globalDivision = 'memory';
     let isSimplifiedMode = true;
-    let is5YrDetailOpen = false;
+    let is5YrDetailOpen = true;
     let isPrevAuto = true;
     let chartInstance = null;
 
@@ -2901,6 +2908,29 @@
 
       recalculateAll();
     });
+
+    async function updateVisitorCount() {
+      const visitorEl = document.getElementById('visitorCount');
+      if (!visitorEl) return;
+    
+      try {
+        // 네임스페이스와 키 이름을 고유한 명칭으로 지정 (예: samsung_ds_calc_mj / visits)
+        const res = await fetch('https://api.counterapi.dev/v1/samsung_ds_calc_mj/visits/up');
+        const data = await res.json();
+        if (data && data.count) {
+          visitorEl.innerText = data.count.toLocaleString();
+        }
+    } catch (err) {
+      // 외부망 차단 또는 API 오류 시 조용히 숨김 처리하거나 기본값 유지
+      visitorEl.innerText = '-';
+    }
+  }
+  
+  // DOM 로드 시 실행
+  document.addEventListener('DOMContentLoaded', () => {
+    updateVisitorCount();
+  });
+    
   </script>
 </body>
 </html>
