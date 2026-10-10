@@ -2874,17 +2874,27 @@
       const visitorEl = document.getElementById('visitorCount');
       if (!visitorEl) return;
     
+      // 이미 접속한 세션인지 확인
+      const hasVisited = sessionStorage.getItem('visited_session');
+    
       try {
-        // API 호출 (Vercel Serverless Function)
+        // 이미 접속한 세션이면 숫자를 올리지 않고 그냥 기존 표시 유지하거나 호출 건너뜀
+        if (hasVisited) {
+          const cached = sessionStorage.getItem('cached_count');
+          if (cached) visitorEl.innerText = Number(cached).toLocaleString();
+          return;
+        }
+    
         const res = await fetch('/api/visit');
         if (res.ok) {
           const data = await res.json();
           if (data && data.count) {
             visitorEl.innerText = data.count.toLocaleString();
+            sessionStorage.setItem('visited_session', 'true');
+            sessionStorage.setItem('cached_count', data.count);
           }
         }
       } catch (err) {
-        console.warn('방문자 카운트 조회 실패:', err);
         visitorEl.innerText = '-';
       }
     }
