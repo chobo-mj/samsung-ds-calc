@@ -92,97 +92,133 @@
     #game-container * {
       touch-action: manipulation;
     }
+
+    /* Mobile Responsive Optimizations */
+    @media (max-width: 640px) {
+      .table-responsive {
+        -webkit-overflow-scrolling: touch;
+      }
+      .table-responsive table {
+        min-width: 720px;
+      }
+    }
+
+    /* Header Fold Animation */
+    .header-collapsible {
+      transition: max-height 0.3s ease, opacity 0.25s ease, margin 0.3s ease;
+      overflow: hidden;
+    }
+    .header-collapsed {
+      max-height: 0 !important;
+      opacity: 0 !important;
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
   <!-- Header & Navigation -->
-  <header class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white border-b border-blue-900/50 sticky top-0 z-50 shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
-      <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 shrink-0">
-            <i class="fa-solid fa-microchip text-xl"></i>
+  <header class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white border-b border-blue-900/50 sticky top-0 z-50 shadow-md transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
+      
+      <!-- Top Title Bar (접혀도 상시 유지되는 컨트롤러) -->
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/30 shrink-0">
+            <i class="fa-solid fa-microchip text-base"></i>
           </div>
           <div>
-            <h1 class="text-lg sm:text-xl font-bold tracking-tight flex items-center gap-2">
-              DS 특별 성과급 (자사주) 계산기
-              <span class="text-[11px] bg-blue-500/30 text-blue-300 border border-blue-400/30 px-2 py-0.5 rounded-full font-medium">1.0</span>
+            <h1 class="text-sm sm:text-base font-bold tracking-tight flex items-center gap-2">
+              DS 성과급 시뮬레이터
+              <span class="text-[10px] bg-blue-500/30 text-blue-300 border border-blue-400/30 px-1.5 py-0.2 rounded-full font-medium">1.0</span>
             </h1>
-            <p class="text-xs text-slate-300">계산 결과는 실제와 다를 수 있음. 재미로만 보세요.</p>
           </div>
         </div>
-        
-        <!-- 누적 방문자 수 표시 배지 -->
-        <div class="flex items-center gap-1.5 text-xs bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700 shadow-inner">
-          <i class="fa-solid fa-users text-blue-400"></i>
-          <span class="text-slate-300">누적 방문자: <strong id="visitorCount" class="text-emerald-400 font-bold">-</strong>명</span>
+
+        <!-- 헤더 접기/펼치기 토글 버튼 & 누적 방문자 배지 -->
+        <div class="flex items-center gap-2">
+          <div class="hidden sm:flex items-center gap-1.5 text-xs bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700 shadow-inner">
+            <i class="fa-solid fa-users text-blue-400 text-[11px]"></i>
+            <span class="text-slate-300 text-[11px]">방문자: <strong id="visitorCount" class="text-emerald-400 font-bold">-</strong>명</span>
+          </div>
+          <button type="button" onclick="toggleHeaderFold()" id="headerFoldBtn"
+                  class="bg-blue-600/80 hover:bg-blue-500 text-white text-xs px-2.5 py-1 rounded-lg border border-blue-400/40 shadow-sm flex items-center gap-1 transition-all">
+            <i id="foldIcon" class="fa-solid fa-chevron-up text-[10px]"></i>
+            <span id="foldText" class="text-[11px] font-semibold">상단 접기</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 접히는 상세 안내 문구 영역 -->
+      <div id="collapsibleHeaderContent" class="header-collapsible max-h-40 opacity-100 mt-2 flex flex-col md:flex-row items-start md:items-center justify-between gap-2 border-t border-blue-900/40 pt-2">
+        <p class="text-xs text-slate-300">※ 삼성전자 DS 부문 특별 성과급(자사주) 및 5개년 종합 보상 시뮬레이션입니다.</p>
+        <div class="flex items-center gap-2 text-xs text-slate-300">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>지급시기 : <strong>27년 3월말~4월초</strong></span>
         </div>
       </div>
 
       <!-- Main Navigation Tabs (계산기 / 휴식 2048 / 휴식 jump) -->
-      <div class="flex items-center p-1 bg-slate-800/90 rounded-xl border border-slate-700/80 shadow-inner w-full md:w-auto justify-center">
+      <div class="mt-2.5 flex items-center p-1 bg-slate-800/90 rounded-xl border border-slate-700/80 shadow-inner w-full md:w-auto justify-center">
         <button type="button" onclick="switchMainTab('calc')" id="mainTab-calc"
-                class="flex-1 md:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 tab-active shadow-md">
+                class="flex-1 md:flex-initial px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 tab-active shadow-md">
           <i class="fa-solid fa-calculator text-blue-300"></i>
           <span>계산기</span>
         </button>
         <button type="button" onclick="switchMainTab('game2048')" id="mainTab-game2048"
-                class="flex-1 md:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-300 hover:text-white hover:bg-slate-700/60">
+                class="flex-1 md:flex-initial px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-300 hover:text-white hover:bg-slate-700/60">
           <i class="fa-solid fa-cubes text-amber-400"></i>
           <span>휴식 (2048)</span>
         </button>
         <button type="button" onclick="switchMainTab('jump')" id="mainTab-jump"
-                class="flex-1 md:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-300 hover:text-white hover:bg-slate-700/60">
+                class="flex-1 md:flex-initial px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-300 hover:text-white hover:bg-slate-700/60">
           <i class="fa-solid fa-person-walking-arrow-loop-left text-emerald-400"></i>
           <span>휴식 (Jump)</span>
         </button>
       </div>
 
-      <div class="hidden lg:flex items-center gap-2 text-xs text-slate-300">
-        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span>지급시기 : <strong> 27년 3말~4초</strong></span>
-      </div>
     </div>
   </header>
 
   <!-- Main Container -->
-  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+  <main class="flex-grow max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 w-full">
 
     <!-- ==================== TAB 1: 성과급 계산기 ==================== -->
     <div id="section-calc" class="space-y-6">
 
       <!-- Top Controller: Global Division Tabs & Primary Inputs -->
-      <div class="bg-white rounded-2xl p-6 border border-slate-200 card-shadow">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-5 border-b border-slate-100 gap-4">
+      <div class="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200 card-shadow">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 sm:pb-5 border-b border-slate-100 gap-3">
           <div>
             <span class="text-xs font-bold uppercase tracking-wider text-blue-600 block mb-0.5">Primary Division</span>
-            <h2 class="text-lg font-bold text-slate-900">소속사업부 선택</h2>
+            <h2 class="text-base sm:text-lg font-bold text-slate-900">소속사업부 선택</h2>
           </div>
           <div class="flex p-1.5 bg-slate-100 rounded-xl w-full sm:w-auto" id="divisionTabs">
-            <button type="button" onclick="setGlobalDivision('memory')" id="tab-memory" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 tab-active flex items-center justify-center gap-2">
+            <button type="button" onclick="setGlobalDivision('memory')" id="tab-memory" class="flex-1 sm:flex-initial px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg font-semibold text-xs sm:text-sm transition-all duration-200 tab-active flex items-center justify-center gap-1.5 sm:gap-2">
               <i class="fa-solid fa-memory"></i> 메모리
             </button>
-            <button type="button" onclick="setGlobalDivision('common')" id="tab-common" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-lg font-semibold text-sm text-slate-600 hover:text-slate-900 transition-all duration-200 flex items-center justify-center gap-2">
+            <button type="button" onclick="setGlobalDivision('common')" id="tab-common" class="flex-1 sm:flex-initial px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg font-semibold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2">
               <i class="fa-solid fa-network-wired"></i> 공통
             </button>
-            <button type="button" onclick="setGlobalDivision('nonmemory')" id="tab-nonmemory" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-lg font-semibold text-sm text-slate-600 hover:text-slate-900 transition-all duration-200 flex items-center justify-center gap-2">
+            <button type="button" onclick="setGlobalDivision('nonmemory')" id="tab-nonmemory" class="flex-1 sm:flex-initial px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg font-semibold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2">
               <i class="fa-solid fa-microchip"></i> 르팡
             </button>
           </div>
         </div>
 
-        <div id="divisionAlert" class="mt-4 p-3.5 rounded-xl text-xs sm:text-sm bg-blue-50 border border-blue-200 text-blue-900 flex items-start justify-between gap-3">
+        <div id="divisionAlert" class="mt-4 p-3 rounded-xl text-xs sm:text-sm bg-blue-50 border border-blue-200 text-blue-900 flex items-start justify-between gap-3">
           <div class="flex items-start gap-2.5">
-            <i class="fa-solid fa-circle-info text-blue-600 mt-0.5 text-base"></i>
+            <i class="fa-solid fa-circle-info text-blue-600 mt-0.5 text-base shrink-0"></i>
             <div id="divisionAlertText">
               결과2에서 <strong>연도별</strong> 사업부 <strong>반영 가능</strong> 
             </div>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-          <div class="bg-slate-50/90 p-4 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-5">
+          <div class="bg-slate-50/90 p-3.5 sm:p-4 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
             <div class="flex items-center justify-between mb-1.5">
               <label for="companyProfit" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                 <i class="fa-solid fa-chart-line text-blue-600"></i> 올해 회사 성과
@@ -191,7 +227,7 @@
             </div>
             <div class="relative flex items-center">
               <input type="number" id="companyProfit" value="394" min="0" step="1" 
-                     class="w-full bg-white text-slate-900 text-xl font-bold rounded-lg border border-slate-300 px-3 py-2 text-right pr-12 focus:outline-none focus:border-blue-500">
+                     class="w-full bg-white text-slate-900 text-lg sm:text-xl font-bold rounded-lg border border-slate-300 px-3 py-2 text-right pr-12 focus:outline-none focus:border-blue-500">
               <span class="absolute right-3 text-slate-500 font-semibold text-sm pointer-events-none">조 원</span>
             </div>
             <p class="text-[11px] text-slate-500 mt-2 flex justify-between">
@@ -200,7 +236,7 @@
             </p>
           </div>
 
-          <div class="bg-slate-50/90 p-4 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+          <div class="bg-slate-50/90 p-3.5 sm:p-4 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
             <div class="flex items-center justify-between mb-1.5">
               <label for="baseSalary" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                 <i class="fa-solid fa-won-sign text-blue-600"></i> 내 계약 연봉
@@ -209,7 +245,7 @@
             </div>
             <div class="relative flex items-center">
               <input type="number" id="baseSalary" value="8000" min="1000" step="10" 
-                     class="w-full bg-white text-slate-900 text-xl font-bold rounded-lg border border-slate-300 px-3 py-2 text-right pr-14 focus:outline-none focus:border-blue-500">
+                     class="w-full bg-white text-slate-900 text-lg sm:text-xl font-bold rounded-lg border border-slate-300 px-3 py-2 text-right pr-14 focus:outline-none focus:border-blue-500">
               <span class="absolute right-3 text-slate-500 font-semibold text-sm pointer-events-none">만 원</span>
             </div>
             <p class="text-[11px] text-slate-500 mt-2">
@@ -217,7 +253,7 @@
             </p>
           </div>
 
-          <div class="bg-slate-50/90 p-4 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+          <div class="bg-slate-50/90 p-3.5 sm:p-4 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
             <div class="flex items-center justify-between mb-1.5">
               <label for="prevYearIncome" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                 <i class="fa-solid fa-file-invoice-dollar text-blue-600"></i> 전년도 원천징수 소득
@@ -226,7 +262,7 @@
             </div>
             <div class="relative flex items-center">
               <input type="number" id="prevYearIncome" value="" min="1000" step="100" 
-                     class="w-full bg-white text-slate-900 text-xl font-bold rounded-lg border border-slate-300 px-3 py-2 text-right pr-14 focus:outline-none focus:border-blue-500">
+                     class="w-full bg-white text-slate-900 text-lg sm:text-xl font-bold rounded-lg border border-slate-300 px-3 py-2 text-right pr-14 focus:outline-none focus:border-blue-500">
               <span class="absolute right-3 text-slate-500 font-semibold text-sm pointer-events-none">만 원</span>
             </div>
             <p class="text-[11px] text-slate-500 mt-2">
@@ -234,7 +270,7 @@
             </p>
           </div>
 
-          <div class="bg-gradient-to-br from-blue-50/80 to-indigo-50/80 p-4 rounded-xl border-2 border-blue-300/80 focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-200 transition-all shadow-sm">
+          <div class="bg-gradient-to-br from-blue-50/80 to-indigo-50/80 p-3.5 sm:p-4 rounded-xl border-2 border-blue-300/80 focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-200 transition-all shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <label for="samsungStockPrice" class="text-xs font-extrabold text-blue-950 flex items-center gap-1.5">
                 <i class="fa-solid fa-arrow-trend-up text-blue-600"></i> 삼성전자 기준주가
@@ -246,7 +282,7 @@
             </div>
             <div class="relative flex items-center">
               <input type="number" id="samsungStockPrice" value="270000" step="1000" 
-                     class="w-full bg-white text-blue-950 text-2xl font-black rounded-lg border border-blue-400 px-3 py-2 text-right pr-10 focus:outline-none focus:border-blue-600 tracking-tight shadow-inner">
+                     class="w-full bg-white text-blue-950 text-xl sm:text-2xl font-black rounded-lg border border-blue-400 px-3 py-2 text-right pr-10 focus:outline-none focus:border-blue-600 tracking-tight shadow-inner">
               <span class="absolute right-3 text-blue-900 font-bold text-sm pointer-events-none">원</span>
             </div>
             <div class="text-[11px] text-blue-800 mt-2" id="stockStatusContainer">
@@ -261,12 +297,12 @@
       </div>
 
       <!-- RESULT 1: 올해 총 보상 -->
-      <section class="bg-white rounded-2xl p-6 border border-slate-200 card-shadow transition-all">
+      <section class="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200 card-shadow transition-all">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
           <div>
             <div class="flex items-center gap-2">
               <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">결과 1</span>
-              <h2 class="text-lg font-bold text-slate-900">올해 총 보상 산정 (26년 실적분)</h2>
+              <h2 class="text-base sm:text-lg font-bold text-slate-900">올해 총 보상 산정 (26년 실적분)</h2>
             </div>
             <p class="text-xs text-slate-500 mt-0.5">OPI, TAI, DS특별성과급, 환급금</p>
           </div>
@@ -283,8 +319,8 @@
           </div>
         </div>
 
-        <div id="compSimplifiedView" class="mt-6">
-          <div class="p-6 rounded-2xl bg-gradient-to-br from-blue-900 via-indigo-950 to-slate-900 text-white relative overflow-hidden shadow-lg">
+        <div id="compSimplifiedView" class="mt-5 sm:mt-6">
+          <div class="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-blue-900 via-indigo-950 to-slate-900 text-white relative overflow-hidden shadow-lg">
             <div class="absolute right-0 top-0 translate-x-10 -translate-y-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
             <div class="flex items-center justify-between mb-4">
               <span class="text-xs uppercase tracking-wider text-blue-300 font-semibold flex items-center gap-1.5">
@@ -293,7 +329,7 @@
               <span class="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full font-medium">전액 자사주 지급</span>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
               <div class="bg-white/5 border border-white/10 rounded-xl p-4">
                 <span class="text-xs text-slate-300 block mb-1">특별성과급 공제 전</span>
                 <p class="text-2xl sm:text-3xl font-extrabold text-white" id="simpleSpecialPre">-</p>
@@ -320,7 +356,7 @@
                 <span>① 계약 연봉</span>
                 <span class="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded text-[10px]">기본급</span>
               </div>
-              <div class="text-xl font-bold text-slate-900" id="cardBaseSalary">-</div>
+              <div class="text-lg sm:text-xl font-bold text-slate-900" id="cardBaseSalary">-</div>
               <div class="text-xs text-slate-500 mt-1 flex justify-between">
                 <span>세후 예상:</span>
                 <span class="font-bold text-slate-700" id="cardBaseSalaryPost">-</span>
@@ -332,7 +368,7 @@
                 <span>② TAI (목표달성장려금)</span>
                 <span class="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-[10px]">연 10% 고정</span>
               </div>
-              <div class="text-xl font-bold text-blue-700" id="cardTaiPre">-</div>
+              <div class="text-lg sm:text-xl font-bold text-blue-700" id="cardTaiPre">-</div>
               <div class="text-xs text-slate-500 mt-1 flex justify-between">
                 <span>세후 예상:</span>
                 <span class="font-bold text-slate-700" id="cardTaiPost">-</span>
@@ -344,7 +380,7 @@
                 <span>③ OPI (성과인센티브)</span>
                 <span class="bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded text-[10px]">상한 50%</span>
               </div>
-              <div class="text-xl font-bold text-purple-700" id="cardOpiPre">-</div>
+              <div class="text-lg sm:text-xl font-bold text-purple-700" id="cardOpiPre">-</div>
               <div class="text-xs text-slate-500 mt-1 flex justify-between">
                 <span>세후 예상:</span>
                 <span class="font-bold text-slate-700" id="cardOpiPost">-</span>
@@ -356,7 +392,7 @@
                 <span>현금 보상 합계 (①+②+③)</span>
                 <span class="bg-blue-600 text-white px-1.5 py-0.5 rounded text-[10px]">계좌 입금</span>
               </div>
-              <div class="text-xl font-bold text-blue-900" id="cardCashTotalPre">-</div>
+              <div class="text-lg sm:text-xl font-bold text-blue-900" id="cardCashTotalPre">-</div>
               <div class="text-xs text-blue-800 mt-1 flex justify-between">
                 <span>세후 총 현금:</span>
                 <span class="font-bold text-blue-900" id="cardCashTotalPost">-</span>
@@ -364,40 +400,40 @@
             </div>
           </div>
 
-          <div class="bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 text-white rounded-2xl p-6 border border-blue-800/40 relative shadow-xl">
+          <div class="bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 text-white rounded-2xl p-5 sm:p-6 border border-blue-800/40 relative shadow-xl">
             <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-white/10 gap-3">
               <div>
                 <div class="flex items-center gap-2">
                   <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-400 text-slate-900">NEW 2026</span>
-                  <h3 class="text-lg font-bold">DS 특별 성과급 세부 명세</h3>
+                  <h3 class="text-base sm:text-lg font-bold">DS 특별 성과급 세부 명세</h3>
                 </div>
                 <p class="text-xs text-slate-300 mt-1">26년 영업이익에 따라 27년 3월 세후 전액 자사주로 입고되는 주식 성과급</p>
               </div>
-              <div class="text-right">
+              <div class="text-left md:text-right">
                 <span class="text-xs text-slate-400 block">원천징수 기준세율</span>
-                <span class="text-sm font-bold text-amber-300">54.476% (소득·지방세 49.5% + 건보·고용 4.976%)</span>
+                <span class="text-xs sm:text-sm font-bold text-amber-300">54.476% (소득·지방세 49.5% + 건보·고용 4.976%)</span>
               </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-5">
               <div class="bg-white/5 border border-white/10 rounded-xl p-4">
                 <span class="text-xs text-slate-300 block mb-1">원천징수 전 (세전 가치)</span>
-                <div class="text-xl sm:text-2xl font-bold text-white" id="specPreDetail">-</div>
+                <div class="text-lg sm:text-2xl font-bold text-white" id="specPreDetail">-</div>
                 <span class="text-[11px] text-slate-400 mt-1 block">영업이익 10.5% 부문 환산액</span>
               </div>
               <div class="bg-white/5 border border-white/10 rounded-xl p-4">
                 <span class="text-xs text-rose-300 block mb-1">원천징수 세액 (54.476%)</span>
-                <div class="text-xl sm:text-2xl font-bold text-rose-400" id="specTaxDetail">-</div>
+                <div class="text-lg sm:text-2xl font-bold text-rose-400" id="specTaxDetail">-</div>
                 <span class="text-[11px] text-slate-400 mt-1 block">최고구간 원천징수 합계</span>
               </div>
               <div class="bg-emerald-500/10 border border-emerald-400/30 rounded-xl p-4">
                 <span class="text-xs text-emerald-300 block mb-1">세후 자사주 환산금액</span>
-                <div class="text-xl sm:text-2xl font-bold text-emerald-400" id="specPostDetail">-</div>
+                <div class="text-lg sm:text-2xl font-bold text-emerald-400" id="specPostDetail">-</div>
                 <span class="text-[11px] text-emerald-300/90 mt-1 block font-semibold" id="specSharesDetail">총 0 주 수령</span>
               </div>
               <div class="bg-amber-400/10 border border-amber-400/30 rounded-xl p-4">
                 <span class="text-xs text-amber-300 block mb-1">1/3 즉시 매도 가능액</span>
-                <div class="text-xl sm:text-2xl font-bold text-amber-300" id="specImmDetail">-</div>
+                <div class="text-lg sm:text-2xl font-bold text-amber-300" id="specImmDetail">-</div>
                 <span class="text-[11px] text-amber-200 mt-1 block font-semibold" id="specImmSharesDetail">0 주 즉시 매도 가능</span>
               </div>
             </div>
@@ -413,13 +449,13 @@
                   <span class="text-xs bg-amber-200/70 text-amber-900 px-2 py-0.5 rounded font-bold">13월의 월급</span>
                 </div>
                 <p class="text-xs text-amber-800 leading-relaxed mb-4">
-                  특별성과급 지급 시 소득세 최고세율(49.5%)로 일괄 원천징수되므로, 종합소득 누진공제 반영 시 실제 결정세액과의 차액만큼 익년도 종합과세/연말정산 시 대규모 환급이 발생합니다.
+                  특별성과급 지급 시 소득세 최고세율(49.5%)로 일괄 원천징수되므로, 종합소득 누진공제 반영 시 실제 결정세액과의 차액만큼 익년도(28년 2월) 정산 시 환급이 발생합니다.
                 </p>
               </div>
               <div class="bg-white rounded-xl p-4 border border-amber-200 flex items-center justify-between">
                 <div>
                   <span class="text-xs text-slate-500 block">예상 환급 세액 (소득세+지방세)</span>
-                  <span class="text-2xl font-extrabold text-amber-600" id="refundEstimate">-</span>
+                  <span class="text-xl sm:text-2xl font-extrabold text-amber-600" id="refundEstimate">-</span>
                 </div>
                 <div class="text-right text-xs text-slate-500">
                   <span class="block">원천징수 총세액: <strong id="totalWithheldTax" class="text-slate-800">-</strong></span>
@@ -441,11 +477,11 @@
               <div class="grid grid-cols-2 gap-3 bg-slate-800 rounded-xl p-4 border border-slate-700">
                 <div>
                   <span class="text-xs text-slate-400 block mb-0.5">총 보상 (세전)</span>
-                  <span class="text-xl sm:text-2xl font-extrabold text-white" id="grandTotalPre">-</span>
+                  <span class="text-lg sm:text-2xl font-extrabold text-white" id="grandTotalPre">-</span>
                 </div>
                 <div>
-                  <span class="text-xs text-emerald-400 block mb-0.5">총 보상 (세후 실지급)</span>
-                  <span class="text-xl sm:text-2xl font-extrabold text-emerald-400" id="grandTotalPost">-</span>
+                  <span class="text-xs text-emerald-400 block mb-0.5">총 보상 (세후 순지급)</span>
+                  <span class="text-lg sm:text-2xl font-extrabold text-emerald-400" id="grandTotalPost">-</span>
                 </div>
               </div>
             </div>
@@ -454,57 +490,57 @@
       </section>
 
       <!-- RESULT 2: 5년간 특별성과금 및 종합보상 -->
-      <section class="bg-white rounded-2xl p-6 border border-slate-200 card-shadow">
+      <section class="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200 card-shadow">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
           <div>
             <div class="flex items-center gap-2">
               <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800">결과 2</span>
-              <h2 class="text-lg font-bold text-slate-900">5년간 특별성과금 및 종합보상</h2>
+              <h2 class="text-base sm:text-lg font-bold text-slate-900">5년간 특별성과금 및 종합보상</h2>
             </div>
-            <p class="text-xs text-slate-500 mt-0.5">자사주 1/3 분할 매도 및 연도별 OPI · TAI · 특별성과금 종합</p>
+            <p class="text-xs text-slate-500 mt-0.5">환급금 분리, 귀속연도 이연 반영 및 당해 가용재원 종합</p>
           </div>
 
           <div class="flex items-center gap-2">
             <button type="button" id="btn-5yr-detail" onclick="toggle5YrDetail()" 
-                    class="px-4 py-2 text-xs font-bold rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-xs">
+                    class="px-3.5 py-1.5 sm:px-4 sm:py-2 text-xs font-bold rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-xs">
               <i class="fa-solid fa-sliders text-indigo-600"></i>
               <span id="btn5YrText">간소화 보기</span>
             </button>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-5">
           <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
             <span class="text-xs text-slate-500 font-semibold block mb-1">5년간 총 특별성과금 (공제 전)</span>
-            <div class="text-2xl font-extrabold text-slate-900" id="fiveYrTotalPre">-</div>
+            <div class="text-xl sm:text-2xl font-extrabold text-slate-900" id="fiveYrTotalPre">-</div>
             <span class="text-[11px] text-slate-400 mt-1 block">5개년 합산 세전 총액</span>
           </div>
           <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-4">
             <span class="text-xs text-blue-700 font-semibold block mb-1">5년간 총 특별성과금 (공제 후)</span>
-            <div class="text-2xl font-extrabold text-blue-800" id="fiveYrTotalPost">-</div>
+            <div class="text-xl sm:text-2xl font-extrabold text-blue-800" id="fiveYrTotalPost">-</div>
             <span class="text-[11px] text-blue-600 mt-1 block">원천징수 후 순수 자사주 가치</span>
           </div>
           <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
             <span class="text-xs text-emerald-700 font-semibold block mb-1">5년간 총 매도 가능 해제액</span>
-            <div class="text-2xl font-extrabold text-emerald-700" id="fiveYrUnlockedSum">-</div>
+            <div class="text-xl sm:text-2xl font-extrabold text-emerald-700" id="fiveYrUnlockedSum">-</div>
             <span class="text-[11px] text-emerald-600 mt-1 block">2027~2031년 기간 내 해제액</span>
           </div>
           <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
             <span class="text-xs text-amber-800 font-semibold block mb-1">31년 이후 잔여 락업 자사주</span>
-            <div class="text-2xl font-extrabold text-amber-700" id="fiveYrRemainingLocked">-</div>
+            <div class="text-xl sm:text-2xl font-extrabold text-amber-700" id="fiveYrRemainingLocked">-</div>
             <span class="text-[11px] text-amber-600 mt-1 block">2032~2033년에 해제될 잔액</span>
           </div>
         </div>
 
         <!-- Detail Input & Comprehensive 5-Year Table Section -->
         <div id="fiveYrInputSection" class="mt-6 space-y-6">
-          <div class="p-5 rounded-2xl bg-indigo-50/50 border border-indigo-200 transition-all">
+          <div class="p-4 sm:p-5 rounded-2xl bg-indigo-50/50 border border-indigo-200 transition-all">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-2">
               <div>
                 <h4 class="text-sm font-bold text-indigo-950 flex items-center gap-1.5">
                   <i class="fa-solid fa-table-cells text-indigo-600"></i> 5개년 연도별 OPI · TAI · 특별성과금 종합 보상표
                 </h4>
-                <p class="text-xs text-slate-500 mt-0.5">※ OPI 50% 상한, TAI 연 10%, 특별성과급 및 당해 소득세율 반영 종합 보상 명세서</p>
+                <p class="text-xs text-slate-500 mt-0.5">※ 세후 보상에는 환급금이 포함되지 않으며, 환급금은 정산연도(익년)에 반영됩니다.</p>
               </div>
               <div class="flex items-center gap-2">
                 <span class="text-xs bg-amber-100 border border-amber-300 text-amber-900 px-3 py-1 rounded-lg font-bold shadow-xs" id="fiveYrRefundSumBadge">
@@ -514,18 +550,20 @@
               </div>
             </div>
 
-            <div class="overflow-x-auto">
+            <!-- 모바일 최적화 반응형 테이블 Wrapper -->
+            <div class="table-responsive overflow-x-auto">
               <table class="min-w-full text-xs text-right border-collapse bg-white rounded-xl shadow-xs overflow-hidden">
                 <thead>
                   <tr class="bg-indigo-900 text-white font-semibold">
-                    <th class="py-2.5 px-3 text-left">실적연도 (지급연도)</th>
-                    <th class="py-2.5 px-3">계약연봉</th>
-                    <th class="py-2.5 px-3">TAI (10%)</th>
-                    <th class="py-2.5 px-3">OPI (50%)</th>
-                    <th class="py-2.5 px-3 text-amber-300">특별성과금(세전)</th>
-                    <th class="py-2.5 px-3 text-indigo-200 font-bold">총 보상 (세전)</th>
-                    <th class="py-2.5 px-3 text-emerald-300 font-extrabold bg-indigo-950">총 보상 (세후)</th>
-                    <th class="py-2.5 px-3 text-amber-300 font-extrabold bg-indigo-950">연말정산 환급 예상액</th>
+                    <th class="py-2.5 px-2.5 sm:px-3 text-left">실적연도 (지급연도)</th>
+                    <th class="py-2.5 px-2.5 sm:px-3">계약연봉</th>
+                    <th class="py-2.5 px-2.5 sm:px-3">TAI (10%)</th>
+                    <th class="py-2.5 px-2.5 sm:px-3">OPI (50%)</th>
+                    <th class="py-2.5 px-2.5 sm:px-3 text-amber-300">특별성과금(세전)</th>
+                    <th class="py-2.5 px-2.5 sm:px-3 text-indigo-200 font-bold">총 보상 (세전)</th>
+                    <th class="py-2.5 px-2.5 sm:px-3 text-emerald-300 font-bold bg-indigo-950">세후 보상 (환급금 제외)</th>
+                    <th class="py-2.5 px-2.5 sm:px-3 text-amber-300 font-bold bg-indigo-950">연말정산 환급금 (입금기준)</th>
+                    <th class="py-2.5 px-2.5 sm:px-3 text-rose-300 font-extrabold bg-slate-900">당해 가용재원 최종합계</th>
                   </tr>
                 </thead>
                 <tbody id="fiveYearCompTableBody" class="divide-y divide-slate-200 text-slate-700"></tbody>
@@ -533,7 +571,7 @@
             </div>
           </div>
 
-          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 transition-all">
+          <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 transition-all">
             <div class="flex items-center justify-between mb-3">
               <div>
                 <h4 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
@@ -544,7 +582,7 @@
               <button onclick="reset5YrDefaults()" class="text-xs text-indigo-600 hover:underline font-bold">기본값 리셋</button>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="table-responsive overflow-x-auto">
               <table class="min-w-full text-xs text-center border-collapse">
                 <thead>
                   <tr class="bg-slate-200/80 text-slate-700 font-semibold border-b border-slate-300">
@@ -648,7 +686,7 @@
               <h4 class="text-xs sm:text-sm font-bold text-slate-800 mb-2 flex items-center gap-1.5">
                 <i class="fa-solid fa-table-list text-indigo-600"></i> 연도별 신규 수령 및 매도 해제 명세
               </h4>
-              <div class="overflow-x-auto text-xs">
+              <div class="table-responsive overflow-x-auto text-xs">
                 <table class="w-full text-right border-collapse">
                   <thead>
                     <tr class="border-b border-slate-300 text-slate-500 text-[11px]">
@@ -671,18 +709,18 @@
       </section>
 
       <!-- RESULT 3: 향후 5년간 예상 월급 -->
-      <section class="bg-white rounded-2xl p-6 border border-slate-200 card-shadow">
+      <section class="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200 card-shadow">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
           <div>
             <div class="flex items-center gap-2">
               <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">결과 3</span>
-              <h2 class="text-lg font-bold text-slate-900">향후 5년간 예상 월급 (매월 21일 실수령액 명세)</h2>
+              <h2 class="text-base sm:text-lg font-bold text-slate-900">향후 5년간 예상 월급 (매월 21일 실수령액 명세)</h2>
             </div>
             <p class="text-xs text-slate-500 mt-0.5">전년도 원천소득 기반 건보료 및 간이세액표 반영</p>
           </div>
         </div>
 
-        <div class="mt-6 overflow-x-auto">
+        <div class="mt-6 table-responsive overflow-x-auto">
           <table class="min-w-full text-xs text-right border-collapse">
             <thead>
               <tr class="bg-slate-100 text-slate-700 font-bold border-y border-slate-200">
@@ -707,10 +745,10 @@
 
     <!-- ==================== TAB 2: 휴식 (2048) ==================== -->
     <div id="section-game2048" class="hidden flex flex-col items-center justify-center w-full py-2">
-      <div class="bg-white rounded-3xl p-6 border border-slate-200 card-shadow max-w-md w-full text-center">
+      <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 card-shadow max-w-md w-full text-center">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h3 class="text-2xl font-black text-slate-900 flex items-center gap-2">
+            <h3 class="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
               <span class="text-amber-500">2048</span> 숫자 퍼즐
             </h3>
             <p class="text-xs text-slate-500 text-left mt-0.5">머리를 식히는 클래식 숫자 합치기</p>
@@ -756,7 +794,7 @@
     <!-- ==================== TAB 3: 휴식 (jump) ==================== -->
     <div id="section-jump" class="hidden flex flex-col items-center justify-center w-full py-1">
       <!-- Jump Game Cabinet Container -->
-      <div id="game-container" class="relative w-full h-[76vh] min-h-[580px] max-h-[820px] max-w-[500px] overflow-hidden shadow-2xl bg-black rounded-3xl border border-slate-800 select-none font-arcade">
+      <div id="game-container" class="relative w-full h-[76vh] min-h-[560px] max-h-[820px] max-w-[500px] overflow-hidden shadow-2xl bg-black rounded-3xl border border-slate-800 select-none font-arcade">
         <!-- Canvas -->
         <canvas id="gameCanvas" class="w-full h-full block"></canvas>
 
@@ -764,7 +802,7 @@
         <div id="dangerOverlay" class="absolute inset-0 pointer-events-none transition-opacity duration-300 opacity-0"></div>
 
         <!-- Top UI Header -->
-        <header class="absolute top-0 left-0 right-0 p-4 pt-4 flex flex-col items-center pointer-events-none z-10">
+        <header class="absolute top-0 left-0 right-0 p-3 sm:p-4 flex flex-col items-center pointer-events-none z-10">
           <div class="w-full flex items-center justify-between mb-2.5 px-2">
             <!-- Current Score Display -->
             <div class="flex items-center gap-2 glass-panel px-3.5 py-1.5 rounded-2xl shadow-lg border-emerald-500/30">
@@ -793,19 +831,19 @@
             </div>
           </div>
 
-          <!-- Timer Gauge Capsule Frame (2배 두꺼워진 게이지 바 & 남은 시간 표시) -->
-          <div class="w-[92%] h-14 glass-panel rounded-2xl p-1.5 border-2 border-white/25 shadow-2xl relative overflow-hidden backdrop-blur-md">
+          <!-- Timer Gauge Capsule Frame -->
+          <div class="w-[92%] h-12 sm:h-14 glass-panel rounded-2xl p-1.5 border-2 border-white/25 shadow-2xl relative overflow-hidden backdrop-blur-md">
             <div id="gaugeProgress" class="h-full rounded-xl transition-all duration-75 relative overflow-hidden flex items-center justify-end px-3" style="width: 100%; background: linear-gradient(90deg, #10b981, #06b6d4);">
               <div class="absolute inset-0 opacity-40 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
-              <div class="w-4 h-4 rounded-full bg-white shadow-[0_0_12px_#ffffff] mr-1 opacity-90 animate-pulse"></div>
+              <div class="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-white shadow-[0_0_12px_#ffffff] mr-1 opacity-90 animate-pulse"></div>
             </div>
             <div class="absolute inset-0 flex items-center justify-between px-5 pointer-events-none">
               <span class="text-xs font-black text-white/90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] tracking-wide">TIME</span>
-              <span id="gaugeTimeText" class="text-sm font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">4.0s</span>
+              <span id="gaugeTimeText" class="text-xs sm:text-sm font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">4.0s</span>
             </div>
           </div>
 
-          <!-- Ready Trigger Banner (첫 조작 대기 팁) -->
+          <!-- Ready Trigger Banner -->
           <div id="readyTipBanner" class="mt-2 text-xs font-bold px-3 py-1 rounded-full bg-amber-500/30 text-amber-200 border border-amber-400/40 animate-bounce">
             ⚡ 첫 조작을 시작하면 타이머가 줄어듭니다!
           </div>
@@ -823,91 +861,89 @@
           </div>
         </div>
 
-        <!-- On-Screen Mobile Touch Controls (터치 버튼 크기 확대 및 상향 배치) -->
-        <div class="absolute bottom-[75px] left-0 right-0 px-7 flex justify-between items-end pointer-events-none z-20">
-          <button id="turnBtn" aria-label="방향 전환 후 오르기" class="touch-btn pointer-events-auto w-24 h-24 rounded-full flex flex-col items-center justify-center shadow-[0_8px_25px_rgba(244,63,94,0.5)] border-4 border-rose-300/50 bg-gradient-to-br from-rose-500 to-pink-600 active:scale-90 select-none">
-            <svg class="w-11 h-11 text-white fill-current filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" viewBox="0 0 24 24">
+        <!-- On-Screen Mobile Touch Controls -->
+        <div class="absolute bottom-[65px] sm:bottom-[75px] left-0 right-0 px-6 sm:px-7 flex justify-between items-end pointer-events-none z-20">
+          <button id="turnBtn" aria-label="방향 전환 후 오르기" class="touch-btn pointer-events-auto w-20 h-20 sm:w-24 sm:h-24 rounded-full flex flex-col items-center justify-center shadow-[0_8px_25px_rgba(244,63,94,0.5)] border-4 border-rose-300/50 bg-gradient-to-br from-rose-500 to-pink-600 active:scale-90 select-none">
+            <svg class="w-9 h-9 sm:w-11 sm:h-11 text-white fill-current filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" viewBox="0 0 24 24">
               <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
             </svg>
-            <span class="text-[11px] font-black text-rose-100 tracking-tight mt-0.5 drop-shadow">방향전환</span>
+            <span class="text-[10px] sm:text-[11px] font-black text-rose-100 tracking-tight mt-0.5 drop-shadow">방향전환</span>
           </button>
 
-          <button id="climbBtn" aria-label="그대로 오르기" class="touch-btn pointer-events-auto w-24 h-24 rounded-full flex flex-col items-center justify-center shadow-[0_8px_25px_rgba(16,185,129,0.5)] border-4 border-emerald-300/50 bg-gradient-to-br from-emerald-500 to-teal-600 active:scale-90 select-none">
-            <svg class="w-12 h-12 text-white fill-current filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" viewBox="0 0 24 24">
+          <button id="climbBtn" aria-label="그대로 오르기" class="touch-btn pointer-events-auto w-20 h-20 sm:w-24 sm:h-24 rounded-full flex flex-col items-center justify-center shadow-[0_8px_25px_rgba(16,185,129,0.5)] border-4 border-emerald-300/50 bg-gradient-to-br from-emerald-500 to-teal-600 active:scale-90 select-none">
+            <svg class="w-10 h-10 sm:w-12 sm:h-12 text-white fill-current filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" viewBox="0 0 24 24">
               <path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/>
             </svg>
-            <span class="text-[11px] font-black text-emerald-100 tracking-tight mt-0.5 drop-shadow">오르기</span>
+            <span class="text-[10px] sm:text-[11px] font-black text-emerald-100 tracking-tight mt-0.5 drop-shadow">오르기</span>
           </button>
         </div>
 
         <!-- Start Game Splash Overlay -->
         <div id="startScreen" class="absolute inset-0 flex flex-col items-center justify-center glass-panel bg-slate-950/85 p-6 z-30 transition-opacity duration-300">
-          <div class="relative mb-5 text-center">
-            <h2 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-emerald-400 to-cyan-400 drop-shadow-[0_4px_12px_rgba(16,185,129,0.5)]">
+          <div class="relative mb-4 sm:mb-5 text-center">
+            <h2 class="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-emerald-400 to-cyan-400 drop-shadow-[0_4px_12px_rgba(16,185,129,0.5)]">
               올라라 계단
             </h2>
             <p class="text-slate-300 text-xs mt-1.5 font-medium tracking-wide">하늘과 우주를 향해 끝없이 계단을 정복하라!</p>
           </div>
 
-          <!-- 모드 선택 탭 (영크크 모드 vs 늙크크 모드) -->
+          <!-- 모드 선택 탭 -->
           <div class="w-full max-w-sm mb-4 glass-panel p-1.5 rounded-2xl border-white/20 flex gap-2">
-            <button id="modeOldBtn" class="flex-1 py-2.5 rounded-xl font-black text-xs transition-all flex flex-col items-center justify-center mode-tab-active border border-white/30">
-              <span class="text-sm">👴 늙크크 모드</span>
-              <span class="text-[10px] opacity-90 mt-0.5">긴 시간 & 직진 보너스</span>
+            <button id="modeOldBtn" class="flex-1 py-2 sm:py-2.5 rounded-xl font-black text-xs transition-all flex flex-col items-center justify-center mode-tab-active border border-white/30">
+              <span class="text-xs sm:text-sm">👴 늙크크 모드</span>
+              <span class="text-[9px] sm:text-[10px] opacity-90 mt-0.5">긴 시간 & 직진 보너스</span>
             </button>
-            <button id="modeYoungBtn" class="flex-1 py-2.5 rounded-xl font-black text-xs transition-all flex flex-col items-center justify-center bg-slate-800/80 text-slate-300 hover:text-white border border-transparent">
-              <span class="text-sm">👶 영크크 모드</span>
-              <span class="text-[10px] opacity-75 mt-0.5">정통 스피드 챌린지</span>
+            <button id="modeYoungBtn" class="flex-1 py-2 sm:py-2.5 rounded-xl font-black text-xs transition-all flex flex-col items-center justify-center bg-slate-800/80 text-slate-300 hover:text-white border border-transparent">
+              <span class="text-xs sm:text-sm">👶 영크크 모드</span>
+              <span class="text-[9px] sm:text-[10px] opacity-75 mt-0.5">정통 스피드 챌린지</span>
             </button>
           </div>
 
           <!-- Mode Detail Description Card -->
-          <div id="modeDescriptionCard" class="glass-panel p-4 rounded-2xl max-w-sm w-full border-white/20 mb-5 space-y-2 text-xs text-slate-200">
+          <div id="modeDescriptionCard" class="glass-panel p-3.5 sm:p-4 rounded-2xl max-w-sm w-full border-white/20 mb-4 sm:mb-5 space-y-1.5 sm:space-y-2 text-xs text-slate-200">
           </div>
 
-          <button id="startGameBtn" class="w-full max-w-sm py-3.5 rounded-2xl font-black text-lg text-slate-900 bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-300 shadow-[0_0_25px_rgba(52,211,153,0.6)] active:scale-95 transition-all hover:brightness-110">
+          <button id="startGameBtn" class="w-full max-w-sm py-3 sm:py-3.5 rounded-2xl font-black text-base sm:text-lg text-slate-900 bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-300 shadow-[0_0_25px_rgba(52,211,153,0.6)] active:scale-95 transition-all hover:brightness-110">
             게임 시작
           </button>
-          <span class="text-slate-400 text-[11px] mt-2.5">스페이스바 또는 화면 터치로 즉시 시작</span>
+          <span class="text-slate-400 text-[10px] sm:text-[11px] mt-2">스페이스바 또는 화면 터치로 즉시 시작</span>
         </div>
 
         <!-- Game Over Modal -->
-        <div id="gameOverModal" class="absolute inset-0 flex flex-col items-center justify-center glass-panel bg-slate-950/85 p-6 z-40 hidden transition-opacity duration-300">
-          <div class="relative w-full max-w-xs glass-panel p-5 rounded-3xl border-rose-500/30 shadow-[0_0_40px_rgba(244,63,94,0.3)] text-center">
-            <div class="w-12 h-12 rounded-full bg-rose-500/20 border-2 border-rose-500 mx-auto flex items-center justify-center mb-2 shadow-[0_0_15px_rgba(244,63,94,0.5)]">
-              <span class="text-xl">⚡</span>
+        <div id="gameOverModal" class="absolute inset-0 flex flex-col items-center justify-center glass-panel bg-slate-950/85 p-5 sm:p-6 z-40 hidden transition-opacity duration-300">
+          <div class="relative w-full max-w-xs glass-panel p-4 sm:p-5 rounded-3xl border-rose-500/30 shadow-[0_0_40px_rgba(244,63,94,0.3)] text-center">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-rose-500/20 border-2 border-rose-500 mx-auto flex items-center justify-center mb-2 shadow-[0_0_15px_rgba(244,63,94,0.5)]">
+              <span class="text-lg sm:text-xl">⚡</span>
             </div>
-            <h3 id="gameOverTitle" class="text-2xl font-black text-rose-400 tracking-tight">GAME OVER</h3>
-            <p id="gameOverReason" class="text-slate-400 text-xs mt-0.5 mb-4">발을 헛디뎌 추락했습니다!</p>
+            <h3 id="gameOverTitle" class="text-xl sm:text-2xl font-black text-rose-400 tracking-tight">GAME OVER</h3>
+            <p id="gameOverReason" class="text-slate-400 text-xs mt-0.5 mb-3 sm:mb-4">발을 헛디뎌 추락했습니다!</p>
 
-            <div class="bg-slate-900/80 rounded-2xl p-3 border border-white/10 mb-5 space-y-2">
+            <div class="bg-slate-900/80 rounded-2xl p-3 border border-white/10 mb-4 space-y-2">
               <div class="flex justify-between items-center">
                 <span class="text-xs text-slate-400 font-bold uppercase">최종 오른 계단</span>
-                <span id="finalScoreVal" class="text-2xl font-black text-emerald-400">0</span>
+                <span id="finalScoreVal" class="text-xl sm:text-2xl font-black text-emerald-400">0</span>
               </div>
               <div class="h-[1px] bg-white/10 w-full"></div>
               <div class="flex justify-between items-center">
                 <span class="text-xs text-amber-400 font-bold uppercase flex items-center gap-1">
-                  <span>🏆</span> 모드 최고 기록
+                  <span>🏆</span> 최고 기록
                 </span>
-                <span id="finalBestVal" class="text-xl font-black text-amber-300">0</span>
+                <span id="finalBestVal" class="text-lg sm:text-xl font-black text-amber-300">0</span>
               </div>
               <div id="newRecordBadge" class="hidden py-1 px-2 rounded-full bg-amber-500/20 text-amber-300 text-[11px] font-bold border border-amber-400/40 animate-pulse">
                 ✨ 최고 기록 경신! ✨
               </div>
             </div>
 
-            <!-- [추가] 게임오버창 모드 변경 버튼 -->
-            <button id="toggleModeInGameOverBtn" class="w-full mb-3 py-3 rounded-2xl font-bold text-sm text-white glass-panel border border-white/20 hover:border-amber-400/50 active:scale-95 transition-all flex items-center justify-center gap-2">
+            <button id="toggleModeInGameOverBtn" class="w-full mb-2.5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm text-white glass-panel border border-white/20 hover:border-amber-400/50 active:scale-95 transition-all flex items-center justify-center gap-2">
               <span>🎮 게임 모드:</span>
               <span id="gameOverModeText" class="text-amber-300 font-black">👴 늙크크 모드</span>
             </button>
 
-            <!-- Restart Button -->
-            <button id="restartGameBtn" class="w-full py-3 rounded-2xl font-black text-base text-slate-900 bg-gradient-to-r from-emerald-400 to-teal-300 shadow-[0_0_20px_rgba(52,211,153,0.5)] active:scale-95 transition-all hover:brightness-110">
+            <button id="restartGameBtn" class="w-full py-2.5 sm:py-3 rounded-2xl font-black text-sm sm:text-base text-slate-900 bg-gradient-to-r from-emerald-400 to-teal-300 shadow-[0_0_20px_rgba(52,211,153,0.5)] active:scale-95 transition-all hover:brightness-110">
               다시 도전하기
             </button>
-            <span class="text-slate-400 text-[10px] block mt-2.5">스페이스바 또는 엔터로 재시작</span>
+            <span class="text-slate-400 text-[10px] block mt-2">스페이스바 또는 엔터로 재시작</span>
           </div>
         </div>
       </div>
@@ -922,10 +958,10 @@
   </main>
 
   <!-- Footer -->
-  <footer class="bg-slate-900 text-slate-400 text-xs py-8 border-t border-slate-800 mt-12">
+  <footer class="bg-slate-900 text-slate-400 text-xs py-7 border-t border-slate-800 mt-10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="space-y-1 text-center md:text-left">
-        <p class="font-bold text-slate-200">삼성전자 DS 성과급 시뮬레이터 (26년 10월 9일 업데이트)</p>
+        <p class="font-bold text-slate-200">삼성전자 DS 성과급 시뮬레이터 (종합 보상 정밀 개정판)</p>
         <p class="text-slate-500">※ 본 계산기는 사내 공개 자료 및 언론 보도에 기반한 시뮬레이션입니다.</p>
       </div>
       <div class="text-slate-500 text-center md:text-right">
@@ -936,6 +972,27 @@
 
   <!-- ==================== SCRIPT SECTIONS ==================== -->
   <script>
+    // ----------------------------------------------------
+    // 0. HEADER FOLD / EXPAND CONTROLLER
+    // ----------------------------------------------------
+    let isHeaderFolded = false;
+    function toggleHeaderFold() {
+      isHeaderFolded = !isHeaderFolded;
+      const content = document.getElementById('collapsibleHeaderContent');
+      const icon = document.getElementById('foldIcon');
+      const text = document.getElementById('foldText');
+
+      if (isHeaderFolded) {
+        content.classList.add('header-collapsed');
+        icon.className = 'fa-solid fa-chevron-down text-[10px]';
+        text.innerText = '상단 열기';
+      } else {
+        content.classList.remove('header-collapsed');
+        icon.className = 'fa-solid fa-chevron-up text-[10px]';
+        text.innerText = '상단 접기';
+      }
+    }
+
     // ----------------------------------------------------
     // 1. MAIN TAB SWITCHER
     // ----------------------------------------------------
@@ -951,13 +1008,18 @@
         const btn = document.getElementById(`mainTab-${t}`);
         const sec = document.getElementById(`section-${t}`);
         if (t === tab) {
-          btn.className = 'flex-1 md:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 tab-active shadow-md';
+          btn.className = 'flex-1 md:flex-initial px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 tab-active shadow-md';
           sec.classList.remove('hidden');
         } else {
-          btn.className = 'flex-1 md:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-300 hover:text-white hover:bg-slate-700/60';
+          btn.className = 'flex-1 md:flex-initial px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-300 hover:text-white hover:bg-slate-700/60';
           sec.classList.add('hidden');
         }
       });
+
+      // 게임 탭 이동 시 화면 쾌적성을 위해 상단 헤더를 자동으로 컴팩트하게 접어줌
+      if (tab === 'game2048' || tab === 'jump') {
+        if (!isHeaderFolded) toggleHeaderFold();
+      }
 
       if (tab === 'calc') {
         if (chartInstance) chartInstance.resize();
@@ -1097,8 +1159,8 @@
         ['memory', 'common', 'nonmemory'].forEach(d => {
           const tab = document.getElementById(`tab-${d}`);
           tab.className = (d === globalDivision)
-            ? 'flex-1 sm:flex-initial px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 tab-active flex items-center justify-center gap-2'
-            : 'flex-1 sm:flex-initial px-5 py-2.5 rounded-lg font-semibold text-sm text-slate-600 hover:text-slate-900 transition-all duration-200 flex items-center justify-center gap-2';
+            ? 'flex-1 sm:flex-initial px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg font-semibold text-xs sm:text-sm transition-all duration-200 tab-active flex items-center justify-center gap-1.5 sm:gap-2'
+            : 'flex-1 sm:flex-initial px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg font-semibold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2';
         });
 
         updateDivisionAlertText(globalDivision);
@@ -1125,8 +1187,8 @@
       ['memory', 'common', 'nonmemory'].forEach(d => {
         const tab = document.getElementById(`tab-${d}`);
         tab.className = (d === div)
-          ? 'flex-1 sm:flex-initial px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 tab-active flex items-center justify-center gap-2'
-          : 'flex-1 sm:flex-initial px-5 py-2.5 rounded-lg font-semibold text-sm text-slate-600 hover:text-slate-900 transition-all duration-200 flex items-center justify-center gap-2';
+          ? 'flex-1 sm:flex-initial px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg font-semibold text-xs sm:text-sm transition-all duration-200 tab-active flex items-center justify-center gap-1.5 sm:gap-2'
+          : 'flex-1 sm:flex-initial px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg font-semibold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2';
       });
 
       updateDivisionAlertText(div);
@@ -1422,6 +1484,7 @@
       const taxRefundWon = Math.max(0, totalWithheldWon - finalAnnualTaxWon);
 
       const grandTotalPre = cashTotalPre + specBonusPre;
+      // 순수 세후 실지급 (환급금 미포함 상태)
       const grandTotalPost = cashTotalPost + specBonusPost;
 
       document.getElementById('simpleSpecialPre').innerText = formatKRW(specBonusPre * 10000);
@@ -1475,8 +1538,8 @@
       const yearlyOpiPre = [];
       const yearlyCashPre = [];
       const yearlyGrandPre = [];
-      const yearlyGrandPost = [];
-      const yearlyRefundWon = [];
+      const yearlyGrandPost = []; // 환급금이 미포함된 순수 당해 세후 보상
+      const yearlyRefundWon = []; // 각 실적연도로 인해 발생하는 환급 세액
 
       for (let i = 0; i < 5; i++) {
         const yr = 2026 + i;
@@ -1495,7 +1558,9 @@
         const totalWithheldWon = specIncomeTaxWon + cashWithheldTaxWon;
         const taxRefundWon = Math.max(0, totalWithheldWon - finalAnnualTaxWon);
 
-        const cashPost = cashPre * (1 - (finalAnnualTaxWon / totalGrossWon));
+        // 지급 시점의 순수 세후 현금
+        const cashWithheldGeneral = calcIncomeTax(cashPre * 10000);
+        const cashPost = (cashPre * 10000 - cashWithheldGeneral) / 10000;
 
         yearlyBonusPre.push(bPre);
         yearlyBonusPost.push(bPost);
@@ -1503,42 +1568,17 @@
         yearlyOpiPre.push(opi);
         yearlyCashPre.push(cashPre);
         yearlyGrandPre.push(cashPre + bPre);
-        yearlyGrandPost.push(cashPost + bPost);
+        yearlyGrandPost.push(cashPost + bPost); // 환급금 제외된 세후 총 보상
         yearlyRefundWon.push(taxRefundWon);
       }
 
-      const total5RefundWon = yearlyRefundWon.reduce((a, b) => a + b, 0);
-      const refundBadge = document.getElementById('fiveYrRefundSumBadge');
-      if (refundBadge) {
-        refundBadge.innerHTML = `5개년 환급 합계: <strong class="text-amber-700">+${formatKRW(total5RefundWon)}</strong>`;
-      }
-
-      const compTbody = document.getElementById('fiveYearCompTableBody');
-      compTbody.innerHTML = '';
-      for (let i = 0; i < 5; i++) {
-        const pYr = 2026 + i;
-        const payYr = pYr + 1;
-        const row = document.createElement('tr');
-        row.className = 'hover:bg-slate-50 transition-colors';
-        row.innerHTML = `
-          <td class="py-2.5 px-3 text-left font-bold text-slate-800">${pYr}년 (${payYr}년 지급)</td>
-          <td class="py-2.5 px-3">${nComma(salaries[i])}만</td>
-          <td class="py-2.5 px-3 text-blue-600">${nComma(yearlyTaiPre[i])}만</td>
-          <td class="py-2.5 px-3 text-purple-600">${nComma(yearlyOpiPre[i])}만</td>
-          <td class="py-2.5 px-3 text-amber-600 font-bold">${formatKRW(yearlyBonusPre[i] * 10000)}</td>
-          <td class="py-2.5 px-3 text-slate-900 font-bold">${formatKRW(yearlyGrandPre[i] * 10000)}</td>
-          <td class="py-2.5 px-3 text-emerald-600 font-extrabold bg-emerald-50/40">${formatKRW(yearlyGrandPost[i] * 10000)}</td>
-          <td class="py-2.5 px-3 text-amber-600 font-bold bg-amber-50/50">+${formatKRW(yearlyRefundWon[i])}</td>
-        `;
-        compTbody.appendChild(row);
-      }
-
+      // 주식 락업 해제 계산: 실적연도(지급연도+1)에 따라 1/3 즉시, 1/3 1년뒤, 1/3 2년뒤
       const payYears = [2027, 2028, 2029, 2030, 2031];
       const unlockedByPerfYear = { 2026: [], 2027: [], 2028: [], 2029: [], 2030: [] };
       const lockedByPerfYear = { 2026: [], 2027: [], 2028: [], 2029: [], 2030: [] };
 
       const newInflows = [0, 0, 0, 0, 0];
-      const totalUnlockedThisYear = [0, 0, 0, 0, 0];
+      const totalUnlockedThisYear = [0, 0, 0, 0, 0]; // 당해에 매도 가능해진 총 자사주 (당해 1/3 + 과거 해제분)
       const totalLockedThisYear = [0, 0, 0, 0, 0];
 
       for (let cIdx = 0; cIdx < payYears.length; cIdx++) {
@@ -1575,6 +1615,57 @@
 
         totalUnlockedThisYear[cIdx] = yearUnlockedSum;
         totalLockedThisYear[cIdx] = yearLockedSum;
+      }
+
+      // 환급금 이연 맵: 실적 2026년(27년 3월 지급분 소득) -> 2028년 지급연도 행에 입금
+      // payYears[i] 기준: i=0(2027년 지급) -> 이전 실적(2025) 환급금 미존재로 '-', i=1(2028년 지급) -> 2026년 실적분 환급금 입금
+      const refundPouredInPayYearWon = [0, 0, 0, 0, 0];
+      const refundPerfYearNote = ['', '', '', '', ''];
+      for (let i = 1; i < 5; i++) {
+        refundPouredInPayYearWon[i] = yearlyRefundWon[i - 1]; // 전년도 실적분 환급액
+        refundPerfYearNote[i] = `${2026 + (i - 1)}년분`;
+      }
+
+      const total5RefundWon = yearlyRefundWon.reduce((a, b) => a + b, 0);
+      const refundBadge = document.getElementById('fiveYrRefundSumBadge');
+      if (refundBadge) {
+        refundBadge.innerHTML = `5개년 환급 합계: <strong class="text-amber-700">+${formatKRW(total5RefundWon)}</strong>`;
+      }
+
+      // 5개년 종합 보상표 테이블 렌더링
+      const compTbody = document.getElementById('fiveYearCompTableBody');
+      compTbody.innerHTML = '';
+      for (let i = 0; i < 5; i++) {
+        const pYr = 2026 + i;
+        const payYr = pYr + 1;
+        
+        // 당해 입금 환급금 표기 (28년칸에 26년분 환급액)
+        let refundDisplay = `<span class="text-slate-400 font-normal">-</span>`;
+        if (refundPouredInPayYearWon[i] > 0) {
+          refundDisplay = `+${formatKRW(refundPouredInPayYearWon[i])} <span class="text-[10px] text-amber-700 font-normal">(${refundPerfYearNote[i]})</span>`;
+        }
+
+        // 당해 가용재원 최종합계:
+        // [그해 받은 즉시매도가능 주식(1/3) + 과거 수령 후 당해 매도가능해진 주식] = totalUnlockedThisYear[i]
+        // + [당해 입금된 연말정산 환급금] = refundPouredInPayYearWon[i]
+        const availableUnlockedStockMan = totalUnlockedThisYear[i];
+        const actualRefundMan = refundPouredInPayYearWon[i] / 10000;
+        const totalLiquidityMan = availableUnlockedStockMan + actualRefundMan;
+
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-slate-50 transition-colors';
+        row.innerHTML = `
+          <td class="py-2.5 px-2.5 sm:px-3 text-left font-bold text-slate-800">${pYr}년 (${payYr}년 지급)</td>
+          <td class="py-2.5 px-2.5 sm:px-3">${nComma(salaries[i])}만</td>
+          <td class="py-2.5 px-2.5 sm:px-3 text-blue-600">${nComma(yearlyTaiPre[i])}만</td>
+          <td class="py-2.5 px-2.5 sm:px-3 text-purple-600">${nComma(yearlyOpiPre[i])}만</td>
+          <td class="py-2.5 px-2.5 sm:px-3 text-amber-600 font-bold">${formatKRW(yearlyBonusPre[i] * 10000)}</td>
+          <td class="py-2.5 px-2.5 sm:px-3 text-slate-900 font-bold">${formatKRW(yearlyGrandPre[i] * 10000)}</td>
+          <td class="py-2.5 px-2.5 sm:px-3 text-emerald-600 font-bold bg-emerald-50/40">${formatKRW(yearlyGrandPost[i] * 10000)}</td>
+          <td class="py-2.5 px-2.5 sm:px-3 text-amber-600 font-bold bg-amber-50/50">${refundDisplay}</td>
+          <td class="py-2.5 px-2.5 sm:px-3 text-rose-600 font-extrabold bg-rose-50/60">${formatKRW(totalLiquidityMan * 10000)}</td>
+        `;
+        compTbody.appendChild(row);
       }
 
       const total5Pre = yearlyBonusPre.reduce((a, b) => a + b, 0);
@@ -1657,7 +1748,7 @@
               if (barHeight >= 18) {
                 ctx.save();
                 ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 10.5px Pretendard, sans-serif';
+                ctx.font = 'bold 10px Pretendard, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
 
@@ -1916,7 +2007,7 @@
     }
 
     // ----------------------------------------------------
-    // 4. JUMP GAME ENGINE (올라라 계단 - 업데이트 버전)
+    // 4. JUMP GAME ENGINE (올라라 계단)
     // ----------------------------------------------------
     class SoundEngine {
       constructor() {
@@ -2066,7 +2157,6 @@
     const STEP_DY = 36;
     const JUMP_DURATION = 0.10;
 
-    // 모드 설정 ('OLD': 늙크크, 'YOUNG': 영크크)
     let selectedMode = 'OLD';
     const STORAGE_KEY_PREFIX = 'climb_stairs_best_';
     let bestScores = {
@@ -2096,7 +2186,7 @@
     let maxGauge = 4.0;
     let lastTimestamp = 0;
     let gameState = 'START';
-    let isTimerStarted = false; // 첫 조작 전까지 타이머 일시 정지
+    let isTimerStarted = false;
 
     let streakCount = 0;
     let streakTimeout = null;
@@ -2108,15 +2198,15 @@
 
     function updateModeUI() {
       if (selectedMode === 'OLD') {
-        modeOldBtn.className = 'flex-1 py-2.5 rounded-xl font-black text-xs transition-all flex flex-col items-center justify-center mode-tab-active border border-white/30';
-        modeYoungBtn.className = 'flex-1 py-2.5 rounded-xl font-black text-xs transition-all flex flex-col items-center justify-center bg-slate-800/80 text-slate-300 hover:text-white border border-transparent';
+        modeOldBtn.className = 'flex-1 py-2 sm:py-2.5 rounded-xl font-black text-xs transition-all flex flex-col items-center justify-center mode-tab-active border border-white/30';
+        modeYoungBtn.className = 'flex-1 py-2 sm:py-2.5 rounded-xl font-black text-xs transition-all flex flex-col items-center justify-center bg-slate-800/80 text-slate-300 hover:text-white border border-transparent';
         currentModeBadge.textContent = '👴 늙크크 모드';
         currentModeBadge.className = 'pointer-events-none px-2.5 py-1 rounded-xl text-xs font-black glass-panel text-amber-300 border-amber-400/30';
         
         modeDescriptionCard.innerHTML = `
           <div class="text-amber-300 font-bold mb-1">👴 늙크크 모드 특징</div>
           <div>• 반사신경을 고려하여 타이머 넉넉히 챙겨드림!</div>
-          <div>• 복잡한거 어려우니까 쉽게 쉽게 갑니다 </div>
+          <div>• 복잡한거 어려우니까 쉽게 쉽게 갑니다</div>
           <div>• 층수 증가에 따라 서서히 난이도가 조절됩니다.</div>
         `;
         if (gameOverModeText) {
@@ -2124,8 +2214,8 @@
           gameOverModeText.className = 'text-amber-300 font-black';
         }
       } else {
-        modeYoungBtn.className = 'flex-1 py-2.5 rounded-xl font-black text-xs transition-all flex flex-col items-center justify-center mode-tab-active border border-white/30';
-        modeOldBtn.className = 'flex-1 py-2.5 rounded-xl font-black text-xs transition-all flex flex-col items-center justify-center bg-slate-800/80 text-slate-300 hover:text-white border border-transparent';
+        modeYoungBtn.className = 'flex-1 py-2 sm:py-2.5 rounded-xl font-black text-xs transition-all flex flex-col items-center justify-center mode-tab-active border border-white/30';
+        modeOldBtn.className = 'flex-1 py-2 sm:py-2.5 rounded-xl font-black text-xs transition-all flex flex-col items-center justify-center bg-slate-800/80 text-slate-300 hover:text-white border border-transparent';
         currentModeBadge.textContent = '👶 영크크 모드';
         currentModeBadge.className = 'pointer-events-none px-2.5 py-1 rounded-xl text-xs font-black glass-panel text-emerald-300 border-emerald-400/30';
 
@@ -2136,10 +2226,10 @@
           <div>• 극강의 반사신경과 속도감으로 젊음을 만끽하세요!</div>
         `;
         
-          if (gameOverModeText) {
-                gameOverModeText.textContent = '👶 영크크 모드';
-                gameOverModeText.className = 'text-emerald-300 font-black';
-          }        
+        if (gameOverModeText) {
+          gameOverModeText.textContent = '👶 영크크 모드';
+          gameOverModeText.className = 'text-emerald-300 font-black';
+        }        
       }
       bestScoreDisplay.textContent = bestScores[selectedMode];
     }
@@ -2955,11 +3045,9 @@
           }, 1000);
         }
       }
-    
+      
       const camX = character ? character.x : 0;
-
-      // 수정 후 (캐릭터 위치를 아래로 100px 낮춤)
-      const camY = character ? character.y - 100: 0;
+      const camY = character ? character.y - 100 : 0;
 
       jumpCtx.clearRect(0, 0, viewW, viewH);
       const themeIdx = drawDynamicBackground(jumpCtx, camX, camY);
@@ -3079,25 +3167,19 @@
     startGameBtn.addEventListener('click', startGame);
     restartGameBtn.addEventListener('click', restartGame);
 
-    // 게임오버창에서 모드 변경 버튼 클릭 시
     toggleModeInGameOverBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       sound.init();
-    
-      // 모드 즉시 전환 (OLD <-> YOUNG)
       selectedMode = (selectedMode === 'OLD') ? 'YOUNG' : 'OLD';
       updateModeUI();
-    
-      // 변경된 모드에 맞춰 게임오버창의 최고 기록(BEST) 숫자도 즉시 갱신
       finalBestVal.textContent = bestScores[selectedMode];
       if (currentScore >= bestScores[selectedMode] && currentScore > 0) {
         newRecordBadge.classList.remove('hidden');
       } else {
         newRecordBadge.classList.add('hidden');
       }
-      });
+    });
 
-    
     startScreen.addEventListener('pointerdown', (e) => {
       if (gameState === 'START' && e.target === startScreen) {
         e.preventDefault();
