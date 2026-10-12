@@ -854,9 +854,9 @@
           </div>
         </header>
 
-        <!-- Floating Streak Combo Banner -->
-        <div id="comboBanner" class="absolute top-36 left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-300 opacity-0 transform scale-50 z-20">
-          <div class="px-5 py-1.5 rounded-full bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-500 font-extrabold text-white text-base shadow-[0_0_20px_rgba(244,63,94,0.7)] border border-white/40 tracking-wider">
+        <!-- Floating Streak Combo Banner (크기 축소 및 상단으로 위치 이동) -->
+        <div id="comboBanner" class="absolute top-24 left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-300 opacity-0 transform scale-50 z-20">
+          <div class="px-3 py-0.5 rounded-full bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-500 font-extrabold text-white text-xs shadow-[0_0_12px_rgba(244,63,94,0.5)] border border-white/30 tracking-wider">
             <span id="comboText">FEVER!</span>
           </div>
         </div>
@@ -2165,14 +2165,14 @@
     };
 
     const STAIR_PATTERNS = [
-      ['L', 'L', 'L', 'L'], // 0
-      ['R', 'R', 'R', 'R'], // 1
-      ['L', 'R', 'L', 'L'], // 2
-      ['L', 'R', 'R', 'L'], // 3
-      ['L', 'R', 'R', 'R'], // 4
-      ['R', 'L', 'R', 'R'], // 5
-      ['R', 'L', 'L', 'R'], // 6
-      ['R', 'L', 'L', 'L']  // 7
+      ['L', 'L', 'L', 'L', 'L'], // 0
+      ['R', 'R', 'R', 'R', 'R'], // 1
+      ['L', 'R', 'L', 'L', 'L'], // 2
+      ['L', 'R', 'R', 'L', 'L'], // 3
+      ['L', 'R', 'R', 'R', 'R'], // 4
+      ['R', 'L', 'R', 'R', 'R'], // 5
+      ['R', 'L', 'L', 'R', 'R'], // 6
+      ['R', 'L', 'L', 'L', 'L']  // 7
     ];
 
     let stairs = [];
@@ -2695,8 +2695,10 @@
       }
 
       let straightWeight = 1;
-      if (currentFloor <= 100) {
-        straightWeight = 5;
+      if (currentFloor <= 50) {
+        straightWeight = 6;
+      } else if (currentFloor <= 100) {
+        straightweight = 5;
       } else if (currentFloor <= 200) {
         straightWeight = 4;
       } else if (currentFloor <= 300) {
@@ -2868,16 +2870,17 @@
 
     function getGaugeConfig(score) {
       if (selectedMode === 'OLD') {
-        if (score <= 100) return { max: 4.0, boost: 1.2 };
-        if (score <= 200) return { max: 3.0, boost: 1.0 };
-        if (score <= 300) return { max: 2.5, boost: 0.8 };
-        if (score <= 400) return { max: 2.0, boost: 0.7 };
+        if (score <= 50) return { max: 5.0, boost: 3.0 }; // 게이지 충전 속도
+        if (score <= 100) return { max: 4.0, boost: 2.0 };
+        if (score <= 200) return { max: 3.0, boost: 1.5 };
+        if (score <= 300) return { max: 2.5, boost: 1.3 };
+        if (score <= 400) return { max: 2.0, boost: 1.0 };
         return { max: 1.5, boost: 0.6 };
       } else {
-        if (score <= 100) return { max: 3.0, boost: 1.0 };
-        if (score <= 200) return { max: 2.0, boost: 0.8 };
+        if (score <= 100) return { max: 3.0, boost: 0.8 };
+        if (score <= 200) return { max: 2.0, boost: 0.6 };
         if (score <= 300) return { max: 1.0, boost: 0.5 };
-        if (score <= 400) return { max: 1.0, boost: 0.6 };
+        if (score <= 400) return { max: 1.0, boost: 0.4 };
         return { max: 1.0, boost: 0.4 };
       }
     }
@@ -2973,7 +2976,7 @@
       if (streakCount >= 20 && streakCount % 10 === 0) {
         comboText.textContent = streakCount >= 50 ? '🔥 ULTRA FEVER!' : '⚡ SUPER FAST!';
         comboBanner.style.opacity = '1';
-        comboBanner.style.transform = 'scale(1.1) translateX(-50%)';
+        comboBanner.style.transform = 'scale(0.9) translateX(-50%)';
       }
       streakTimeout = setTimeout(() => {
         streakCount = 0;
