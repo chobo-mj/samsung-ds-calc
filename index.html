@@ -132,11 +132,12 @@
           <div>
             <h1 class="text-sm sm:text-base font-bold tracking-tight flex items-center gap-2">
               DS 성과급 시뮬레이터
+              <span class="text-[10px] bg-blue-500/30 text-blue-300 border border-blue-400/30 px-1.5 py-0.2 rounded-full font-medium">1.0</span>
             </h1>
           </div>
         </div>
 
-        <!-- 헤더 접기/펼치기 토글 버튼 & 누적 방문자 배지- -->
+        <!-- 헤더 접기/펼치기 토글 버튼 & 누적 방문자 배지 -->
         <div class="flex items-center gap-2">
           <div class="hidden sm:flex items-center gap-1.5 text-xs bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700 shadow-inner">
             <i class="fa-solid fa-users text-blue-400 text-[11px]"></i>
@@ -145,11 +146,19 @@
           <button type="button" onclick="toggleHeaderFold()" id="headerFoldBtn"
                   class="bg-blue-600/80 hover:bg-blue-500 text-white text-xs px-2.5 py-1 rounded-lg border border-blue-400/40 shadow-sm flex items-center gap-1 transition-all">
             <i id="foldIcon" class="fa-solid fa-chevron-up text-[10px]"></i>
-           <span id="foldText" class="text-[11px] font-semibold">상단 접기</span>
+            <span id="foldText" class="text-[11px] font-semibold">상단 접기</span>
           </button>
         </div>
       </div>
 
+      <!-- 접히는 상세 안내 문구 영역 -->
+      <div id="collapsibleHeaderContent" class="header-collapsible max-h-40 opacity-100 mt-2 flex flex-col md:flex-row items-start md:items-center justify-between gap-2 border-t border-blue-900/40 pt-2">
+        <p class="text-xs text-slate-300">※ 삼성전자 DS 부문 특별 성과급(자사주) 및 5개년 종합 보상 시뮬레이션입니다.</p>
+        <div class="flex items-center gap-2 text-xs text-slate-300">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>지급시기 : <strong>27년 3월말~4월초</strong></span>
+        </div>
+      </div>
 
       <!-- Main Navigation Tabs (계산기 / 휴식 2048 / 휴식 jump) -->
       <div class="mt-2.5 flex items-center p-1 bg-slate-800/90 rounded-xl border border-slate-700/80 shadow-inner w-full md:w-auto justify-center">
@@ -247,7 +256,7 @@
           <div class="bg-slate-50/90 p-3.5 sm:p-4 rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
             <div class="flex items-center justify-between mb-1.5">
               <label for="prevYearIncome" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                <i class="fa-solid fa-file-invoice-dollar text-blue-600"></i> 전년도 원천소득
+                <i class="fa-solid fa-file-invoice-dollar text-blue-600"></i> 전년도 원천징수 소득
               </label>
               <span class="text-[11px] text-blue-600 font-semibold cursor-pointer hover:underline" onclick="togglePrevYearAuto()" id="prevAutoLabel">자동 입력(*1.5)</span>
             </div>
@@ -546,15 +555,15 @@
               <table class="min-w-full text-xs text-right border-collapse bg-white rounded-xl shadow-xs overflow-hidden">
                 <thead>
                   <tr class="bg-indigo-900 text-white font-semibold">
-                    <th class="py-2.5 px-2.5 sm:px-3 text-left">실적(지급)</th>
+                    <th class="py-2.5 px-2.5 sm:px-3 text-left">실적연도 (지급연도)</th>
                     <th class="py-2.5 px-2.5 sm:px-3">계약연봉</th>
-                    <th class="py-2.5 px-2.5 sm:px-3">TAI</th>
-                    <th class="py-2.5 px-2.5 sm:px-3">OPI1</th>
-                    <th class="py-2.5 px-2.5 sm:px-3 text-amber-300">OPI2(세전)</th>
+                    <th class="py-2.5 px-2.5 sm:px-3">TAI (10%)</th>
+                    <th class="py-2.5 px-2.5 sm:px-3">OPI (50%)</th>
+                    <th class="py-2.5 px-2.5 sm:px-3 text-amber-300">특별성과금(세전)</th>
                     <th class="py-2.5 px-2.5 sm:px-3 text-indigo-200 font-bold">총 보상 (세전)</th>
-                    <th class="py-2.5 px-2.5 sm:px-3 text-emerald-300 font-bold bg-indigo-950">세후</th>
-                    <th class="py-2.5 px-2.5 sm:px-3 text-amber-300 font-bold bg-indigo-950">연말정산</th>
-                    <th class="py-2.5 px-2.5 sm:px-3 text-rose-300 font-extrabold bg-slate-900">주식매도+환급금</th>
+                    <th class="py-2.5 px-2.5 sm:px-3 text-emerald-300 font-bold bg-indigo-950">세후 보상 (환급금 제외)</th>
+                    <th class="py-2.5 px-2.5 sm:px-3 text-amber-300 font-bold bg-indigo-950">연말정산 환급금 (입금기준)</th>
+                    <th class="py-2.5 px-2.5 sm:px-3 text-rose-300 font-extrabold bg-slate-900">당해 가용재원 최종합계</th>
                   </tr>
                 </thead>
                 <tbody id="fiveYearCompTableBody" class="divide-y divide-slate-200 text-slate-700"></tbody>
@@ -566,7 +575,7 @@
             <div class="flex items-center justify-between mb-3">
               <div>
                 <h4 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                  <i class="fa-solid fa-pen-to-square text-indigo-600"></i> 사업부, 영업이익, 연봉 세부 편집
+                  <i class="fa-solid fa-pen-to-square text-indigo-600"></i> 연도별 소속 사업부(파견), 영업이익, 계약연봉 세부 편집
                 </h4>
                 <p class="text-xs text-slate-500 mt-0.5">※ 상단 메인 탭 선택 시 5년 전체가 자동 동기화되며, 필요한 연도만 개별 수정 가능합니다.</p>
               </div>
@@ -587,7 +596,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-200 bg-white">
                   <tr class="bg-indigo-50/40">
-                    <td class="py-2.5 px-3 font-bold text-indigo-900 text-left bg-indigo-100/40">사업부</td>
+                    <td class="py-2.5 px-3 font-bold text-indigo-900 text-left bg-indigo-100/40">소속 사업부 (파견)</td>
                     <td class="p-1.5">
                       <select id="div_2026" onchange="recalculateAll()" class="w-full py-1.5 px-1 text-xs border rounded-lg bg-white font-bold text-slate-800">
                         <option value="memory" selected>메모리 (100%)</option>
@@ -632,7 +641,8 @@
 
                   <tr>
                     <td class="py-2.5 px-3 font-bold text-slate-700 text-left bg-slate-50">
-                      성과(조)
+                      DS 영업이익 (조원)
+                      <span class="block text-[10px] text-slate-400 font-normal">문턱: 26~28년 200조 / 이후 100조</span>
                     </td>
                     <td class="p-1.5"><input type="number" id="p_2026" value="394" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
                     <td class="p-1.5"><input type="number" id="p_2027" value="567" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
@@ -643,7 +653,7 @@
 
                   <tr>
                     <td class="py-2.5 px-3 font-bold text-slate-700 text-left bg-slate-50">
-                      연봉(만원)
+                      계약연봉 (만원)
                       <span class="block text-[10px] text-slate-400 font-normal">연 4% 증가 자동반영</span>
                     </td>
                     <td class="p-1.5"><input type="number" id="s_2026" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900"></td>
@@ -2155,14 +2165,14 @@
     };
 
     const STAIR_PATTERNS = [
-      ['L', 'L', 'L', 'L', 'L'], // 0
-      ['R', 'R', 'R', 'R', 'R'], // 1
-      ['L', 'R', 'L', 'L', 'L'], // 2
-      ['L', 'R', 'R', 'L', 'L'], // 3
-      ['L', 'R', 'R', 'R', 'R'], // 4
-      ['R', 'L', 'R', 'R', 'R'], // 5
-      ['R', 'L', 'L', 'R', 'R'], // 6
-      ['R', 'L', 'L', 'L', 'L']  // 7
+      ['L', 'L', 'L', 'L'], // 0 패
+      ['R', 'R', 'R', 'R'], // 1
+      ['L', 'R', 'L', 'L'], // 2
+      ['L', 'R', 'R', 'L'], // 3
+      ['L', 'R', 'R', 'R'], // 4
+      ['R', 'L', 'R', 'R'], // 5
+      ['R', 'L', 'L', 'R'], // 6
+      ['R', 'L', 'L', 'L']  // 7
     ];
 
     let stairs = [];
@@ -2680,15 +2690,16 @@
     }
 
     function getWeightedStairPattern(currentFloor) {
+      // 1) 영크크 모드: 8가지 패턴이 무작위(동일 확률)로 등장
       if (selectedMode === 'YOUNG') {
         return STAIR_PATTERNS[Math.floor(Math.random() * STAIR_PATTERNS.length)];
       }
-
+      // 2) 늙크크 모드: 저층일수록 직진 패턴(0번, 1번)의 가중치를 높여 쉽게 설정
       let straightWeight = 1;
-      if (currentFloor <= 50) {
+      if (currentFloor <= 500) {
         straightWeight = 6;
       } else if (currentFloor <= 100) {
-        straightweight = 5;
+        straightWeight = 5;
       } else if (currentFloor <= 200) {
         straightWeight = 4;
       } else if (currentFloor <= 300) {
@@ -2700,9 +2711,9 @@
       }
 
       const weights = [
-        straightWeight, // 0: LLLL
-        straightWeight, // 1: RRRR
-        1, 1, 1, 1, 1, 1
+        straightWeight, // 0번 패턴 (LLLL) 가중치
+        straightWeight, // 1번 패턴 (RRRR) 가중치
+        1, 1, 1, 1, 1, 1 // 2~7번 꺾기 패턴 가중치
       ];
 
       const totalWeight = weights.reduce((acc, w) => acc + w, 0);
@@ -2743,135 +2754,420 @@
       }
     }
 
-    function drawDynamicBackground(context, camX, camY) {
+      //배경은 여기부터
+        function drawDynamicBackground(context, camX, camY) {
       let themeIdx = 0;
       let stageName = 'STAGE 1 • 벽돌집 루프탑';
-      if (currentScore > 300) { themeIdx = 3; stageName = 'STAGE 4 • 은하계 우주정복'; }
-      else if (currentScore > 200) { themeIdx = 2; stageName = 'STAGE 3 • 천공의 구름바다'; }
-      else if (currentScore > 100) { themeIdx = 1; stageName = 'STAGE 2 • 거대 세계수 줄기'; }
-
-      themeBanner.textContent = stageName;
+    
+      // 400점 이상 시 STAGE 5 (외계인 우주선) 추가
+      if (currentScore >= 400) { 
+        themeIdx = 4; 
+        stageName = 'STAGE 5 • 외계인 우주선'; 
+      } else if (currentScore > 300) { 
+        themeIdx = 3; 
+        stageName = 'STAGE 4 • 은하계 우주정복'; 
+      } else if (currentScore > 200) { 
+        themeIdx = 2; 
+        stageName = 'STAGE 3 • 천공의 구름바다'; 
+      } else if (currentScore > 100) { 
+        themeIdx = 1; 
+        stageName = 'STAGE 2 • 거대 세계수 줄기'; 
+      }
+    
+      if (themeBanner) themeBanner.textContent = stageName;
       const parallaxY = (-camY * 0.35) % viewH;
-
+    
+      // ==========================================
+      // STAGE 1 • 벽돌집 루프탑 (메이플 커닝시티/헤네시스 감성)
+      // ==========================================
       if (themeIdx === 0) {
+        // 따뜻한 노을빛 밤하늘
         const grad = context.createLinearGradient(0, 0, 0, viewH);
-        grad.addColorStop(0, '#1e1b4b'); grad.addColorStop(0.5, '#431407'); grad.addColorStop(1, '#1c1917');
-        context.fillStyle = grad; context.fillRect(0, 0, viewW, viewH);
-
+        grad.addColorStop(0, '#191535');
+        grad.addColorStop(0.5, '#4a1d2e');
+        grad.addColorStop(0.85, '#a8432c');
+        grad.addColorStop(1, '#ff8343');
+        context.fillStyle = grad;
+        context.fillRect(0, 0, viewW, viewH);
+    
         context.save();
         context.translate(0, parallaxY);
         for (let wrap = -1; wrap <= 1; wrap++) {
           const base = wrap * viewH;
-          context.fillStyle = '#292524';
-          context.fillRect(20, base + 120, 110, 240);
-          context.fillStyle = '#fef08a';
-          context.shadowColor = '#f59e0b';
-          context.shadowBlur = 15;
+    
+          // 1. 뒤쪽 건물 실루엣 레이어
+          context.fillStyle = '#261928';
+          context.fillRect(40, base + viewH - 260, 90, 260);
+          context.fillRect(viewW * 0.45, base + viewH - 220, 110, 220);
+          context.fillRect(viewW - 90, base + viewH - 300, 80, 300);
+    
+          // 2. 메인 벽돌집 건물 (앞 레이어)
+          context.fillStyle = '#5c2c28';
+          context.fillRect(15, base + viewH - 180, 150, 180);
+          // 기와 지붕 (삼각형)
+          context.fillStyle = '#9e3d2f';
           context.beginPath();
-          context.arc(75, base + 180, 16, Math.PI, 0);
-          context.rect(59, base + 180, 32, 28);
+          context.moveTo(10, base + viewH - 180);
+          context.lineTo(90, base + viewH - 230);
+          context.lineTo(170, base + viewH - 180);
           context.fill();
-          context.shadowBlur = 0;
-
-          context.strokeStyle = '#44403c';
-          context.lineWidth = 2.5;
+    
+          // 굴뚝 & 굴뚝 연기 구름
+          context.fillStyle = '#421f1d';
+          context.fillRect(125, base + viewH - 250, 26, 70);
+          context.fillStyle = 'rgba(255, 230, 210, 0.35)';
           context.beginPath();
-          context.moveTo(75, base + 164);
-          context.lineTo(75, base + 208);
-          context.moveTo(59, base + 188);
-          context.lineTo(91, base + 188);
+          context.arc(138, base + viewH - 265, 12, 0, Math.PI * 2);
+          context.arc(146, base + viewH - 285, 16, 0, Math.PI * 2);
+          context.fill();
+    
+          // 따뜻하게 빛나는 창문 (메이플풍 발광 효과)
+          context.save();
+          context.shadowColor = '#facc15';
+          context.shadowBlur = 18;
+          context.fillStyle = '#fef08a';
+          // 왼쪽 아치 창문
+          context.beginPath();
+          context.arc(65, base + viewH - 130, 16, Math.PI, 0);
+          context.rect(49, base + viewH - 130, 32, 34);
+          context.fill();
+          context.restore();
+    
+          // 창문 십자 프레임
+          context.strokeStyle = '#42201b';
+          context.lineWidth = 3;
+          context.beginPath();
+          context.moveTo(65, base + viewH - 146);
+          context.lineTo(65, base + viewH - 96);
+          context.moveTo(49, base + viewH - 120);
+          context.lineTo(81, base + viewH - 120);
           context.stroke();
-
-          context.fillStyle = '#1c1917';
-          context.fillRect(viewW - 130, base + 240, 100, 280);
-          context.fillStyle = '#451a03';
-          context.fillRect(viewW - 90, base + 195, 30, 45);
+    
+          // 오른쪽 집과 다락방 창문
+          context.fillStyle = '#42222a';
+          context.fillRect(viewW - 160, base + viewH - 200, 145, 200);
+          context.fillStyle = '#fde047';
+          context.fillRect(viewW - 120, base + viewH - 150, 24, 30);
+          context.fillRect(viewW - 80, base + viewH - 150, 24, 30);
+    
+          // 난간 & 루프탑 디테일
+          context.strokeStyle = '#331d24';
+          context.lineWidth = 2;
+          for (let rx = 18; rx < 160; rx += 12) {
+            context.strokeRect(rx, base + viewH - 188, 8, 8);
+          }
         }
         context.restore();
+    
+      // ==========================================
+      // STAGE 2 • 거대 세계수 줄기 (메이플 엘리니아 감성)
+      // ==========================================
       } else if (themeIdx === 1) {
         const grad = context.createLinearGradient(0, 0, 0, viewH);
-        grad.addColorStop(0, '#064e3b'); grad.addColorStop(0.6, '#022c22'); grad.addColorStop(1, '#0f172a');
-        context.fillStyle = grad; context.fillRect(0, 0, viewW, viewH);
-
+        grad.addColorStop(0, '#022c22');
+        grad.addColorStop(0.5, '#064e3b');
+        grad.addColorStop(1, '#061c16');
+        context.fillStyle = grad;
+        context.fillRect(0, 0, viewW, viewH);
+    
         context.save();
         context.translate(0, parallaxY);
         for (let wrap = -1; wrap <= 1; wrap++) {
           const baseOffset = wrap * viewH;
-          context.fillStyle = '#1c130c';
-          context.fillRect(viewW * 0.15, baseOffset, viewW * 0.7, viewH);
-          context.strokeStyle = '#2d1f14';
-          context.lineWidth = 6;
+    
+          // 거대한 나무 기둥 (고목 텍스처)
+          const trunkGrad = context.createLinearGradient(viewW * 0.1, 0, viewW * 0.85, 0);
+          trunkGrad.addColorStop(0, '#1c110a');
+          trunkGrad.addColorStop(0.5, '#3b2314');
+          trunkGrad.addColorStop(1, '#1a0f09');
+          context.fillStyle = trunkGrad;
+          context.fillRect(viewW * 0.12, baseOffset, viewW * 0.76, viewH);
+    
+          // 얽혀 있는 덩굴과 나무결
+          context.strokeStyle = '#573820';
+          context.lineWidth = 7;
           for (let i = 0; i < 4; i++) {
-            const bx = viewW * 0.25 + i * 42;
+            const bx = viewW * 0.22 + i * (viewW * 0.18);
             context.beginPath();
             context.moveTo(bx, baseOffset);
-            context.bezierCurveTo(bx - 15, baseOffset + viewH * 0.3, bx + 20, baseOffset + viewH * 0.7, bx, baseOffset + viewH);
+            context.bezierCurveTo(bx - 35, baseOffset + viewH * 0.35, bx + 45, baseOffset + viewH * 0.65, bx, baseOffset + viewH);
             context.stroke();
+          }
+    
+          // 야광 마법 버섯들 (엘리니아 명물)
+          const mushrooms = [
+            { x: viewW * 0.22, y: baseOffset + 120, col: '#38bdf8', glow: '#0284c7' },
+            { x: viewW * 0.72, y: baseOffset + 260, col: '#f43f5e', glow: '#e11d48' },
+            { x: viewW * 0.35, y: baseOffset + 380, col: '#a855f7', glow: '#9333ea' }
+          ];
+    
+          mushrooms.forEach(m => {
+            context.save();
+            context.shadowColor = m.glow;
+            context.shadowBlur = 15;
+            // 갓
+            context.fillStyle = m.col;
+            context.beginPath();
+            context.arc(m.x, m.y, 16, Math.PI, 0);
+            context.fill();
+            // 기둥
+            context.fillStyle = '#fef9c3';
+            context.fillRect(m.x - 4, m.y, 8, 14);
+            context.restore();
+          });
+    
+          // 반짝이는 요정 가루 & 이파리
+          context.fillStyle = '#4ade80';
+          for (let leaf = 0; leaf < 6; leaf++) {
+            const lx = viewW * (0.15 + (leaf * 0.14));
+            const ly = baseOffset + 60 + leaf * 80;
+            context.beginPath();
+            context.ellipse(lx, ly, 10, 5, Math.PI / 4, 0, Math.PI * 2);
+            context.fill();
           }
         }
         context.restore();
+    
+      // ==========================================
+      // STAGE 3 • 천공의 구름바다 (메이플 오르비스 / 포켓몬 천공 감성)
+      // ==========================================
       } else if (themeIdx === 2) {
+        // 환상적인 오르비스 핑크-퍼플 노을 하늘
         const grad = context.createLinearGradient(0, 0, 0, viewH);
-        grad.addColorStop(0, '#f97316'); grad.addColorStop(0.4, '#db2777'); grad.addColorStop(0.8, '#4f46e5'); grad.addColorStop(1, '#1e1b4b');
-        context.fillStyle = grad; context.fillRect(0, 0, viewW, viewH);
-
+        grad.addColorStop(0, '#fdba74');
+        grad.addColorStop(0.35, '#f472b6');
+        grad.addColorStop(0.7, '#818cf8');
+        grad.addColorStop(1, '#312e81');
+        context.fillStyle = grad;
+        context.fillRect(0, 0, viewW, viewH);
+    
         context.save();
         context.translate(0, parallaxY * 0.6);
         for (let wrap = -1; wrap <= 1; wrap++) {
           const baseOffset = wrap * viewH;
-          context.fillStyle = 'rgba(255, 255, 255, 0.25)';
+    
+          // 떠다니는 고대 공중섬 신전 유적지
+          context.fillStyle = '#64748b';
           context.beginPath();
-          context.arc(viewW * 0.2, baseOffset + 180, 60, 0, Math.PI * 2);
-          context.arc(viewW * 0.38, baseOffset + 160, 80, 0, Math.PI * 2);
-          context.arc(viewW * 0.58, baseOffset + 180, 65, 0, Math.PI * 2);
+          context.moveTo(viewW * 0.15, baseOffset + 140);
+          context.lineTo(viewW * 0.45, baseOffset + 140);
+          context.lineTo(viewW * 0.35, baseOffset + 195);
+          context.lineTo(viewW * 0.22, baseOffset + 185);
+          context.closePath();
+          context.fill();
+          // 유적지 기둥
+          context.fillStyle = '#cbd5e1';
+          context.fillRect(viewW * 0.22, baseOffset + 105, 12, 35);
+          context.fillRect(viewW * 0.32, baseOffset + 115, 12, 25);
+    
+          // 폭신폭신한 핑크빛 솜사탕 구름 (음영 레이어)
+          context.fillStyle = 'rgba(253, 224, 71, 0.3)';
+          context.beginPath();
+          context.arc(viewW * 0.25, baseOffset + 250, 75, 0, Math.PI * 2);
+          context.arc(viewW * 0.55, baseOffset + 240, 95, 0, Math.PI * 2);
+          context.arc(viewW * 0.85, baseOffset + 260, 80, 0, Math.PI * 2);
+          context.fill();
+    
+          // 전경 밝은 구름
+          context.fillStyle = 'rgba(255, 255, 255, 0.75)';
+          context.beginPath();
+          context.arc(viewW * 0.15, baseOffset + 280, 65, 0, Math.PI * 2);
+          context.arc(viewW * 0.42, baseOffset + 270, 85, 0, Math.PI * 2);
+          context.arc(viewW * 0.75, baseOffset + 285, 75, 0, Math.PI * 2);
           context.fill();
         }
         context.restore();
-      } else {
+    
+      // ==========================================
+      // STAGE 4 • 은하계 우주정복 (루디브리엄 / 지구방위본부 우주선 밖)
+      // ==========================================
+      } else if (themeIdx === 3) {
+        // 깊고 광활한 딥 스페이스
         const grad = context.createLinearGradient(0, 0, 0, viewH);
-        grad.addColorStop(0, '#030712'); grad.addColorStop(0.5, '#0f172a'); grad.addColorStop(1, '#020617');
-        context.fillStyle = grad; context.fillRect(0, 0, viewW, viewH);
-
+        grad.addColorStop(0, '#030712');
+        grad.addColorStop(0.5, '#1e1145');
+        grad.addColorStop(1, '#07091e');
+        context.fillStyle = grad;
+        context.fillRect(0, 0, viewW, viewH);
+    
+        // 반짝이는 성운 구름 (보라/청록)
         context.save();
-        context.translate(viewW * 0.8, viewH * 0.18);
+        const nebula = context.createRadialGradient(viewW * 0.3, viewH * 0.35, 10, viewW * 0.3, viewH * 0.35, 180);
+        nebula.addColorStop(0, 'rgba(192, 132, 252, 0.35)');
+        nebula.addColorStop(0.6, 'rgba(56, 189, 248, 0.15)');
+        nebula.addColorStop(1, 'transparent');
+        context.fillStyle = nebula;
+        context.fillRect(0, 0, viewW, viewH);
+    
+        // 고리를 가진 웅장한 토성형 행성
+        context.translate(viewW * 0.75, viewH * 0.22);
         context.rotate(-0.35);
-        const planetGrad = context.createLinearGradient(-30, -30, 30, 30);
-        planetGrad.addColorStop(0, '#fbbf24'); planetGrad.addColorStop(1, '#ea580c');
+    
+        const planetGrad = context.createLinearGradient(-35, -35, 35, 35);
+        planetGrad.addColorStop(0, '#fef08a');
+        planetGrad.addColorStop(0.4, '#f97316');
+        planetGrad.addColorStop(1, '#9333ea');
         context.fillStyle = planetGrad;
         context.beginPath();
-        context.arc(0, 0, 26, 0, Math.PI * 2);
+        context.arc(0, 0, 34, 0, Math.PI * 2);
         context.fill();
-        context.strokeStyle = 'rgba(253, 230, 138, 0.6)';
-        context.lineWidth = 5;
+    
+        // 행성 고리
+        context.strokeStyle = 'rgba(254, 240, 138, 0.75)';
+        context.lineWidth = 6;
         context.beginPath();
-        context.ellipse(0, 0, 52, 14, 0, 0, Math.PI * 2);
+        context.ellipse(0, 0, 72, 18, 0, 0, Math.PI * 2);
         context.stroke();
         context.restore();
-
-        shootingStars.forEach(star => { star.update(0.016); star.draw(context); });
+    
+        // 별똥별 효과
+        if (typeof shootingStars !== 'undefined') {
+          shootingStars.forEach(star => { star.update(0.016); star.draw(context); });
+        }
+    
+      // ==========================================
+      // [NEW!] STAGE 5 • 외계인 우주선 (지구방위본부 메이트론 모선 콘셉트)
+      // ==========================================
+      } else {
+        // 외계선 내부 메탈릭 인디고 & 네온 암흑
+        const grad = context.createLinearGradient(0, 0, 0, viewH);
+        grad.addColorStop(0, '#050714');
+        grad.addColorStop(0.5, '#0b1329');
+        grad.addColorStop(1, '#03141f');
+        context.fillStyle = grad;
+        context.fillRect(0, 0, viewW, viewH);
+    
+        context.save();
+        context.translate(0, parallaxY * 0.3);
+    
+        for (let wrap = -1; wrap <= 1; wrap++) {
+          const base = wrap * viewH;
+    
+          // 1. 우주선 메인 전망창 프레임 (대형 뷰포트 아치)
+          context.fillStyle = '#0f172a';
+          context.strokeStyle = '#22d3ee';
+          context.lineWidth = 4;
+    
+          context.beginPath();
+          context.roundRect(viewW * 0.08, base + 80, viewW * 0.84, viewH * 0.42, 28);
+          context.fill();
+          context.stroke();
+    
+          // 창밖 우주 풍경 (창문 내부 클리핑 영역)
+          context.save();
+          context.beginPath();
+          context.roundRect(viewW * 0.08, base + 80, viewW * 0.84, viewH * 0.42, 28);
+          context.clip();
+    
+          const spaceWindowGrad = context.createLinearGradient(0, base + 80, 0, base + 80 + viewH * 0.42);
+          spaceWindowGrad.addColorStop(0, '#020617');
+          spaceWindowGrad.addColorStop(1, '#1e1b4b');
+          context.fillStyle = spaceWindowGrad;
+          context.fillRect(viewW * 0.08, base + 80, viewW * 0.84, viewH * 0.42);
+    
+          // 창밖 미니 UFO (외계 비행체)
+          context.fillStyle = '#67e8f9';
+          context.beginPath();
+          context.ellipse(viewW * 0.5, base + 140, 36, 12, 0, 0, Math.PI * 2);
+          context.fill();
+          context.fillStyle = '#a7f3d0';
+          context.beginPath();
+          context.arc(viewW * 0.5, base + 134, 14, Math.PI, 0);
+          context.fill();
+    
+          // UFO 트랙터 광선 빔 (반투명 네온 초록 빔)
+          const beamGrad = context.createLinearGradient(viewW * 0.5, base + 145, viewW * 0.5, base + 240);
+          beamGrad.addColorStop(0, 'rgba(52, 211, 153, 0.7)');
+          beamGrad.addColorStop(1, 'rgba(52, 211, 153, 0.0)');
+          context.fillStyle = beamGrad;
+          context.beginPath();
+          context.moveTo(viewW * 0.5 - 15, base + 145);
+          context.lineTo(viewW * 0.5 + 15, base + 145);
+          context.lineTo(viewW * 0.5 + 45, base + 240);
+          context.lineTo(viewW * 0.5 - 45, base + 240);
+          context.closePath();
+          context.fill();
+          context.restore(); // 클리핑 해제
+    
+          // 2. 우주선 내부 조종실 홀로그램 콘솔 & 제어판
+          context.fillStyle = '#1e293b';
+          context.fillRect(viewW * 0.05, base + viewH * 0.55, viewW * 0.9, viewH * 0.45);
+    
+          // 메카닉 네온 테두리 라인
+          context.strokeStyle = '#4ade80';
+          context.lineWidth = 3;
+          context.beginPath();
+          context.moveTo(viewW * 0.05, base + viewH * 0.55);
+          context.lineTo(viewW * 0.95, base + viewH * 0.55);
+          context.stroke();
+    
+          // 사이버 홀로그램 스크린 디스플레이들
+          const screens = [
+            { x: viewW * 0.12, w: viewW * 0.22, color: '#38bdf8' },
+            { x: viewW * 0.39, w: viewW * 0.22, color: '#ec4899' },
+            { x: viewW * 0.66, w: viewW * 0.22, color: '#a855f7' }
+          ];
+    
+          screens.forEach(sc => {
+            context.save();
+            context.shadowColor = sc.color;
+            context.shadowBlur = 12;
+            context.fillStyle = 'rgba(15, 23, 42, 0.85)';
+            context.strokeStyle = sc.color;
+            context.lineWidth = 2;
+            context.fillRect(sc.x, base + viewH * 0.6, sc.w, 45);
+            context.strokeRect(sc.x, base + viewH * 0.6, sc.w, 45);
+    
+            // 스크린 내부 홀로그램 파형 라인
+            context.strokeStyle = sc.color;
+            context.lineWidth = 1.5;
+            context.beginPath();
+            context.moveTo(sc.x + 8, base + viewH * 0.6 + 22);
+            context.lineTo(sc.x + 18, base + viewH * 0.6 + 12);
+            context.lineTo(sc.x + 28, base + viewH * 0.6 + 32);
+            context.lineTo(sc.x + sc.w - 8, base + viewH * 0.6 + 22);
+            context.stroke();
+            context.restore();
+          });
+    
+          // 깜빡이는 외계인 조종석 상태 표시 램프 (LED 점등)
+          for (let led = 0; led < 7; led++) {
+            context.fillStyle = (led % 2 === 0) ? '#34d399' : '#f43f5e';
+            context.beginPath();
+            context.arc(viewW * 0.15 + (led * (viewW * 0.11)), base + viewH * 0.74, 5, 0, Math.PI * 2);
+            context.fill();
+          }
+        }
+        context.restore();
       }
-
-      backgroundParticles.forEach(bp => {
-        bp.update(0.016, (gameState === 'PLAYING' && character && character.isJumping) ? 1.5 : 0);
-        bp.draw(context, themeIdx);
-      });
+    
+      // 배경 부유 파티클 (기존 코드 유지)
+      if (typeof backgroundParticles !== 'undefined') {
+        backgroundParticles.forEach(bp => {
+          bp.update(0.016, (typeof gameState !== 'undefined' && gameState === 'PLAYING' && typeof character !== 'undefined' && character.isJumping) ? 1.5 : 0);
+          bp.draw(context, themeIdx);
+        });
+      }
+    
       return themeIdx;
     }
+//배경은 여기까지
 
+    
     function getGaugeConfig(score) {
       if (selectedMode === 'OLD') {
-        if (score <= 50) return { max: 5.0, boost: 3.0 }; // 게이지 충전 속도
-        if (score <= 100) return { max: 4.0, boost: 2.0 };
-        if (score <= 200) return { max: 3.0, boost: 1.5 };
-        if (score <= 300) return { max: 2.5, boost: 1.3 };
-        if (score <= 400) return { max: 2.0, boost: 1.0 };
-        return { max: 1.5, boost: 0.6 };
+        if (score <= 50) return { max: 5.0, boost: 4.0 };
+        if (score <= 100) return { max: 4.0, boost: 3.0 }; //게이지 충전
+        if (score <= 200) return { max: 3.0, boost: 2.0 };
+        if (score <= 300) return { max: 2.5, boost: 1.0 };
+        if (score <= 400) return { max: 2.0, boost: 0.7 };
+        return { max: 1.5, boost: 0.5 };
       } else {
         if (score <= 100) return { max: 3.0, boost: 0.8 };
-        if (score <= 200) return { max: 2.0, boost: 0.6 };
-        if (score <= 300) return { max: 1.0, boost: 0.5 };
+        if (score <= 200) return { max: 2.0, boost: 0.7 };
+        if (score <= 300) return { max: 1.0, boost: 0.6 };
         if (score <= 400) return { max: 1.0, boost: 0.4 };
-        return { max: 1.0, boost: 0.4 };
+        return { max: 1.0, boost: 0.3 };
       }
     }
 
