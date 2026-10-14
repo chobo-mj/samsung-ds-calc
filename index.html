@@ -1432,24 +1432,26 @@
       return incomeTax + localTax;
     }
 
-    function calcMonthlyDeductions(monthlyGrossWon, prevYearWon) {
-        const npsBase = Math.min(monthlyGrossWon, 6170000);
-        const nps = Math.floor(npsBase * 0.045);
-        
-        // 👉 건보료 보수월액 상한액 적용 (초고소득 건보료 폭발 방지)
-        let nhiMonthlyBase = Math.max(monthlyGrossWon, (prevYearWon / 12));
-        nhiMonthlyBase = Math.min(nhiMonthlyBase, 119625120); 
-        
-        const nhi = Math.floor(nhiMonthlyBase * 0.03545);
-        const ltc = Math.floor(nhi * 0.1295);
-        const ei = Math.floor(monthlyGrossWon * 0.009);
-        
-        const incTax = getStandardMonthlyIncomeTax(monthlyGrossWon);
-        const totalDeduction = nps + nhi + ltc + ei + incTax;
-        const netMonthly = monthlyGrossWon - totalDeduction;
-        
-        return { gross: monthlyGrossWon, nps, nhiPlusLtc: nhi + ltc, ei, incTax, totalDeduction, netMonthly };
-    }
+    function calcMonthlyDeductions(monthlyGrossWon, prevYearWon, yearIndex = 0) {
+    // 👉 국민연금 상한액을 매년 4%씩 인상 (24년 상한액 617만 원 기준)
+    const npsCap = Math.round(6170000 * Math.pow(1.04, yearIndex));
+    const npsBase = Math.min(monthlyGrossWon, npsCap);
+    const nps = Math.floor(npsBase * 0.045);
+    
+    // 건보료 상한액 적용
+    let nhiMonthlyBase = Math.max(monthlyGrossWon, (prevYearWon / 12));
+    nhiMonthlyBase = Math.min(nhiMonthlyBase, 119625120); 
+    
+    const nhi = Math.floor(nhiMonthlyBase * 0.03545);
+    const ltc = Math.floor(nhi * 0.1295);
+    const ei = Math.floor(monthlyGrossWon * 0.009);
+    
+    const incTax = getStandardMonthlyIncomeTax(monthlyGrossWon);
+    const totalDeduction = nps + nhi + ltc + ei + incTax;
+    const netMonthly = monthlyGrossWon - totalDeduction;
+    
+    return { gross: monthlyGrossWon, nps, nhiPlusLtc: nhi + ltc, ei, incTax, totalDeduction, netMonthly };
+}
 
     function getSpecialBonus(pProfit, salaryManwon, divCode, yr) {
       const threshold = (yr <= 2028) ? 200 : 100;
@@ -1846,7 +1848,7 @@ function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
     
     for (let i = 0; i < 6; i++) {
         const yr = 2026 + i;
-        const yearSalary = Math.round(startSalary * Math.pow(1.04, i));
+        const yearSalary = Math.round(startSalary * Math.pow(1.04, i)); // 국민연금 매년 얼마 오를지 모르니 일단 4%
         const monthlyGross = Math.round((yearSalary * 10000) / 12);
         
         let prevGrossForThisYear = 0;
@@ -1860,8 +1862,9 @@ function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
                 ? sharedYearlyGross[i - 1] 
                 : (yearSalary * 1.5 * 10000);
         }
-        
-        const d = calcMonthlyDeductions(monthlyGross, prevGrossForThisYear);
+      
+        // 👉 세 번째 인자로 yearIndex(i)를 전달하여 연도별 상한액 인상률 적용
+        const d = calcMonthlyDeductions(monthlyGross, prevGrossForThisYear, i);
         
         const row = document.createElement('tr');
         row.className = 'hover:bg-slate-50 transition-colors';
