@@ -3571,7 +3571,7 @@ function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
 
       baseSalaryInput.addEventListener('input', () => {
         const val = parseFloat(baseSalaryInput.value) || 8000;
-        if (isPrevAuto) prevYearIncomeInput.value = Math.round(val * 1.5);
+        if (isPrevAuto) prevYearIncomeInput.value = Math.round(val * 1.7);
         update5YrSalaries(val);
         recalculateAll();
         saveToLocalStorage();
