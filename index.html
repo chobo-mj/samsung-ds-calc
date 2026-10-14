@@ -1838,12 +1838,17 @@ function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
         
         let prevGrossForThisYear = 0;
         
-        if (i === 0) {
-            // 2026년: 사용자가 상단에 입력한 전년도 소득 사용
+        if (i === 0 || i === 1) {
+            // 👉 2026년(26년분)과 2027년(27년분) 월급은 사용자가 입력한 초기 전년도 소득 기준 유지
+            // (27년에 받은 OPI2는 아직 28년 4월 건보료 개편 전이므로 27년 월급에 영향을 주지 않음)
             prevGrossForThisYear = initialPrevGrossWon;
+        } else if (i === 2) {
+            // 👉 2028년(28년분) 월급: 2027년에 입금된 성과급(OPI2 포함)이 반영된 2027년 총소득(sharedYearlyGross[1]) 적용
+            prevGrossForThisYear = (sharedYearlyGross && sharedYearlyGross[1]) 
+                ? sharedYearlyGross[1] 
+                : (yearSalary * 1.5 * 10000);
         } else {
-            // 2027년(i=1)은 26년도 실제 소득(sharedYearlyGross[0]), 
-            // 2028년(i=2)은 27년도 실제 소득(sharedYearlyGross[1])을 건보료 기준으로 반영
+            // 👉 2029년 이후(i=3, 4): 직전 연도 실제 총소득 적용
             prevGrossForThisYear = (sharedYearlyGross && sharedYearlyGross[i - 1]) 
                 ? sharedYearlyGross[i - 1] 
                 : (yearSalary * 1.5 * 10000);
@@ -1864,7 +1869,7 @@ function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
             <td class="py-3 px-3 text-rose-600 font-bold">-${nComma(d.totalDeduction)}원</td>
             <td class="py-3 px-3 text-emerald-700 font-extrabold text-sm bg-emerald-50/40">${nComma(d.netMonthly)}원</td>
         `;
-        tbody.appendChild(row); // 자꾸 논리오류.. 이번엔 맞게 계산좀되라 얍
+        tbody.appendChild(row);
     }
 }
     
