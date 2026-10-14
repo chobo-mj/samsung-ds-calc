@@ -1827,7 +1827,7 @@
     }
 
 
-  function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
+function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
     const tbody = document.getElementById('monthlySalaryTableBody');
     tbody.innerHTML = '';
     
@@ -1839,8 +1839,11 @@
         let prevGrossForThisYear = 0;
         
         if (i === 0) {
+            // 2026년: 사용자가 상단에 입력한 전년도 소득 사용
             prevGrossForThisYear = initialPrevGrossWon;
         } else {
+            // 2027년(i=1)은 26년도 실제 소득(sharedYearlyGross[0]), 
+            // 2028년(i=2)은 27년도 실제 소득(sharedYearlyGross[1])을 건보료 기준으로 반영
             prevGrossForThisYear = (sharedYearlyGross && sharedYearlyGross[i - 1]) 
                 ? sharedYearlyGross[i - 1] 
                 : (yearSalary * 1.5 * 10000);
