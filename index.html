@@ -1844,7 +1844,7 @@ function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
     const tbody = document.getElementById('monthlySalaryTableBody');
     tbody.innerHTML = '';
     
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 6; i++) {
         const yr = 2026 + i;
         const yearSalary = Math.round(startSalary * Math.pow(1.04, i));
         const monthlyGross = Math.round((yearSalary * 10000) / 12);
