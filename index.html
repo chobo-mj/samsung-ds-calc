@@ -1537,14 +1537,29 @@
       calc5YearVesting();
       renderMonthlySalaryTable(currentSalary, prevIncome * 10000);
     }
-
+    
+    
+    const yearlyTotalGross = [];
+    let sharedYearlyGross = []; // 연도별 총소득을 담을 전역 혹은 공유 변수 선언
+    
     function calc5YearVesting() {
       const profits = [];
       const salaries = [];
       const divCodes = [];
+      
 
       for (let i = 0; i < 5; i++) {
         const yr = 2026 + i;
+        const s = salaries[i];
+        const tai = s * 0.10;
+        const opi = s * 0.50;
+        const cashPre = s + tai + opi;
+        const bPre = getSpecialBonus(profits[i], s, divCodes[i], yr);
+
+        // 당해 연도 총 과세소득 (만 원 단위) = 현금보상총액(기본급+TAI+OPI) + 특별성과금 세전
+        const totalYearlyIncomeMan = cashPre + bPre;
+        yearlyTotalGross.push(totalYearlyIncomeMan * 10000);
+        
         profits.push(parseFloat(document.getElementById(`p_${yr}`).value) || 0);
         salaries.push(parseFloat(document.getElementById(`s_${yr}`).value) || 8000);
         const sel = document.getElementById(`div_${yr}`);
@@ -1713,6 +1728,8 @@
       }
 
       renderVestingChartWithCohorts(payYears, unlockedByPerfYear, lockedByPerfYear);
+      
+      sharedYearlyGross = yearlyTotalGross;
     }
 
     function renderVestingChartWithCohorts(payYears, unlockedByPerfYear, lockedByPerfYear) {
@@ -1838,23 +1855,37 @@
         const yr = 2026 + i;
         const yearSalary = Math.round(startSalary * Math.pow(1.04, i));
         const monthlyGross = Math.round((yearSalary * 10000) / 12);
-        const yearPrevGross = prevGrossWon * Math.pow(1.04, i);
-        const d = calcMonthlyDeductions(monthlyGross, yearPrevGross);
 
+        let prevGrossForThisYear = 0;
+        
+        if (i === 0) {
+            // 2026년은 사용자가 입력한(또는 자동계산된) 초기 전년도 소득 사용
+            prevGrossForThisYear = initialPrevGrossWon;
+        } else {
+            // 2027년 이후부터는 직전 연도(i-1)에 실제 발생한 총소득(현금+성과급)을 반영
+            // 단, sharedYearlyGross 데이터가 없을 경우를 대비해 기존 방식(연봉*1.5) fallback 처리
+            prevGrossForThisYear = (sharedYearlyGross && sharedYearlyGross[i - 1]) 
+                ? sharedYearlyGross[i - 1] 
+                : (yearSalary * 1.5 * 10000);
+        }  
+        
+        const d =  calcMonthlyDeductions(monthlyGross, prevGrossForThisYear);
+        
         const row = document.createElement('tr');
         row.className = 'hover:bg-slate-50 transition-colors';
         row.innerHTML = `
-          <td class="py-3 px-3 text-left font-bold text-slate-800">${yr}년</td>
-          <td class="py-3 px-3 font-semibold text-slate-700">${nComma(yearSalary)}만원</td>
-          <td class="py-3 px-3 font-bold text-slate-900">${nComma(d.gross)}원</td>
-          <td class="py-3 px-3 text-slate-500">${nComma(d.nps)}원</td>
-          <td class="py-3 px-3 text-slate-500">${nComma(d.nhiPlusLtc)}원</td>
-          <td class="py-3 px-3 text-slate-500">${nComma(d.ei)}원</td>
-          <td class="py-3 px-3 text-slate-500">${nComma(d.incTax)}원</td>
-          <td class="py-3 px-3 text-rose-600 font-bold">-${nComma(d.totalDeduction)}원</td>
-          <td class="py-3 px-3 text-emerald-700 font-extrabold text-sm bg-emerald-50/40">${nComma(d.netMonthly)}원</td>
+            <td class="py-3 px-3 text-left font-bold text-slate-800">${yr}년</td>
+            <td class="py-3 px-3 font-semibold text-slate-700">${nComma(yearSalary)}만원</td>
+            <td class="py-3 px-3 font-bold text-slate-900">${nComma(d.gross)}원</td>
+            <td class="py-3 px-3 text-slate-500">${nComma(d.nps)}원</td>
+            <td class="py-3 px-3 text-slate-500">${nComma(d.nhiPlusLtc)}원</td>
+            <td class="py-3 px-3 text-slate-500">${nComma(d.ei)}원</td>
+            <td class="py-3 px-3 text-slate-500">${nComma(d.incTax)}원</td>
+            <td class="py-3 px-3 text-rose-600 font-bold">-${nComma(d.totalDeduction)}원</td>
+            <td class="py-3 px-3 text-emerald-700 font-extrabold text-sm bg-emerald-50/40">${nComma(d.netMonthly)}원</td>
         `;
         tbody.appendChild(row);
+        
       }
     }
 
