@@ -579,7 +579,7 @@
                 <h4 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
                   <i class="fa-solid fa-pen-to-square text-indigo-600"></i> 연도별 소속 사업부(파견), 영업이익, 계약연봉 세부 편집
                 </h4>
-                <p class="text-xs text-slate-500 mt-0.5">※ 상단 메인 탭 선택 시 5년 전체가 자동 동기화되며, 필요한 연도만 개별 수정 가능합니다.</p>
+                <p class="text-xs text-slate-500 mt-0.5">※29년 30년 영익은 비관적인 제미나이가 예측함.</p>
               </div>
               <button onclick="reset5YrDefaults()" class="text-xs text-indigo-600 hover:underline font-bold">기본값 리셋</button>
             </div>
@@ -649,8 +649,8 @@
                     <td class="p-1.5"><input type="number" id="p_2026" value="381" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
                     <td class="p-1.5"><input type="number" id="p_2027" value="547" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
                     <td class="p-1.5"><input type="number" id="p_2028" value="568" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
-                    <td class="p-1.5"><input type="number" id="p_2029" value="518" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
-                    <td class="p-1.5"><input type="number" id="p_2030" value="466" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
+                    <td class="p-1.5"><input type="number" id="p_2029" value="320" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
+                    <td class="p-1.5"><input type="number" id="p_2030" value="300" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
                   </tr>
 
                   <tr>
@@ -1054,7 +1054,7 @@
     let chartInstance = null;
     
     // 영익수정 여기서 하자
-    const profits = [381, 547, 568, 518, 466];
+    const profits = [381, 547, 568, 320, 300];
     
     function formatKRW(val) {
       if (isNaN(val) || val === null) return '0원';
