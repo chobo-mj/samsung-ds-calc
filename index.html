@@ -1864,7 +1864,7 @@ function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
             <td class="py-3 px-3 text-rose-600 font-bold">-${nComma(d.totalDeduction)}원</td>
             <td class="py-3 px-3 text-emerald-700 font-extrabold text-sm bg-emerald-50/40">${nComma(d.netMonthly)}원</td>
         `;
-        tbody.appendChild(row);
+        tbody.appendChild(row); // 자꾸 논리오류.. 이번엔 맞게 계산좀되라 얍
     }
 }
     
