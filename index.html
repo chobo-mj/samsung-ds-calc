@@ -1543,7 +1543,7 @@
     let sharedYearlyGross = []; // 연도별 총소득을 담을 전역 혹은 공유 변수 선언
     
     function calc5YearVesting() {
-      const profits = [];
+      const pValues = [];
       const salaries = [];
       const divCodes = [];
       
@@ -1554,18 +1554,36 @@
         const tai = s * 0.10;
         const opi = s * 0.50;
         const cashPre = s + tai + opi;
-        const bPre = getSpecialBonus(profits[i], s, divCodes[i], yr);
-
-        // 당해 연도 총 과세소득 (만 원 단위) = 현금보상총액(기본급+TAI+OPI) + 특별성과금 세전
-        const totalYearlyIncomeMan = cashPre + bPre;
-        yearlyTotalGross.push(totalYearlyIncomeMan * 10000);
+        const bPre = getSpecialBonus(pValues[i], s, divCodes[i], yr);
         
-        profits.push(parseFloat(document.getElementById(`p_${yr}`).value) || 0);
-        salaries.push(parseFloat(document.getElementById(`s_${yr}`).value) || 8000);
-        const sel = document.getElementById(`div_${yr}`);
-        divCodes.push(sel ? sel.value : globalDivision);
+        // 당해 연도 총 과세소득 (원 단위) = (현금보상총액 + 특별성과금 세전) * 10000
+        const totalYearlyIncomeWon = (cashPre + bPre) * 10000;
+        yearlyTotalGross.push(totalYearlyIncomeWon);
+
+        const bPost = bPre * (1 - 0.54476);
+        const totalGrossWon = totalYearlyIncomeWon;
+        const finalAnnualTaxWon = calcIncomeTax(totalGrossWon);
+        const specIncomeTaxWon = (bPre * 0.495) * 10000;
+        const cashWithheldTaxWon = calcIncomeTax(cashPre * 10000);
+        const totalWithheldWon = specIncomeTaxWon + cashWithheldTaxWon;
+        const taxRefundWon = Math.max(0, totalWithheldWon - finalAnnualTaxWon);
+        
+        const cashWithheldGeneral = calcIncomeTax(cashPre * 10000);
+        const cashPost = (cashPre * 10000 - cashWithheldGeneral) / 10000;
+        
+        yearlyBonusPre.push(bPre);
+        yearlyBonusPost.push(bPost);
+        yearlyTaiPre.push(tai);
+        yearlyOpiPre.push(opi);
+        yearlyCashPre.push(cashPre);
+        yearlyGrandPre.push(cashPre + bPre);
+        yearlyGrandPost.push(cashPost + bPost);
+        yearlyRefundWon.push(taxRefundWon);
       }
 
+      // 👉 2028년 이후 월급 계산용으로 공유 변수에 전달
+      sharedYearlyGross = yearlyTotalGross;
+      
       const yearlyBonusPre = [];
       const yearlyBonusPost = [];
       const yearlyTaiPre = [];
@@ -1729,7 +1747,7 @@
 
       renderVestingChartWithCohorts(payYears, unlockedByPerfYear, lockedByPerfYear);
       
-      sharedYearlyGross = yearlyTotalGross;
+
     }
 
     function renderVestingChartWithCohorts(payYears, unlockedByPerfYear, lockedByPerfYear) {
