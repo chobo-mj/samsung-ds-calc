@@ -972,7 +972,7 @@
     </div>
   </footer>
 
-  <!-- ==================== SCRIPT SECTIONS ==================== -->
+  <!-- ==================== 계산기 스크립트 영역 SCRIPT SECTIONS ==================== -->
   <script>
     // ----------------------------------------------------
     // 0. HEADER FOLD / EXPAND CONTROLLER
@@ -1052,7 +1052,10 @@
     let is5YrDetailOpen = true;
     let isPrevAuto = true;
     let chartInstance = null;
-
+    
+    // 영익수정 여기서 하자
+    const profits = [381, 547, 568, 518, 466];
+    
     function formatKRW(val) {
       if (isNaN(val) || val === null) return '0원';
       const roundVal = Math.round(val);
@@ -1272,7 +1275,7 @@
     }
 
     function reset5YrDefaults() {
-      const profits = [381, 547, 568, 518, 466];
+      
       for (let i = 0; i < 5; i++) {
         document.getElementById(`p_${2026 + i}`).value = profits[i];
       }
