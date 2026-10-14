@@ -226,13 +226,13 @@
               <span class="text-[11px] text-slate-400 font-medium">문턱: 200조</span>
             </div>
             <div class="relative flex items-center">
-              <input type="number" id="companyProfit" value="394" min="0" step="1" 
+              <input type="number" id="companyProfit" value="381" min="0" step="1" 
                      class="w-full bg-white text-slate-900 text-lg sm:text-xl font-bold rounded-lg border border-slate-300 px-3 py-2 text-right pr-12 focus:outline-none focus:border-blue-500">
               <span class="absolute right-3 text-slate-500 font-semibold text-sm pointer-events-none">조 원</span>
             </div>
             <p class="text-[11px] text-slate-500 mt-2 flex justify-between">
-              <span>2026 컨센서스: 394조</span>
-              <button onclick="setProfit(394)" class="text-blue-600 font-semibold hover:underline">394조 복원</button>
+              <span>2026 컨센서스: 81조</span>
+              <button onclick="setProfit(381)" class="text-blue-600 font-semibold hover:underline">381조 복원</button>
             </p>
           </div>
 
@@ -644,9 +644,9 @@
                       DS 영업이익 (조원)
                       <span class="block text-[10px] text-slate-400 font-normal">문턱: 26~28년 200조 / 이후 100조</span>
                     </td>
-                    <td class="p-1.5"><input type="number" id="p_2026" value="394" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
-                    <td class="p-1.5"><input type="number" id="p_2027" value="567" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
-                    <td class="p-1.5"><input type="number" id="p_2028" value="576" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
+                    <td class="p-1.5"><input type="number" id="p_2026" value="381" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
+                    <td class="p-1.5"><input type="number" id="p_2027" value="547" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
+                    <td class="p-1.5"><input type="number" id="p_2028" value="568" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
                     <td class="p-1.5"><input type="number" id="p_2029" value="518" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
                     <td class="p-1.5"><input type="number" id="p_2030" value="466" onchange="recalculateAll()" class="w-full text-center py-1.5 px-1 border rounded font-semibold text-slate-900 bg-slate-50 focus:bg-white"></td>
                   </tr>
@@ -1262,7 +1262,7 @@
     }
 
     function reset5YrDefaults() {
-      const profits = [394, 567, 576, 518, 466];
+      const profits = [381, 547, 568, 518, 466];
       for (let i = 0; i < 5; i++) {
         document.getElementById(`p_${2026 + i}`).value = profits[i];
       }
