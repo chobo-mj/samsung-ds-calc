@@ -1437,9 +1437,9 @@
         }
     
         // 연간 산출세액을 12개월로 나누어 월별 소득세 도출
-        const monthlyIncomeTax = Math.floor(annualTax / 12);
+        const monthlyIncomeTax = Math.floor((annualTax / 12) / 10) * 10; // 나누기10 곱하기10 - 원단위 절사
         // 지방소득세는 소득세의 10%
-        const monthlyLocalTax = Math.floor(monthlyIncomeTax * 0.1);
+        const monthlyLocalTax = Math.floor((monthlyIncomeTax * 0.1) / 10) * 10;
     
         return monthlyIncomeTax + monthlyLocalTax;
     }
@@ -1448,7 +1448,8 @@
     // 👉 얼마 오를지 모르니 국민연금 상한액을 매년 4%씩 인상 (24년 상한액 617만 원 기준)
     const npsCap = Math.round(6170000 * Math.pow(1.04, yearIndex));
     const npsBase = Math.min(monthlyGrossWon, npsCap);
-    const nps = Math.floor(npsBase * 0.045);
+    // 👉 4대보험 원단위 절사 (/ 10) * 10 적용
+    const nps = Math.floor((npsBase * 0.045) / 10) * 10;
     
     // 건보료 상한액 적용
     let nhiMonthlyBase = Math.max(monthlyGrossWon, (prevYearWon / 12));
