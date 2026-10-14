@@ -1433,17 +1433,22 @@
     }
 
     function calcMonthlyDeductions(monthlyGrossWon, prevYearWon) {
-      const npsBase = Math.min(monthlyGrossWon, 6170000);
-      const nps = Math.floor(npsBase * 0.045);
-      const nhiMonthlyBase = Math.max(monthlyGrossWon, (prevYearWon / 12));
-      const nhi = Math.floor(nhiMonthlyBase * 0.03545);
-      const ltc = Math.floor(nhi * 0.1295);
-      const ei = Math.floor(monthlyGrossWon * 0.009);
-      const incTax = getStandardMonthlyIncomeTax(monthlyGrossWon);
-      const totalDeduction = nps + nhi + ltc + ei + incTax;
-      const netMonthly = monthlyGrossWon - totalDeduction;
-
-      return { gross: monthlyGrossWon, nps, nhiPlusLtc: nhi + ltc, ei, incTax, totalDeduction, netMonthly };
+        const npsBase = Math.min(monthlyGrossWon, 6170000);
+        const nps = Math.floor(npsBase * 0.045);
+        
+        // 👉 건보료 보수월액 상한액 적용 (초고소득 건보료 폭발 방지)
+        let nhiMonthlyBase = Math.max(monthlyGrossWon, (prevYearWon / 12));
+        nhiMonthlyBase = Math.min(nhiMonthlyBase, 119625120); 
+        
+        const nhi = Math.floor(nhiMonthlyBase * 0.03545);
+        const ltc = Math.floor(nhi * 0.1295);
+        const ei = Math.floor(monthlyGrossWon * 0.009);
+        
+        const incTax = getStandardMonthlyIncomeTax(monthlyGrossWon);
+        const totalDeduction = nps + nhi + ltc + ei + incTax;
+        const netMonthly = monthlyGrossWon - totalDeduction;
+        
+        return { gross: monthlyGrossWon, nps, nhiPlusLtc: nhi + ltc, ei, incTax, totalDeduction, netMonthly };
     }
 
     function getSpecialBonus(pProfit, salaryManwon, divCode, yr) {
@@ -1543,8 +1548,9 @@
     let sharedYearlyGross = []; // 연도별 총소득을 담을 전역 혹은 공유 변수 선언
     
 
+
     function calc5YearVesting() {
-    const pValues = []; // profits 배열과 이름이 겹치지 않도록 변수이름 갈이함. ㅠㅠ
+    const pValues = [];
     const salaries = [];
     const divCodes = [];
     for (let i = 0; i < 5; i++) {
@@ -1563,7 +1569,6 @@
     const yearlyGrandPre = [];
     const yearlyGrandPost = [];
     const yearlyRefundWon = []; 
-    const yearlyTotalGross = []; // 2028년 이후 건보료 연동용 연도별 총소득 배열
 
     for (let i = 0; i < 5; i++) {
         const yr = 2026 + i;
@@ -1573,13 +1578,11 @@
         const cashPre = s + tai + opi;
         const bPre = getSpecialBonus(pValues[i], s, divCodes[i], yr);
         
-        // 당해 연도 총 과세소득 (원 단위)
-        const totalYearlyIncomeWon = (cashPre + bPre) * 10000;
-        yearlyTotalGross.push(totalYearlyIncomeWon);
+        // 환급금 정산을 위한 패키지 기준 총소득 (실제 현금흐름 아님)
+        const packageTotalWon = (cashPre + bPre) * 10000;
 
         const bPost = bPre * (1 - 0.54476);
-        const totalGrossWon = totalYearlyIncomeWon;
-        const finalAnnualTaxWon = calcIncomeTax(totalGrossWon);
+        const finalAnnualTaxWon = calcIncomeTax(packageTotalWon);
         const specIncomeTaxWon = (bPre * 0.495) * 10000;
         const cashWithheldTaxWon = calcIncomeTax(cashPre * 10000);
         const totalWithheldWon = specIncomeTaxWon + cashWithheldTaxWon;
@@ -1598,7 +1601,18 @@
         yearlyRefundWon.push(taxRefundWon);
     }
 
-    // 2028년 이후 월급 계산용으로 공유 변수에 전달
+    // 👉 [수정] 건보료 산정을 위한 '실제 연도별 현금흐름 소득' 재계산
+    const yearlyTotalGross = [];
+    for (let i = 0; i < 5; i++) {
+        const cashPre = yearlyCashPre[i];
+        // 2026년(i=0)에는 특별성과급 입금이 없으므로 0원, 2027년(i=1)부터 직전 연도분 반영
+        const receivedBonusPre = (i === 0) ? 0 : yearlyBonusPre[i - 1]; 
+        
+        const actualTotalIncomeWon = (cashPre + receivedBonusPre) * 10000;
+        yearlyTotalGross.push(actualTotalIncomeWon);
+    }
+
+    // 2028년 이후 월급 계산용으로 공유
     sharedYearlyGross = yearlyTotalGross;
 
     // 주식 락업 해제 계산
@@ -1618,8 +1632,7 @@
             const payYr = perfYr + 1;
             const bonus = yearlyBonusPost[pIdx];
             const oneThird = bonus / 3;
-            let unl = 0;
-            let lck = 0;
+            let unl = 0; let lck = 0;
             if (calYr === payYr) {
                 newInflows[cIdx] += bonus;
                 unl = oneThird;
@@ -1838,17 +1851,11 @@ function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
         
         let prevGrossForThisYear = 0;
         
-        if (i === 0 || i === 1) {
-            // 👉 2026년(26년분)과 2027년(27년분) 월급은 사용자가 입력한 초기 전년도 소득 기준 유지
-            // (27년에 받은 OPI2는 아직 28년 4월 건보료 개편 전이므로 27년 월급에 영향을 주지 않음)
+        if (i === 0) {
+            // 2026년은 사용자가 입력한 초기값
             prevGrossForThisYear = initialPrevGrossWon;
-        } else if (i === 2) {
-            // 👉 2028년(28년분) 월급: 2027년에 입금된 성과급(OPI2 포함)이 반영된 2027년 총소득(sharedYearlyGross[1]) 적용
-            prevGrossForThisYear = (sharedYearlyGross && sharedYearlyGross[1]) 
-                ? sharedYearlyGross[1] 
-                : (yearSalary * 1.5 * 10000);
         } else {
-            // 👉 2029년 이후(i=3, 4): 직전 연도 실제 총소득 적용
+            // 2027년(i=1)부터는 정상적으로 직전 연도(i-1)의 현금흐름 소득을 참조
             prevGrossForThisYear = (sharedYearlyGross && sharedYearlyGross[i - 1]) 
                 ? sharedYearlyGross[i - 1] 
                 : (yearSalary * 1.5 * 10000);
