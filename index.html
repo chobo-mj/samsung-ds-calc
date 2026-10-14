@@ -1542,13 +1542,30 @@
     const yearlyTotalGross = [];
     let sharedYearlyGross = []; // 연도별 총소득을 담을 전역 혹은 공유 변수 선언
     
-    function calc5YearVesting() {
-      const pValues = [];
-      const salaries = [];
-      const divCodes = [];
-      
 
-      for (let i = 0; i < 5; i++) {
+    function calc5YearVesting() {
+    const pValues = [];
+    const salaries = [];
+    const divCodes = [];
+    for (let i = 0; i < 5; i++) {
+        const yr = 2026 + i;
+        pValues.push(parseFloat(document.getElementById(`p_${yr}`).value) || 0);
+        salaries.push(parseFloat(document.getElementById(`s_${yr}`).value) || 8000);
+        const sel = document.getElementById(`div_${yr}`);
+        divCodes.push(sel ? sel.value : globalDivision);
+    }
+
+    const yearlyBonusPre = [];
+    const yearlyBonusPost = [];
+    const yearlyTaiPre = [];
+    const yearlyOpiPre = [];
+    const yearlyCashPre = [];
+    const yearlyGrandPre = [];
+    const yearlyGrandPost = [];
+    const yearlyRefundWon = []; 
+    const yearlyTotalGross = []; // 2028년 이후 건보료 연동용 연도별 총소득 배열
+
+    for (let i = 0; i < 5; i++) {
         const yr = 2026 + i;
         const s = salaries[i];
         const tai = s * 0.10;
@@ -1556,7 +1573,7 @@
         const cashPre = s + tai + opi;
         const bPre = getSpecialBonus(pValues[i], s, divCodes[i], yr);
         
-        // 당해 연도 총 과세소득 (원 단위) = (현금보상총액 + 특별성과금 세전) * 10000
+        // 당해 연도 총 과세소득 (원 단위)
         const totalYearlyIncomeWon = (cashPre + bPre) * 10000;
         yearlyTotalGross.push(totalYearlyIncomeWon);
 
@@ -1579,127 +1596,71 @@
         yearlyGrandPre.push(cashPre + bPre);
         yearlyGrandPost.push(cashPost + bPost);
         yearlyRefundWon.push(taxRefundWon);
-      }
+    }
 
-      // 👉 2028년 이후 월급 계산용으로 공유 변수에 전달
-      sharedYearlyGross = yearlyTotalGross;
-      
-      const yearlyBonusPre = [];
-      const yearlyBonusPost = [];
-      const yearlyTaiPre = [];
-      const yearlyOpiPre = [];
-      const yearlyCashPre = [];
-      const yearlyGrandPre = [];
-      const yearlyGrandPost = []; // 환급금이 미포함된 순수 당해 세후 보상
-      const yearlyRefundWon = []; // 각 실적연도로 인해 발생하는 환급 세액
+    // 2028년 이후 월급 계산용으로 공유 변수에 전달
+    sharedYearlyGross = yearlyTotalGross;
 
-      for (let i = 0; i < 5; i++) {
-        const yr = 2026 + i;
-        const s = salaries[i];
-        const tai = s * 0.10;
-        const opi = s * 0.50;
-        const cashPre = s + tai + opi;
-        
-        const bPre = getSpecialBonus(profits[i], s, divCodes[i], yr);
-        const bPost = bPre * (1 - 0.54476);
-        
-        const totalGrossWon = (cashPre + bPre) * 10000;
-        const finalAnnualTaxWon = calcIncomeTax(totalGrossWon);
-        const specIncomeTaxWon = (bPre * 0.495) * 10000;
-        const cashWithheldTaxWon = calcIncomeTax(cashPre * 10000);
-        const totalWithheldWon = specIncomeTaxWon + cashWithheldTaxWon;
-        const taxRefundWon = Math.max(0, totalWithheldWon - finalAnnualTaxWon);
+    // 주식 락업 해제 계산
+    const payYears = [2027, 2028, 2029, 2030, 2031];
+    const unlockedByPerfYear = { 2026: [], 2027: [], 2028: [], 2029: [], 2030: [] };
+    const lockedByPerfYear = { 2026: [], 2027: [], 2028: [], 2029: [], 2030: [] };
+    const newInflows = [0, 0, 0, 0, 0];
+    const totalUnlockedThisYear = [0, 0, 0, 0, 0]; 
+    const totalLockedThisYear = [0, 0, 0, 0, 0]; 
 
-        // 지급 시점의 순수 세후 현금
-        const cashWithheldGeneral = calcIncomeTax(cashPre * 10000);
-        const cashPost = (cashPre * 10000 - cashWithheldGeneral) / 10000;
-
-        yearlyBonusPre.push(bPre);
-        yearlyBonusPost.push(bPost);
-        yearlyTaiPre.push(tai);
-        yearlyOpiPre.push(opi);
-        yearlyCashPre.push(cashPre);
-        yearlyGrandPre.push(cashPre + bPre);
-        yearlyGrandPost.push(cashPost + bPost); // 환급금 제외된 세후 총 보상
-        yearlyRefundWon.push(taxRefundWon);
-      }
-
-      // 주식 락업 해제 계산: 실적연도(지급연도+1)에 따라 1/3 즉시, 1/3 1년뒤, 1/3 2년뒤
-      const payYears = [2027, 2028, 2029, 2030, 2031];
-      const unlockedByPerfYear = { 2026: [], 2027: [], 2028: [], 2029: [], 2030: [] };
-      const lockedByPerfYear = { 2026: [], 2027: [], 2028: [], 2029: [], 2030: [] };
-
-      const newInflows = [0, 0, 0, 0, 0];
-      const totalUnlockedThisYear = [0, 0, 0, 0, 0]; // 당해에 매도 가능해진 총 자사주 (당해 1/3 + 과거 해제분)
-      const totalLockedThisYear = [0, 0, 0, 0, 0];
-
-      for (let cIdx = 0; cIdx < payYears.length; cIdx++) {
+    for (let cIdx = 0; cIdx < payYears.length; cIdx++) {
         const calYr = payYears[cIdx];
         let yearUnlockedSum = 0;
         let yearLockedSum = 0;
-
         for (let pIdx = 0; pIdx < 5; pIdx++) {
-          const perfYr = 2026 + pIdx;
-          const payYr = perfYr + 1;
-          const bonus = yearlyBonusPost[pIdx];
-          const oneThird = bonus / 3;
-
-          let unl = 0;
-          let lck = 0;
-
-          if (calYr === payYr) {
-            newInflows[cIdx] += bonus;
-            unl = oneThird;
-            lck = bonus - oneThird;
-          } else if (calYr === payYr + 1) {
-            unl = oneThird;
-            lck = bonus - (oneThird * 2);
-          } else if (calYr === payYr + 2) {
-            unl = oneThird;
-            lck = 0;
-          }
-
-          unlockedByPerfYear[perfYr].push(Math.round(unl));
-          lockedByPerfYear[perfYr].push(Math.round(lck));
-          yearUnlockedSum += unl;
-          yearLockedSum += lck;
+            const perfYr = 2026 + pIdx;
+            const payYr = perfYr + 1;
+            const bonus = yearlyBonusPost[pIdx];
+            const oneThird = bonus / 3;
+            let unl = 0;
+            let lck = 0;
+            if (calYr === payYr) {
+                newInflows[cIdx] += bonus;
+                unl = oneThird;
+                lck = bonus - oneThird;
+            } else if (calYr === payYr + 1) {
+                unl = oneThird;
+                lck = bonus - (oneThird * 2);
+            } else if (calYr === payYr + 2) {
+                unl = oneThird;
+                lck = 0;
+            }
+            unlockedByPerfYear[perfYr].push(Math.round(unl));
+            lockedByPerfYear[perfYr].push(Math.round(lck));
+            yearUnlockedSum += unl;
+            yearLockedSum += lck;
         }
-
         totalUnlockedThisYear[cIdx] = yearUnlockedSum;
         totalLockedThisYear[cIdx] = yearLockedSum;
-      }
+    }
 
-      // 환급금 이연 맵: 실적 2026년(27년 3월 지급분 소득) -> 2028년 지급연도 행에 입금
-      // payYears[i] 기준: i=0(2027년 지급) -> 이전 실적(2025) 환급금 미존재로 '-', i=1(2028년 지급) -> 2026년 실적분 환급금 입금
-      const refundPouredInPayYearWon = [0, 0, 0, 0, 0];
-      const refundPerfYearNote = ['', '', '', '', ''];
-      for (let i = 1; i < 5; i++) {
-        refundPouredInPayYearWon[i] = yearlyRefundWon[i - 1]; // 전년도 실적분 환급액
+    const refundPouredInPayYearWon = [0, 0, 0, 0, 0];
+    const refundPerfYearNote = ['', '', '', '', ''];
+    for (let i = 1; i < 5; i++) {
+        refundPouredInPayYearWon[i] = yearlyRefundWon[i - 1];
         refundPerfYearNote[i] = `${2026 + (i - 1)}년분`;
-      }
-
-      const total5RefundWon = yearlyRefundWon.reduce((a, b) => a + b, 0);
-      const refundBadge = document.getElementById('fiveYrRefundSumBadge');
-      if (refundBadge) {
+    }
+    const total5RefundWon = yearlyRefundWon.reduce((a, b) => a + b, 0);
+    const refundBadge = document.getElementById('fiveYrRefundSumBadge');
+    if (refundBadge) {
         refundBadge.innerHTML = `5개년 환급 합계: <strong class="text-amber-700">+${formatKRW(total5RefundWon)}</strong>`;
-      }
+    }
 
-      // 5개년 종합 보상표 테이블 렌더링
-      const compTbody = document.getElementById('fiveYearCompTableBody');
-      compTbody.innerHTML = '';
-      for (let i = 0; i < 5; i++) {
+    const compTbody = document.getElementById('fiveYearCompTableBody');
+    compTbody.innerHTML = '';
+    for (let i = 0; i < 5; i++) {
         const pYr = 2026 + i;
         const payYr = pYr + 1;
-        
-        // 당해 입금 환급금 표기 (28년칸에 26년분 환급액)
         let refundDisplay = `<span class="text-slate-400 font-normal">-</span>`;
         if (refundPouredInPayYearWon[i] > 0) {
-          refundDisplay = `+${formatKRW(refundPouredInPayYearWon[i])} <span class="text-[10px] text-amber-700 font-normal">(${refundPerfYearNote[i]})</span>`;
+            refundDisplay = `+${formatKRW(refundPouredInPayYearWon[i])} <span class="text-[10px] text-amber-700 font-normal">(${refundPerfYearNote[i]})</span>`;
         }
-
-        // 당해 가용재원 최종합계:
-        // [그해 받은 즉시매도가능 주식(1/3) + 과거 수령 후 당해 매도가능해진 주식] = totalUnlockedThisYear[i]
-        // + [당해 입금된 연말정산 환급금] = refundPouredInPayYearWon[i]
         const availableUnlockedStockMan = totalUnlockedThisYear[i];
         const actualRefundMan = refundPouredInPayYearWon[i] / 10000;
         const totalLiquidityMan = availableUnlockedStockMan + actualRefundMan;
@@ -1707,48 +1668,48 @@
         const row = document.createElement('tr');
         row.className = 'hover:bg-slate-50 transition-colors';
         row.innerHTML = `
-          <td class="py-2.5 px-2.5 sm:px-3 text-left font-bold text-slate-800">${pYr}년 (${payYr}년 지급)</td>
-          <td class="py-2.5 px-2.5 sm:px-3">${nComma(salaries[i])}만</td>
-          <td class="py-2.5 px-2.5 sm:px-3 text-blue-600">${nComma(yearlyTaiPre[i])}만</td>
-          <td class="py-2.5 px-2.5 sm:px-3 text-purple-600">${nComma(yearlyOpiPre[i])}만</td>
-          <td class="py-2.5 px-2.5 sm:px-3 text-amber-600 font-bold">${formatKRW(yearlyBonusPre[i] * 10000)}</td>
-          <td class="py-2.5 px-2.5 sm:px-3 text-slate-900 font-bold">${formatKRW(yearlyGrandPre[i] * 10000)}</td>
-          <td class="py-2.5 px-2.5 sm:px-3 text-emerald-600 font-bold bg-emerald-50/40">${formatKRW(yearlyGrandPost[i] * 10000)}</td>
-          <td class="py-2.5 px-2.5 sm:px-3 text-amber-600 font-bold bg-amber-50/50">${refundDisplay}</td>
-          <td class="py-2.5 px-2.5 sm:px-3 text-rose-600 font-extrabold bg-rose-50/60">${formatKRW(totalLiquidityMan * 10000)}</td>
+            <td class="py-2.5 px-2.5 sm:px-3 text-left font-bold text-slate-800">${pYr}년 (${payYr}년 지급)</td>
+            <td class="py-2.5 px-2.5 sm:px-3">${nComma(salaries[i])}만</td>
+            <td class="py-2.5 px-2.5 sm:px-3 text-blue-600">${nComma(yearlyTaiPre[i])}만</td>
+            <td class="py-2.5 px-2.5 sm:px-3 text-purple-600">${nComma(yearlyOpiPre[i])}만</td>
+            <td class="py-2.5 px-2.5 sm:px-3 text-amber-600 font-bold">${formatKRW(yearlyBonusPre[i] * 10000)}</td>
+            <td class="py-2.5 px-2.5 sm:px-3 text-slate-900 font-bold">${formatKRW(yearlyGrandPre[i] * 10000)}</td>
+            <td class="py-2.5 px-2.5 sm:px-3 text-emerald-600 font-bold bg-emerald-50/40">${formatKRW(yearlyGrandPost[i] * 10000)}</td>
+            <td class="py-2.5 px-2.5 sm:px-3 text-amber-600 font-bold bg-amber-50/50">${refundDisplay}</td>
+            <td class="py-2.5 px-2.5 sm:px-3 text-rose-600 font-extrabold bg-rose-50/60">${formatKRW(totalLiquidityMan * 10000)}</td>
         `;
         compTbody.appendChild(row);
-      }
+    }
 
-      const total5Pre = yearlyBonusPre.reduce((a, b) => a + b, 0);
-      const total5Post = yearlyBonusPost.reduce((a, b) => a + b, 0);
-      const total5Unlocked = totalUnlockedThisYear.reduce((a, b) => a + b, 0);
-      const remainingLocked31 = total5Post - total5Unlocked;
+    const total5Pre = yearlyBonusPre.reduce((a, b) => a + b, 0);
+    const total5Post = yearlyBonusPost.reduce((a, b) => a + b, 0);
+    const total5Unlocked = totalUnlockedThisYear.reduce((a, b) => a + b, 0);
+    const remainingLocked31 = total5Post - total5Unlocked;
 
-      document.getElementById('fiveYrTotalPre').innerText = formatKRW(total5Pre * 10000);
-      document.getElementById('fiveYrTotalPost').innerText = formatKRW(total5Post * 10000);
-      document.getElementById('fiveYrUnlockedSum').innerText = formatKRW(total5Unlocked * 10000);
-      document.getElementById('fiveYrRemainingLocked').innerText = formatKRW(remainingLocked31 * 10000);
+    document.getElementById('fiveYrTotalPre').innerText = formatKRW(total5Pre * 10000);
+    document.getElementById('fiveYrTotalPost').innerText = formatKRW(total5Post * 10000);
+    document.getElementById('fiveYrUnlockedSum').innerText = formatKRW(total5Unlocked * 10000);
+    document.getElementById('fiveYrRemainingLocked').innerText = formatKRW(remainingLocked31 * 10000);
 
-      const tbody = document.getElementById('vestingTableBody');
-      tbody.innerHTML = '';
-      for (let i = 0; i < 5; i++) {
+    const tbody = document.getElementById('vestingTableBody');
+    tbody.innerHTML = '';
+    for (let i = 0; i < 5; i++) {
         const calYr = payYears[i];
         const row = document.createElement('tr');
         row.className = 'hover:bg-slate-100 transition-colors';
         row.innerHTML = `
-          <td class="py-2.5 text-left font-bold text-slate-800">${calYr}년 3월</td>
-          <td class="py-2.5 font-medium">${formatKRW(newInflows[i] * 10000)}</td>
-          <td class="py-2.5 text-emerald-600 font-bold">+${formatKRW(totalUnlockedThisYear[i] * 10000)}</td>
-          <td class="py-2.5 text-amber-600 font-medium">${formatKRW(totalLockedThisYear[i] * 10000)}</td>
+            <td class="py-2.5 text-left font-bold text-slate-800">${calYr}년 3월</td>
+            <td class="py-2.5 font-medium">${formatKRW(newInflows[i] * 10000)}</td>
+            <td class="py-2.5 text-emerald-600 font-bold">+${formatKRW(totalUnlockedThisYear[i] * 10000)}</td>
+            <td class="py-2.5 text-amber-600 font-medium">${formatKRW(totalLockedThisYear[i] * 10000)}</td>
         `;
         tbody.appendChild(row);
-      }
-
-      renderVestingChartWithCohorts(payYears, unlockedByPerfYear, lockedByPerfYear);
-      
-
     }
+
+    renderVestingChartWithCohorts(payYears, unlockedByPerfYear, lockedByPerfYear);
+}
+
+    
 
     function renderVestingChartWithCohorts(payYears, unlockedByPerfYear, lockedByPerfYear) {
       const ctx = document.getElementById('vestingChart').getContext('2d');
@@ -1865,29 +1826,27 @@
       });
     }
 
-    function renderMonthlySalaryTable(startSalary, prevGrossWon) {
-      const tbody = document.getElementById('monthlySalaryTableBody');
-      tbody.innerHTML = '';
 
-      for (let i = 0; i < 5; i++) {
+  function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
+    const tbody = document.getElementById('monthlySalaryTableBody');
+    tbody.innerHTML = '';
+    
+    for (let i = 0; i < 5; i++) {
         const yr = 2026 + i;
         const yearSalary = Math.round(startSalary * Math.pow(1.04, i));
         const monthlyGross = Math.round((yearSalary * 10000) / 12);
-
+        
         let prevGrossForThisYear = 0;
         
         if (i === 0) {
-            // 2026년은 사용자가 입력한(또는 자동계산된) 초기 전년도 소득 사용
             prevGrossForThisYear = initialPrevGrossWon;
         } else {
-            // 2027년 이후부터는 직전 연도(i-1)에 실제 발생한 총소득(현금+성과급)을 반영
-            // 단, sharedYearlyGross 데이터가 없을 경우를 대비해 기존 방식(연봉*1.5) fallback 처리
             prevGrossForThisYear = (sharedYearlyGross && sharedYearlyGross[i - 1]) 
                 ? sharedYearlyGross[i - 1] 
                 : (yearSalary * 1.5 * 10000);
-        }  
+        }
         
-        const d =  calcMonthlyDeductions(monthlyGross, prevGrossForThisYear);
+        const d = calcMonthlyDeductions(monthlyGross, prevGrossForThisYear);
         
         const row = document.createElement('tr');
         row.className = 'hover:bg-slate-50 transition-colors';
@@ -1903,9 +1862,9 @@
             <td class="py-3 px-3 text-emerald-700 font-extrabold text-sm bg-emerald-50/40">${nComma(d.netMonthly)}원</td>
         `;
         tbody.appendChild(row);
-        
-      }
     }
+}
+    
 
     // ----------------------------------------------------
     // 3. 2048 PUZZLE GAME ENGINE
