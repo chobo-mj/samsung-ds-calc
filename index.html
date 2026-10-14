@@ -1232,7 +1232,7 @@
         label.innerText = '자동 (연봉×1.7)';
         label.classList.add('text-blue-600');
         const sal = parseFloat(document.getElementById('baseSalary').value) || 8000;
-        document.getElementById('prevYearIncome').value = Math.round(sal * 1.5);
+        document.getElementById('prevYearIncome').value = Math.round(sal * 1.7);
       } else {
         label.innerText = '수동 입력 중';
         label.classList.remove('text-blue-600');
