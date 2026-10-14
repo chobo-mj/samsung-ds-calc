@@ -1411,29 +1411,41 @@
       return finalTax * 1.1;
     }
 
-    function getStandardMonthlyIncomeTax(monthlyGrossWon) {
-      if (monthlyGrossWon <= 1060000) return 0;
-      let baseTax = 0;
-      if (monthlyGrossWon > 14000000) {
-        baseTax = 3643640 + (monthlyGrossWon - 14000000) * 0.42;
-      } else if (monthlyGrossWon > 10000000) {
-        baseTax = 2123640 + (monthlyGrossWon - 10000000) * 0.38;
-      } else if (monthlyGrossWon > 7000000) {
-        baseTax = 1073640 + (monthlyGrossWon - 7000000) * 0.35;
-      } else if (monthlyGrossWon > 5000000) {
-        baseTax = 476000 + (monthlyGrossWon - 5000000) * 0.24;
-      } else if (monthlyGrossWon > 3000000) {
-        baseTax = 176000 + (monthlyGrossWon - 3000000) * 0.15;
-      } else {
-        baseTax = (monthlyGrossWon - 1060000) * 0.06;
-      }
-      const incomeTax = Math.floor(baseTax);
-      const localTax = Math.floor(incomeTax * 0.1);
-      return incomeTax + localTax;
+    function getStandardMonthlyIncomeTax(monthlyTaxBase) {
+        if (monthlyTaxBase <= 0) return 0;
+    
+        // 월 과세표준을 연환산하여 정확한 법정 종합소득세율 적용
+        const annualTaxBase = monthlyTaxBase * 12;
+        let annualTax = 0;
+    
+        if (annualTaxBase <= 14000000) {
+            annualTax = annualTaxBase * 0.06;
+        } else if (annualTaxBase <= 50000000) {
+            annualTax = 840000 + (annualTaxBase - 14000000) * 0.15;
+        } else if (annualTaxBase <= 88000000) {
+            annualTax = 6240000 + (annualTaxBase - 50000000) * 0.24;
+        } else if (annualTaxBase <= 150000000) {
+            annualTax = 15360000 + (annualTaxBase - 88000000) * 0.35;
+        } else if (annualTaxBase <= 300000000) {
+            annualTax = 37060000 + (annualTaxBase - 150000000) * 0.38;
+        } else if (annualTaxBase <= 500000000) {
+            annualTax = 94060000 + (annualTaxBase - 300000000) * 0.40;
+        } else if (annualTaxBase <= 1000000000) {
+            annualTax = 174060000 + (annualTaxBase - 500000000) * 0.42;
+        } else {
+            annualTax = 384060000 + (annualTaxBase - 1000000000) * 0.45;
+        }
+    
+        // 연간 산출세액을 12개월로 나누어 월별 소득세 도출
+        const monthlyIncomeTax = Math.floor(annualTax / 12);
+        // 지방소득세는 소득세의 10%
+        const monthlyLocalTax = Math.floor(monthlyIncomeTax * 0.1);
+    
+        return monthlyIncomeTax + monthlyLocalTax;
     }
 
     function calcMonthlyDeductions(monthlyGrossWon, prevYearWon, yearIndex = 0) {
-    // 👉 국민연금 상한액을 매년 4%씩 인상 (24년 상한액 617만 원 기준)
+    // 👉 얼마 오를지 모르니 국민연금 상한액을 매년 4%씩 인상 (24년 상한액 617만 원 기준)
     const npsCap = Math.round(6170000 * Math.pow(1.04, yearIndex));
     const npsBase = Math.min(monthlyGrossWon, npsCap);
     const nps = Math.floor(npsBase * 0.045);
@@ -1445,9 +1457,17 @@
     const nhi = Math.floor(nhiMonthlyBase * 0.03545);
     const ltc = Math.floor(nhi * 0.1295);
     const ei = Math.floor(monthlyGrossWon * 0.009);
+
+    const totalInsurances = nps + nhi + ltc + ei;
+
+    // 2. 소득세 과세표준 = (세전 월급 - 4대보험 총액)
+    // 소득공제, 인적항목 무시하고 4대보험만 뺀 금액을 기준으로 세금을 매깁니다.
+    const taxBase = Math.max(0, monthlyGrossWon - totalInsurances);
     
-    const incTax = getStandardMonthlyIncomeTax(monthlyGrossWon);
-    const totalDeduction = nps + nhi + ltc + ei + incTax;
+    // 3. 소득세+지방세 계산
+    const incTax = getStandardMonthlyIncomeTax(taxBase);
+    
+    const totalDeduction = totalInsurances + incTax;
     const netMonthly = monthlyGrossWon - totalDeduction;
     
     return { gross: monthlyGrossWon, nps, nhiPlusLtc: nhi + ltc, ei, incTax, totalDeduction, netMonthly };
