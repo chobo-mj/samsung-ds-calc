@@ -226,7 +226,9 @@
               <span class="text-[11px] text-slate-400 font-medium">문턱: 200조</span>
             </div>
             <div class="relative flex items-center">
+              <!-- 수정 후 (oninput 추가) -->
               <input type="number" id="companyProfit" value="381" min="0" step="1" 
+                     oninput="syncFirstYearProfit(this.value)" 
                      class="w-full bg-white text-slate-900 text-lg sm:text-xl font-bold rounded-lg border border-slate-300 px-3 py-2 text-right pr-12 focus:outline-none focus:border-blue-500">
               <span class="absolute right-3 text-slate-500 font-semibold text-sm pointer-events-none">조 원</span>
             </div>
@@ -1064,7 +1066,15 @@
       }
       return `${roundVal.toLocaleString()}원`;
     }
-
+    // 상단 영업이익 입력을 5개년 표의 첫 해(2026년)에 연동
+    function syncFirstYearProfit(val) {
+        const profit2026Input = document.getElementById('p_2026');
+        if (profit2026Input) {
+            profit2026Input.value = val;
+        }
+        recalculateAll();
+        saveToLocalStorage();
+    }
     function nComma(num) {
       return Math.round(num).toLocaleString();
     }
@@ -1269,6 +1279,12 @@
       const base = parseFloat(document.getElementById('baseSalary').value) || 8000;
       update5YrSalaries(base);
       setGlobalDivision('memory');
+// 👉 [추가] 상단 영업이익 입력창의 값도 함께 기본값으로 원복      
+      const companyProfitInput = document.getElementById('companyProfit'); 
+      if (companyProfitInput) {
+          companyProfitInput.value = profits[0]; // 상단 기본 영업이익 값
+      }
+      
       recalculateAll();
       saveToLocalStorage();
     }
