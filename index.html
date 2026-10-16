@@ -4066,7 +4066,7 @@ function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
       class DomeBall {
         constructor(num) {
           this.num = num;
-          this.r = 9;
+          this.r = 20; // 로또 볼 공 크기 수정
           this.x = 112 + (Math.random() - 0.5) * 90;
           this.y = 112 + (Math.random() - 0.5) * 90;
           this.vx = (Math.random() - 0.5) * 1.0;
@@ -4109,7 +4109,7 @@ function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
           ctx.fillStyle = 'rgba(255,255,255,0.65)';
           ctx.fill();
           ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 7px Pretendard, sans-serif';
+          ctx.font = 'bold 14px Pretendard, sans-serif'; // 볼안에 숫자 크기 기존 7(볼 9px)
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillText(this.num, this.x, this.y + 0.5);
