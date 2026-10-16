@@ -14,6 +14,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700;800&family=Jua&display=swap" rel="stylesheet">
+  <!-- 가챠 머신용 라이브러리 및 폰트 -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
+
   
   <script>
     tailwind.config = {
@@ -115,6 +120,56 @@
       margin-bottom: 0 !important;
       pointer-events: none;
     }
+    /* ==================== 로또 가챠 머신 전용 스타일 ==================== */
+    .font-cinzel { font-family: 'Cinzel', serif; }
+    
+    .lotto-ball {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #ffffff;
+      border-radius: 9999px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+      box-shadow: inset -2px -3px 5px rgba(0, 0, 0, 0.45),
+                  inset 2px 3px 5px rgba(255, 255, 255, 0.55),
+                  0 4px 8px rgba(0, 0, 0, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+    .lotto-ball::after {
+      content: '';
+      position: absolute;
+      top: 12%;
+      left: 18%;
+      width: 35%;
+      height: 35%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 80%);
+      pointer-events: none;
+    }
+    
+    .ball-y { background: radial-gradient(circle at 35% 35%, #FFE082, #F57F17); } /* 1-10 */
+    .ball-b { background: radial-gradient(circle at 35% 35%, #90CAF9, #1976D2); } /* 11-20 */
+    .ball-r { background: radial-gradient(circle at 35% 35%, #EF9A9A, #C62828); } /* 21-30 */
+    .ball-g { background: radial-gradient(circle at 35% 35%, #B0BEC5, #455A64); } /* 31-40 */
+    .ball-l { background: radial-gradient(circle at 35% 35%, #A5D6A7, #2E7D32); } /* 41-45 */
+    
+    .lever-turn { animation: spinLever 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
+    @keyframes spinLever {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.08); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+    
+    .shake-machine { animation: shakeAnim 0.3s ease-in-out; }
+    @keyframes shakeAnim {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      20% { transform: translate(-6px, 3px) rotate(-1.5deg); }
+      40% { transform: translate(6px, -3px) rotate(1.5deg); }
+      60% { transform: translate(-4px, -2px) rotate(-1deg); }
+      80% { transform: translate(4px, 2px) rotate(1deg); }
+    }
   </style>
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col">
@@ -176,6 +231,10 @@
                 class="flex-1 md:flex-initial px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-300 hover:text-white hover:bg-slate-700/60">
           <i class="fa-solid fa-person-walking-arrow-loop-left text-emerald-400"></i>
           <span>계단 (Jump)</span>
+        </button>
+        <button type="button" onclick="switchMainTab('gacha')" id="mainTab-gacha" class="flex-1 md:flex-initial px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-300 hover:text-white hover:bg-slate-700/60">
+          <i class="fa-solid fa-clover text-amber-400"></i>
+          <span>번호뽑기</span>
         </button>
       </div>
 
@@ -957,6 +1016,157 @@
       </p>
     </div>
 
+    <!-- ==================== TAB 4: 번호뽑기 ==================== -->
+    <div id="section-gacha" class="hidden flex flex-col items-center justify-center w-full py-1">
+      <div class="w-full max-w-6xl mx-auto rounded-3xl p-3 sm:p-5 border border-slate-800 bg-[#090a10] text-white card-shadow">
+        
+        <!-- 과몰입 방지 안내 배너 -->
+        <div class="w-full bg-gradient-to-r from-red-950 via-red-900 to-amber-950 border border-amber-500/30 py-1 px-3 text-center rounded-xl mb-3">
+          <div class="flex flex-wrap items-center justify-center gap-1.5 text-[11px] font-semibold text-amber-200">
+            <span class="inline-flex items-center gap-1 bg-red-800/80 text-amber-100 px-1.5 py-0.2 rounded-full border border-red-500/50 text-[10px]">
+              <i data-lucide="shield-alert" class="w-3 h-3"></i> 과몰입 경고
+            </span>
+            <span>복권 과몰입 상담전화:</span>
+            <a href="tel:080-800-0501" class="underline text-yellow-300 hover:text-white font-mono font-bold">080-800-0501 (무료)</a>
+          </div>
+        </div>
+    
+        <!-- 상태 및 서브헤더 -->
+        <section class="glass-panel rounded-xl p-2 sm:p-2.5 mb-2 flex items-center justify-between gap-2 border border-amber-500/20">
+          <div class="flex items-center gap-2">
+            <div id="themeIconBox" class="w-8 h-8 rounded-lg flex items-center justify-center text-lg bg-black/40 border border-white/10">👑</div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <h1 id="themeTitle" class="text-xs sm:text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-100 font-cinzel">LUXURY GACHA</h1>
+                <span id="themeBadge" class="text-[9px] px-1.5 py-0.2 rounded-full font-bold uppercase tracking-wider">THEME</span>
+              </div>
+              <p class="text-[10px] text-slate-300"><span class="text-emerald-400 font-semibold">● 4대 필터 적용:</span> 합 120~160 / AC 7~10 / 동끝수 1쌍 / 매트릭스</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 text-xs bg-black/40 px-2 py-1 rounded-lg border border-white/10">
+            <div class="font-bold text-amber-300 font-mono text-[11px] sm:text-xs" id="progressText">1 / 5 세트 (0/6 구슬)</div>
+            <div class="h-4 w-[1px] bg-white/20"></div>
+            <button id="resetQuickBtn" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-slate-200 transition text-[11px] flex items-center gap-1">
+              <i data-lucide="rotate-ccw" class="w-3 h-3"></i> 초기화
+            </button>
+          </div>
+        </section>
+    
+        <!-- 현재 추출 슬롯 -->
+        <section class="glass-panel rounded-xl p-2 sm:p-2.5 mb-2 border border-amber-400/30 text-center relative overflow-hidden">
+          <div class="flex items-center justify-between gap-2 mb-1 px-1">
+            <div class="text-[11px] font-bold text-amber-300 flex items-center gap-1">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i> [ <span id="currentSetLabel">제 1세트 추출 중</span> ]
+            </div>
+            <div id="statExplanation" class="text-[10px] text-slate-300 italic truncate max-w-[200px] sm:max-w-md">"레버를 꾹 누르거나 클릭해 번호를 추출하세요!"</div>
+          </div>
+          <div class="flex items-center justify-center gap-1.5 sm:gap-2.5 py-1" id="currentSlotGroup"></div>
+        </section>
+    
+        <!-- 머신 & 5세트 보드 -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-3 items-start">
+          <!-- 머신 조작부 -->
+          <div class="lg:col-span-7 flex flex-col items-center">
+            <div id="machineArena" class="relative w-full h-[370px] sm:h-[410px] flex items-center justify-center overflow-hidden rounded-2xl p-1 bg-black/20 border border-white/5">
+              <div id="gachaMachineWrapper" class="relative cursor-grab active:cursor-grabbing transition-transform select-none" style="width: 250px; height: 380px; touch-action: none;">
+                <div id="machineCrown" class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 w-18 h-7 px-3 rounded-t-full flex items-center justify-center border-t border-x shadow-md">
+                  <span class="text-[9px] font-black tracking-widest uppercase">VIP LOTTO</span>
+                </div>
+                <div id="glassDome" class="relative w-56 h-56 mx-auto rounded-full overflow-hidden border-2 shadow-xl z-10 transition-transform">
+                  <div class="absolute inset-0 rounded-full pointer-events-none z-30" style="background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.05) 50%, rgba(0,0,0,0.4) 100%);"></div>
+                  <div class="absolute top-1.5 left-4 w-14 h-7 rounded-full bg-white/25 blur-[1.5px] rotate-[-25deg] pointer-events-none z-30"></div>
+                  <canvas id="domeCanvas" width="224" height="224" class="w-full h-full block bg-black/40"></canvas>
+                </div>
+                <div id="machineMid" class="w-64 -mt-5 mx-auto rounded-xl p-2 border shadow-xl relative z-20 flex flex-col items-center justify-between">
+                  <div class="w-full text-center py-0.5 bg-black/50 rounded border border-white/10 mb-1">
+                    <span class="text-[10px] font-extrabold tracking-widest text-amber-300 font-cinzel">ALGORITHM EXTRACTOR</span>
+                  </div>
+                  <div class="flex items-center justify-center py-0.5">
+                    <button type="button" id="spinLeverBtn" class="relative w-16 h-16 rounded-full flex items-center justify-center border-2 shadow-[0_0_15px_rgba(255,215,0,0.4)] transition-transform hover:scale-105 active:scale-95 group focus:outline-none">
+                      <div class="absolute inset-0.5 rounded-full border border-dashed border-yellow-200/40 pointer-events-none"></div>
+                      <div id="leverKnob" class="w-11 h-11 rounded-full bg-gradient-to-tr from-amber-600 via-yellow-400 to-amber-200 border border-amber-100 shadow flex items-center justify-center transition-transform">
+                        <i data-lucide="disc" class="w-5 h-5 text-amber-950"></i>
+                      </div>
+                      <div class="absolute -top-2 w-3 h-5 bg-gradient-to-t from-amber-600 to-yellow-300 rounded-full border border-yellow-100 shadow"></div>
+                    </button>
+                  </div>
+                  <div class="text-[9px] font-bold text-center text-amber-100/90 tracking-tight animate-pulse">▲ 누르고 있으면 연속 튕김 ▲</div>
+                  <div class="w-full mt-1 pt-1 border-t border-white/10 flex items-center justify-center">
+                    <div id="dispenseChute" class="relative w-16 h-7 rounded-b-xl bg-black/80 border border-amber-400/50 flex items-center justify-center overflow-hidden shadow-inner">
+                      <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">EXIT</span>
+                    </div>
+                  </div>
+                </div>
+                <div id="machineBase" class="w-56 h-6 mx-auto -mt-1 rounded-b-2xl border border-t-0 shadow-lg flex items-center justify-center">
+                  <span class="text-[8px] font-semibold tracking-wider text-slate-400">GOLDEN RATIO QUANTUM</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 mt-2">
+              <button type="button" id="shakeBtn" class="px-3 py-1.5 rounded-lg text-xs font-bold glass-panel hover:bg-white/10 text-amber-300 border border-amber-500/30 flex items-center gap-1 transition">
+                <i data-lucide="vibrate" class="w-3.5 h-3.5"></i> 머신 흔들기
+              </button>
+              <button type="button" id="autoPickBtn" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 shadow-md shadow-amber-500/20 flex items-center gap-1 transition">
+                <i data-lucide="zap" class="w-3.5 h-3.5"></i> 1세트 빠르게 뽑기
+              </button>
+            </div>
+          </div>
+    
+          <!-- 우측 5세트 결과 기록판 -->
+          <div class="lg:col-span-5 flex flex-col gap-2">
+            <div class="glass-panel rounded-2xl p-2.5 sm:p-3 border border-amber-500/30 shadow-xl flex flex-col">
+              <div class="flex items-center justify-between pb-1.5 border-b border-white/10 mb-2">
+                <div class="flex items-center gap-1.5">
+                  <div class="p-1 rounded-lg bg-amber-500/20 text-yellow-300"><i data-lucide="scroll-text" class="w-4 h-4"></i></div>
+                  <div><h2 class="text-xs sm:text-sm font-black text-amber-200">극비 번호표 (5세트)</h2></div>
+                </div>
+                <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 bg-amber-500/20 text-yellow-300 rounded border border-amber-500/30">5 GAMES</span>
+              </div>
+              <div class="space-y-1.5" id="setsBoard"></div>
+              <div class="mt-2 p-1.5 rounded-xl bg-black/40 border border-white/5 text-[10px] space-y-0.5 text-slate-300">
+                <div class="flex items-center gap-1 text-amber-400 font-bold"><i data-lucide="check-check" class="w-3 h-3"></i> 될놈될</div>
+                <p class="leading-tight text-slate-400 text-[9px]">정규분포 곡선 및 편향 회귀 알고리즘으로 계산된 상위 0.1% 최적 유효값 조합입니다.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 완성 세레머니 모달 -->
+    <div id="ceremonyModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 opacity-0 pointer-events-none transition-opacity duration-300 overflow-y-auto">
+      <div class="glass-panel max-w-md w-full rounded-2xl p-4 sm:p-5 border-2 border-amber-400 shadow-[0_0_35px_rgba(255,215,0,0.3)] text-center relative transform scale-95 transition-transform duration-300 my-auto">
+        <div class="w-12 h-12 mx-auto rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center text-xl shadow-lg mb-2 border border-white/50">👑</div>
+        <div class="inline-block px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400 text-amber-300 text-[10px] font-extrabold mb-1 tracking-wider">GOLDEN 5-SET COMPLETED</div>
+        <h3 class="text-lg sm:text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-amber-300 to-yellow-100 mb-2">1등 대박의 기운이 완성되었습니다!</h3>
+        <div class="bg-black/60 rounded-xl p-2.5 border border-amber-500/30 text-left mb-3 space-y-1.5">
+          <div class="text-[11px] font-bold text-amber-300 flex items-center justify-between pb-1 border-b border-white/10">
+            <span>최종 완성 번호 조합</span>
+            <span class="text-[9px] text-slate-400">A ~ E 세트</span>
+          </div>
+          <div id="modalSetsViewer" class="space-y-1.5 py-1"></div>
+        </div>
+        <div class="bg-black/40 rounded-xl p-2 border border-amber-500/10 text-[11px] text-amber-100/90 leading-snug text-left space-y-1 mb-3">
+          <p>✨ <b>"이것은 단순한 난수가 아닙니다."</b></p>
+          <p class="text-slate-300 text-[10px]">수학적 수렴 법칙과 카오스 반발 계수를 통과한 5개의 정밀 조합입니다. 이번 주 주인공은 바로 당신!</p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <button type="button" id="copyAllNumbersBtn" class="flex-1 py-2 px-3 rounded-lg font-bold bg-white/10 hover:bg-white/20 text-amber-200 border border-amber-400/40 transition flex items-center justify-center gap-1.5 text-xs">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 번호 전체 복사
+          </button>
+          <button type="button" id="restartGameBtn" class="flex-1 py-2 px-3 rounded-lg font-black bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 hover:brightness-110 shadow-md shadow-amber-500/30 transition flex items-center justify-center gap-1.5 text-xs">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> 다시 뽑기
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 토스트 알림 -->
+    <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full bg-slate-900/90 text-amber-200 border border-amber-500/40 shadow-xl text-xs font-semibold pointer-events-none opacity-0 transition-opacity duration-300 z-50 flex items-center gap-1.5">
+      <i data-lucide="info" class="w-3.5 h-3.5 text-amber-400"></i>
+      <span id="toastMsg">알림</span>
+    </div>
+
   </main>
 
   <!-- Footer -->
@@ -1000,15 +1210,20 @@
     // ----------------------------------------------------
     let currentMainTab = 'calc';
     let isJumpInitialized = false;
-
+    let isGachaInitialized = false;
+    
     function switchMainTab(tab) {
       if (currentMainTab === tab) return;
       currentMainTab = tab;
-
-      const tabs = ['calc', 'game2048', 'jump'];
+      
+      // 👉 'gacha' 추가
+      const tabs = ['calc', 'game2048', 'jump', 'gacha'];
+      
       tabs.forEach(t => {
         const btn = document.getElementById(`mainTab-${t}`);
         const sec = document.getElementById(`section-${t}`);
+        if (!btn || !sec) return;
+        
         if (t === tab) {
           btn.className = 'flex-1 md:flex-initial px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 tab-active shadow-md';
           sec.classList.remove('hidden');
@@ -1017,12 +1232,12 @@
           sec.classList.add('hidden');
         }
       });
-
-      // 게임 탭 이동 시 화면 쾌적성을 위해 상단 헤더를 자동으로 컴팩트하게 접어줌
-      if (tab === 'game2048' || tab === 'jump') {
+    
+      // 게임 및 운빨 탭 진입 시 화면 확보를 위해 헤더 접기
+      if (tab === 'game2048' || tab === 'jump' || tab === 'gacha') {
         if (!isHeaderFolded) toggleHeaderFold();
       }
-
+    
       if (tab === 'calc') {
         if (chartInstance) chartInstance.resize();
       } else if (tab === 'game2048') {
@@ -1041,6 +1256,12 @@
           }
           startJumpLoop();
         }, 50);
+      } else if (tab === 'gacha') {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        if (!isGachaInitialized) {
+          initGachaModule();
+          isGachaInitialized = true;
+        }
       }
     }
 
@@ -3624,6 +3845,649 @@ function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
       recalculateAll();
       updateVisitorCount();
     });
-  </script>
+
+    // ====================================================
+    // 5. LOTTO GACHA MACHINE ENGINE (운빨 모듈)
+    // ====================================================
+    function initGachaModule() {
+      if (window.lucide) lucide.createIcons();
+    
+      const THEMES = [
+        {
+          id: 'gold-ruby',
+          name: '럭셔리 골드 & 루비',
+          badge: 'ROYAL RUBY',
+          icon: '👑',
+          bgGradient: 'radial-gradient(ellipse at top, #2b0b14 0%, #0a060d 70%, #040205 100%)',
+          domeBorder: 'border-amber-400',
+          crownBg: 'bg-gradient-to-r from-red-800 via-amber-600 to-red-800 text-amber-200 border-amber-400',
+          midBg: 'bg-gradient-to-b from-red-950 via-neutral-900 to-red-950 border-amber-500/70',
+          baseBg: 'bg-gradient-to-r from-amber-700 via-red-900 to-amber-700 border-amber-400',
+          tagColor: 'bg-red-500/20 text-red-300 border-red-500/30'
+        },
+        {
+          id: 'cyber-neon',
+          name: '사이버펑크 네온 2077',
+          badge: 'CYBER MATRIX',
+          icon: '⚡',
+          bgGradient: 'radial-gradient(ellipse at top, #0f1c3f 0%, #080d1e 70%, #020409 100%)',
+          domeBorder: 'border-cyan-400 shadow-[0_0_15px_#00F0FF]',
+          crownBg: 'bg-gradient-to-r from-fuchsia-700 via-cyan-600 to-fuchsia-700 text-cyan-200 border-cyan-400',
+          midBg: 'bg-gradient-to-b from-slate-900 via-purple-950 to-slate-900 border-cyan-500/70',
+          baseBg: 'bg-gradient-to-r from-cyan-600 via-fuchsia-700 to-cyan-600 border-cyan-400',
+          tagColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
+        },
+        {
+          id: 'steampunk',
+          name: '빈티지 앤틱 스팀펑크',
+          badge: 'BRASS CHRONO',
+          icon: '⚙️',
+          bgGradient: 'radial-gradient(ellipse at top, #291b0f 0%, #150e08 70%, #070503 100%)',
+          domeBorder: 'border-amber-600 shadow-[0_0_15px_rgba(180,120,40,0.4)]',
+          crownBg: 'bg-gradient-to-r from-amber-900 via-yellow-700 to-amber-900 text-yellow-200 border-amber-600',
+          midBg: 'bg-gradient-to-b from-[#2a1d15] via-[#1a120d] to-[#2a1d15] border-amber-700/80',
+          baseBg: 'bg-gradient-to-r from-amber-900 via-amber-800 to-amber-900 border-amber-600',
+          tagColor: 'bg-amber-600/20 text-amber-300 border-amber-600/30'
+        }
+      ];
+    
+      const currentTheme = THEMES[Math.floor(Math.random() * THEMES.length)];
+      let gachaAudioCtx = null;
+      function getGachaAudio() {
+        if (!gachaAudioCtx) gachaAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (gachaAudioCtx.state === 'suspended') gachaAudioCtx.resume();
+        return gachaAudioCtx;
+      }
+    
+      const GachaSound = {
+        playLeverRatchet() {
+          try {
+            const ctx = getGachaAudio();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(260, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(70, ctx.currentTime + 0.15);
+            gain.gain.setValueAtTime(0.2, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(); osc.stop(ctx.currentTime + 0.15);
+          } catch(e) {}
+        },
+        playPop() {
+          try {
+            const ctx = getGachaAudio();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(280, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(750, ctx.currentTime + 0.2);
+            gain.gain.setValueAtTime(0.25, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(); osc.stop(ctx.currentTime + 0.2);
+          } catch(e) {}
+        },
+        playSlotSettle() {
+          try {
+            const ctx = getGachaAudio();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(480, ctx.currentTime);
+            osc.frequency.setValueAtTime(640, ctx.currentTime + 0.05);
+            gain.gain.setValueAtTime(0.2, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(); osc.stop(ctx.currentTime + 0.15);
+          } catch(e) {}
+        },
+        playShake() {
+          try {
+            const ctx = getGachaAudio();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(60, ctx.currentTime);
+            osc.frequency.linearRampToValueAtTime(40, ctx.currentTime + 0.15);
+            gain.gain.setValueAtTime(0.12, ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(); osc.stop(ctx.currentTime + 0.15);
+          } catch(e) {}
+        },
+        playFanfare() {
+          try {
+            const ctx = getGachaAudio();
+            const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99];
+            notes.forEach((freq, idx) => {
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.type = 'sine';
+              osc.frequency.value = freq;
+              const startTime = ctx.currentTime + idx * 0.08;
+              gain.gain.setValueAtTime(0.15, startTime);
+              gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.7);
+              osc.connect(gain); gain.connect(ctx.destination);
+              osc.start(startTime); osc.stop(startTime + 0.75);
+            });
+          } catch(e) {}
+        }
+      };
+    
+      function checkRule1Sum(arr) {
+        const sum = arr.reduce((a, b) => a + b, 0);
+        return sum >= 120 && sum <= 160;
+      }
+      function checkRule2AC(arr) {
+        const diffs = new Set();
+        for (let i = 0; i < arr.length; i++) {
+          for (let j = i + 1; j < arr.length; j++) {
+            diffs.add(Math.abs(arr[i] - arr[j]));
+          }
+        }
+        const ac = diffs.size - (arr.length - 1);
+        return ac >= 7 && ac <= 10;
+      }
+      function checkRule3EndDigit(arr) {
+        const digitCounts = {};
+        for (const num of arr) {
+          const d = num % 10;
+          digitCounts[d] = (digitCounts[d] || 0) + 1;
+        }
+        const counts = Object.values(digitCounts);
+        const pairs = counts.filter(c => c === 2).length;
+        const triplesOrMore = counts.some(c => c >= 3);
+        return pairs === 1 && !triplesOrMore;
+      }
+      function checkRule4Matrix(arr, prevSet = null) {
+        if (prevSet && prevSet.length === 6) {
+          const intersection = arr.filter(n => prevSet.includes(n));
+          if (intersection.length !== 1) return false;
+        }
+        const odds = arr.filter(n => n % 2 !== 0).length;
+        if (odds < 2 || odds > 4) return false;
+        const zones = new Set(arr.map(n => n <= 10 ? 0 : n <= 20 ? 1 : n <= 30 ? 2 : n <= 40 ? 3 : 4));
+        return zones.size >= 3;
+      }
+    
+      function getBallColorClass(num) {
+        if (num <= 10) return 'ball-y';
+        if (num <= 20) return 'ball-b';
+        if (num <= 30) return 'ball-r';
+        if (num <= 40) return 'ball-g';
+        return 'ball-l';
+      }
+    
+      function generateValidGoldenSet(prevSet = null) {
+        let attempts = 0;
+        while (attempts < 20000) {
+          attempts++;
+          const candidate = [];
+          while (candidate.length < 6) {
+            const r = Math.floor(Math.random() * 45) + 1;
+            if (!candidate.includes(r)) candidate.push(r);
+          }
+          candidate.sort((a, b) => a - b);
+          if (!checkRule1Sum(candidate)) continue;
+          if (!checkRule2AC(candidate)) continue;
+          if (!checkRule3EndDigit(candidate)) continue;
+          if (!checkRule4Matrix(candidate, prevSet)) continue;
+          return candidate;
+        }
+        return [3, 14, 23, 29, 34, 41];
+      }
+    
+      function generateAllFiveSets() {
+        const sets = [];
+        let prev = null;
+        for (let i = 0; i < 5; i++) {
+          const nextSet = generateValidGoldenSet(prev);
+          sets.push(nextSet);
+          prev = nextSet;
+        }
+        return sets;
+      }
+    
+      let precomputedSets = [];
+      let currentSetIndex = 0;
+      let currentBallPickIndex = 0;
+      let completedSets = [[], [], [], [], []];
+      let isExtracting = false;
+    
+      const domeCanvas = document.getElementById('domeCanvas');
+      const domeCtx = domeCanvas.getContext('2d');
+      let domeBalls = [];
+    
+      class DomeBall {
+        constructor(num) {
+          this.num = num;
+          this.r = 9;
+          this.x = 112 + (Math.random() - 0.5) * 90;
+          this.y = 112 + (Math.random() - 0.5) * 90;
+          this.vx = (Math.random() - 0.5) * 1.0;
+          this.vy = (Math.random() - 0.5) * 1.0;
+          this.color = (num <= 10) ? '#F57F17' : (num <= 20) ? '#1976D2' : (num <= 30) ? '#C62828' : (num <= 40) ? '#546E7A' : '#2E7D32';
+        }
+        update(shakePower = 0) {
+          if (shakePower > 0) {
+            this.vx += (Math.random() - 0.5) * (shakePower * 0.5);
+            this.vy += (Math.random() - 0.5) * (shakePower * 0.5);
+          }
+          this.vy += 0.04;
+          this.x += this.vx;
+          this.y += this.vy;
+          const cx = 112, cy = 112, maxDist = 96;
+          const dx = this.x - cx, dy = this.y - cy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist > maxDist) {
+            const nx = dx / dist, ny = dy / dist;
+            this.x = cx + nx * maxDist;
+            this.y = cy + ny * maxDist;
+            const dot = this.vx * nx + this.vy * ny;
+            this.vx = (this.vx - 2 * dot * nx) * 0.7;
+            this.vy = (this.vy - 2 * dot * ny) * 0.7;
+          }
+          this.vx *= 0.985;
+          this.vy *= 0.985;
+        }
+        draw(ctx) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+          ctx.fillStyle = this.color;
+          ctx.fill();
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(this.x - 2.5, this.y - 2.5, 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255,255,255,0.65)';
+          ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 7px Pretendard, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(this.num, this.x, this.y + 0.5);
+          ctx.restore();
+        }
+      }
+    
+      function initDomeBalls() {
+        domeBalls = [];
+        for (let i = 1; i <= 45; i++) domeBalls.push(new DomeBall(i));
+      }
+    
+      let globalShake = 0;
+      function animateDome() {
+        if (currentMainTab === 'gacha') {
+          domeCtx.clearRect(0, 0, domeCanvas.width, domeCanvas.height);
+          for (let i = 0; i < domeBalls.length; i++) {
+            domeBalls[i].update(globalShake);
+            domeBalls[i].draw(domeCtx);
+          }
+          if (globalShake > 0.05) globalShake *= 0.9;
+          else globalShake = 0;
+        }
+        requestAnimationFrame(animateDome);
+      }
+    
+      const machineWrapper = document.getElementById('gachaMachineWrapper');
+      let posX = 0, posY = 0, velX = 0, velY = 0;
+      let isDragging = false, dragStartX = 0, dragStartY = 0;
+      let lastMouseX = 0, lastMouseY = 0, lastMouseTime = 0;
+    
+      machineWrapper.addEventListener('pointerdown', (e) => {
+        if (e.target.closest('#spinLeverBtn')) return;
+        isDragging = true;
+        machineWrapper.setPointerCapture(e.pointerId);
+        dragStartX = e.clientX - posX;
+        dragStartY = e.clientY - posY;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+        lastMouseTime = performance.now();
+        velX = 0; velY = 0;
+        globalShake = 8;
+        GachaSound.playShake();
+      });
+    
+      window.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        const now = performance.now();
+        const dt = Math.max(1, now - lastMouseTime);
+        posX = e.clientX - dragStartX;
+        posY = e.clientY - dragStartY;
+        velX = ((e.clientX - lastMouseX) / dt) * 12;
+        velY = ((e.clientY - lastMouseY) / dt) * 12;
+        lastMouseX = e.clientX; lastMouseY = e.clientY; lastMouseTime = now;
+        const speed = Math.sqrt(velX * velX + velY * velY);
+        if (speed > 4) globalShake = Math.min(16, globalShake + speed * 0.25);
+        applyMachineTransform();
+      });
+    
+      window.addEventListener('pointerup', (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        try { machineWrapper.releasePointerCapture(e.pointerId); } catch(err) {}
+      });
+    
+      function applyMachineTransform() {
+        const rot = Math.max(-10, Math.min(10, posX * 0.06 + velX * 0.3));
+        machineWrapper.style.transform = `translate3d(${posX}px, ${posY}px, 0px) rotate(${rot}deg)`;
+      }
+    
+      function updateMachinePhysics() {
+        if (!isDragging) {
+          velX += (0 - posX) * 0.06;
+          velY += (0 - posY) * 0.06;
+          velX *= 0.8; velY *= 0.8;
+          posX += velX; posY += velY;
+          if (Math.abs(posX) > 120) posX = Math.sign(posX) * 120;
+          if (Math.abs(posY) > 70) posY = Math.sign(posY) * 70;
+          applyMachineTransform();
+        }
+        requestAnimationFrame(updateMachinePhysics);
+      }
+    
+      function drawSingleBall(callback) {
+        if (isExtracting) return;
+        if (currentSetIndex >= 5) {
+          showGachaToast("모든 5세트 추첨이 완료되었습니다!");
+          return;
+        }
+        isExtracting = true;
+        GachaSound.playLeverRatchet();
+    
+        const knob = document.getElementById('leverKnob');
+        knob.classList.remove('lever-turn');
+        void knob.offsetWidth;
+        knob.classList.add('lever-turn');
+    
+        globalShake = 16;
+        const targetNumber = precomputedSets[currentSetIndex][currentBallPickIndex];
+    
+        setTimeout(() => {
+          launchFlyingBall(targetNumber, () => {
+            completedSets[currentSetIndex].push(targetNumber);
+            renderCurrentSlotPlaceholders();
+            currentBallPickIndex++;
+            if (currentBallPickIndex === 6) {
+              handleSetCompleted(callback);
+            } else {
+              isExtracting = false;
+              updateProgressDisplay();
+              if (callback) callback();
+            }
+          });
+        }, 300);
+      }
+    
+      function launchFlyingBall(number, onComplete) {
+        GachaSound.playPop();
+        const chute = document.getElementById('dispenseChute');
+        const chuteRect = chute.getBoundingClientRect();
+        const targetSlot = document.getElementById(`slot-${currentBallPickIndex}`);
+        const slotRect = targetSlot.getBoundingClientRect();
+    
+        const flyingBall = document.createElement('div');
+        flyingBall.className = `lotto-ball ${getBallColorClass(number)} fixed z-[9999]`;
+        flyingBall.style.width = '30px';
+        flyingBall.style.height = '30px';
+        flyingBall.style.fontSize = '12px';
+        flyingBall.style.left = `${chuteRect.left + chuteRect.width / 2 - 15}px`;
+        flyingBall.style.top = `${chuteRect.top + chuteRect.height / 2 - 15}px`;
+        flyingBall.style.transition = 'all 0.8s cubic-bezier(0.25, 0.9, 0.3, 1.1)';
+        flyingBall.innerText = number;
+        document.body.appendChild(flyingBall);
+    
+        requestAnimationFrame(() => {
+          flyingBall.style.transform = 'scale(1.15) rotate(720deg)';
+          flyingBall.style.left = `${slotRect.left + slotRect.width / 2 - 15}px`;
+          flyingBall.style.top = `${slotRect.top + slotRect.height / 2 - 15}px`;
+        });
+    
+        setTimeout(() => {
+          flyingBall.remove();
+          GachaSound.playSlotSettle();
+          if (onComplete) onComplete();
+        }, 1300);
+      }
+    
+      function handleSetCompleted(callback) {
+        completedSets[currentSetIndex].sort((a, b) => a - b);
+        renderRightLedger();
+        showGachaToast(`제 ${currentSetIndex + 1}세트 완성! (총합 ${completedSets[currentSetIndex].reduce((a,b)=>a+b,0)})`);
+        currentSetIndex++;
+        currentBallPickIndex = 0;
+        if (currentSetIndex < 5) {
+          setTimeout(() => {
+            renderCurrentSlotPlaceholders();
+            updateProgressDisplay();
+            isExtracting = false;
+            if (callback) callback();
+          }, 600);
+        } else {
+          setTimeout(() => {
+            isExtracting = false;
+            updateProgressDisplay();
+            openCeremonyModal();
+            if (callback) callback();
+          }, 700);
+        }
+      }
+    
+      function autoPickCurrentSet() {
+        if (currentSetIndex >= 5 || isExtracting) return;
+        const targetSet = currentSetIndex;
+        function pickNext() {
+          if (currentSetIndex === targetSet && currentBallPickIndex < 6 && !isExtracting) {
+            drawSingleBall(() => {
+              if (currentSetIndex === targetSet && currentBallPickIndex < 6) {
+                setTimeout(pickNext, 150);
+              }
+            });
+          }
+        }
+        pickNext();
+      }
+    
+      let leverHoldInterval = null;
+      let isHoldingLever = false;
+      const leverBtn = document.getElementById('spinLeverBtn');
+    
+      leverBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        if (isExtracting || currentSetIndex >= 5) return;
+        isHoldingLever = true;
+        globalShake = 14;
+        GachaSound.playShake();
+        leverHoldInterval = setInterval(() => {
+          globalShake = 16;
+          GachaSound.playShake();
+        }, 180);
+      });
+    
+      window.addEventListener('pointerup', () => {
+        if (!isHoldingLever) return;
+        isHoldingLever = false;
+        clearInterval(leverHoldInterval);
+        leverHoldInterval = null;
+        drawSingleBall();
+      });
+    
+      function renderCurrentSlotPlaceholders() {
+        const group = document.getElementById('currentSlotGroup');
+        group.innerHTML = '';
+        const setLabel = document.getElementById('currentSetLabel');
+        if (currentSetIndex < 5) {
+          setLabel.innerText = `제 ${currentSetIndex + 1}세트 (${currentBallPickIndex}/6)`;
+        } else {
+          setLabel.innerText = `5개 세트 전체 완성!`;
+        }
+        const activeNums = (currentSetIndex < 5) ? completedSets[currentSetIndex] : [];
+        for (let i = 0; i < 6; i++) {
+          const slot = document.createElement('div');
+          slot.id = `slot-${i}`;
+          slot.className = 'w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all duration-300 relative';
+          if (i < activeNums.length) {
+            const num = activeNums[i];
+            slot.className += ` lotto-ball ${getBallColorClass(num)} text-xs sm:text-sm scale-100 shadow-md`;
+            slot.innerText = num;
+          } else {
+            slot.className += ' border border-dashed border-amber-500/40 bg-black/40 text-slate-500 text-[11px] font-bold';
+            slot.innerText = i + 1;
+          }
+          group.appendChild(slot);
+        }
+      }
+    
+      function renderRightLedger() {
+        const board = document.getElementById('setsBoard');
+        board.innerHTML = '';
+        const setLabels = ['A', 'B', 'C', 'D', 'E'];
+        for (let i = 0; i < 5; i++) {
+          const isCurrent = (i === currentSetIndex && currentSetIndex < 5);
+          const isDone = (i < currentSetIndex || (currentSetIndex === 5));
+          const setNums = completedSets[i] || [];
+          const row = document.createElement('div');
+          row.className = `p-2 rounded-xl border transition-all ${
+            isCurrent ? 'bg-amber-500/10 border-amber-400/80 shadow ring-1 ring-amber-400/50' : isDone ? 'bg-black/40 border-amber-500/20' : 'bg-black/20 border-white/5 opacity-50'
+          }`;
+          let metaInfo = (isDone && setNums.length === 6)
+            ? `<span class="text-[9px] text-amber-300 font-mono">합:${setNums.reduce((a,b)=>a+b,0)} | AC통과</span>`
+            : isCurrent ? `<span class="text-[9px] text-yellow-400 animate-pulse font-bold">추첨 중...</span>`
+            : `<span class="text-[9px] text-slate-500">대기</span>`;
+    
+          row.innerHTML = `
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[11px] font-black font-cinzel text-amber-300 flex items-center gap-1">
+                <span class="w-4 h-4 rounded bg-amber-400/20 flex items-center justify-center text-yellow-300 text-[9px] font-bold">${setLabels[i]}</span> 세트
+              </span>
+              ${metaInfo}
+            </div>
+            <div class="flex items-center gap-1 sm:gap-1.5 justify-start min-h-[30px]">
+              ${
+                setNums.length > 0
+                  ? setNums.map(n => `<div class="lotto-ball ${getBallColorClass(n)} w-6 h-6 sm:w-7 sm:h-7 text-[10px] sm:text-xs">${n}</div>`).join('')
+                  : `<span class="text-[10px] text-slate-500 italic pl-1">레버를 눌러 번호를 채우세요</span>`
+              }
+            </div>
+          `;
+          board.appendChild(row);
+        }
+      }
+    
+      function updateProgressDisplay() {
+        const text = document.getElementById('progressText');
+        if (currentSetIndex >= 5) {
+          text.innerText = '5 / 5 세트 완성 (완료!)';
+          text.className = 'font-bold text-emerald-400 font-mono text-xs';
+        } else {
+          text.innerText = `${currentSetIndex + 1} / 5 세트 (${currentBallPickIndex}/6 구슬)`;
+          text.className = 'font-bold text-amber-300 font-mono text-xs';
+        }
+      }
+    
+      function openCeremonyModal() {
+        GachaSound.playFanfare();
+        if (typeof confetti === 'function') {
+          confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+        }
+        const modalViewer = document.getElementById('modalSetsViewer');
+        modalViewer.innerHTML = '';
+        const setLabels = ['A', 'B', 'C', 'D', 'E'];
+        completedSets.forEach((set, idx) => {
+          const sum = set.reduce((a,b)=>a+b, 0);
+          const row = document.createElement('div');
+          row.className = 'flex items-center justify-between bg-black/40 px-2 py-1.5 rounded-lg border border-white/5';
+          row.innerHTML = `
+            <span class="text-xs font-bold text-amber-300 font-cinzel w-6">${setLabels[idx]}</span>
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              ${set.map(n => `<span class="lotto-ball ${getBallColorClass(n)} w-6 h-6 text-[10px]">${n}</span>`).join('')}
+            </div>
+            <span class="text-[10px] font-mono text-slate-400">합:${sum}</span>
+          `;
+          modalViewer.appendChild(row);
+        });
+    
+        const modal = document.getElementById('ceremonyModal');
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.querySelector('div').classList.remove('scale-95');
+        modal.querySelector('div').classList.add('scale-100');
+      }
+    
+      function closeCeremonyModal() {
+        const modal = document.getElementById('ceremonyModal');
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modal.querySelector('div').classList.add('scale-95');
+        modal.querySelector('div').classList.remove('scale-100');
+      }
+    
+      function showGachaToast(msg) {
+        const toast = document.getElementById('toast');
+        document.getElementById('toastMsg').innerText = msg;
+        toast.classList.remove('opacity-0');
+        clearTimeout(window._gachaToastTimer);
+        window._gachaToastTimer = setTimeout(() => { toast.classList.add('opacity-0'); }, 2000);
+      }
+    
+      function startGachaGame() {
+        precomputedSets = generateAllFiveSets();
+        currentSetIndex = 0;
+        currentBallPickIndex = 0;
+        completedSets = [[], [], [], [], []];
+        isExtracting = false;
+        renderCurrentSlotPlaceholders();
+        renderRightLedger();
+        updateProgressDisplay();
+        closeCeremonyModal();
+      }
+    
+      // 테마 적용
+      document.getElementById('themeTitle').innerText = currentTheme.name;
+      document.getElementById('themeIconBox').innerText = currentTheme.icon;
+      document.getElementById('themeBadge').innerText = currentTheme.badge;
+      document.getElementById('themeBadge').className = `text-[9px] px-1.5 py-0.2 rounded-full font-bold uppercase tracking-wider ${currentTheme.tagColor}`;
+      document.getElementById('glassDome').className = `relative w-56 h-56 mx-auto rounded-full overflow-hidden border-2 shadow-xl z-10 transition-transform ${currentTheme.domeBorder}`;
+      document.getElementById('machineCrown').className = `absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 w-18 h-7 px-3 rounded-t-full flex items-center justify-center border-t border-x shadow-md ${currentTheme.crownBg}`;
+      document.getElementById('machineMid').className = `w-64 -mt-5 mx-auto rounded-xl p-2 border shadow-xl relative z-20 flex flex-col items-center justify-between ${currentTheme.midBg}`;
+      document.getElementById('machineBase').className = `w-56 h-6 mx-auto -mt-1 rounded-b-2xl border border-t-0 shadow-lg flex items-center justify-center ${currentTheme.baseBg}`;
+    
+      // 이벤트 리스너 등록
+      document.getElementById('shakeBtn').addEventListener('click', () => {
+        machineWrapper.classList.remove('shake-machine');
+        void machineWrapper.offsetWidth;
+        machineWrapper.classList.add('shake-machine');
+        globalShake = 16;
+        GachaSound.playShake();
+      });
+      document.getElementById('autoPickBtn').addEventListener('click', autoPickCurrentSet);
+      document.getElementById('resetQuickBtn').addEventListener('click', () => {
+        startGachaGame();
+        showGachaToast("머신이 초기화되었습니다.");
+      });
+      document.getElementById('restartGameBtn').addEventListener('click', () => {
+        startGachaGame();
+        showGachaToast("새로운 추첨이 시작되었습니다!");
+      });
+      document.getElementById('copyAllNumbersBtn').addEventListener('click', () => {
+        const labels = ['A', 'B', 'C', 'D', 'E'];
+        let copyText = `★ 0.1% 극비 황금비율 번호 추천번호 (5세트) ★\n`;
+        completedSets.forEach((set, idx) => {
+          if (set && set.length > 0) copyText += `[${labels[idx]}세트] ${set.join(', ')}\n`;
+        });
+        copyText += `* 과몰입 방지 상담: 080-800-0501`;
+        navigator.clipboard.writeText(copyText).then(() => {
+          showGachaToast("5세트 번호 전체가 복사되었습니다!");
+        }).catch(() => showGachaToast("복사 실패"));
+      });
+    
+      initDomeBalls();
+      animateDome();
+      updateMachinePhysics();
+      startGachaGame();
+    }
+    
+  </script> // 스크립트 끝
 </body>
 </html>
