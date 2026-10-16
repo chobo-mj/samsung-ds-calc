@@ -4066,35 +4066,76 @@ function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
       class DomeBall {
         constructor(num) {
           this.num = num;
-          this.r = 20; // 로또 볼 공 크기 수정
-          this.x = 112 + (Math.random() - 0.5) * 90;
-          this.y = 112 + (Math.random() - 0.5) * 90;
+          this.r = 12; // 👈 적정 볼 반지름 (머신 내부가 절반 정도 넉넉하게 빔)
+          this.x = 112 + (Math.random() - 0.5) * 80;
+          this.y = 112 + (Math.random() - 0.5) * 80;
           this.vx = (Math.random() - 0.5) * 1.0;
           this.vy = (Math.random() - 0.5) * 1.0;
           this.color = (num <= 10) ? '#F57F17' : (num <= 20) ? '#1976D2' : (num <= 30) ? '#C62828' : (num <= 40) ? '#546E7A' : '#2E7D32';
         }
-        update(shakePower = 0) {
+    
+        update(shakePower = 0, allBalls = [], myIndex = 0) {
           if (shakePower > 0) {
             this.vx += (Math.random() - 0.5) * (shakePower * 0.5);
             this.vy += (Math.random() - 0.5) * (shakePower * 0.5);
           }
-          this.vy += 0.04;
+    
+          this.vy += 0.04; // 중력
           this.x += this.vx;
           this.y += this.vy;
-          const cx = 112, cy = 112, maxDist = 96;
-          const dx = this.x - cx, dy = this.y - cy;
+    
+          // 1. 공끼리 겹침 방지 (원형 충돌 처리)
+          for (let i = 0; i < allBalls.length; i++) {
+            if (i === myIndex) continue;
+            const other = allBalls[i];
+            const dx = other.x - this.x;
+            const dy = other.y - this.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const minDist = this.r + other.r;
+    
+            if (dist < minDist && dist > 0) {
+              const overlap = minDist - dist;
+              const nx = dx / dist;
+              const ny = dy / dist;
+    
+              // 서로 겹치지 않게 위치 강제 분리
+              this.x -= nx * overlap * 0.5;
+              this.y -= ny * overlap * 0.5;
+              other.x += nx * overlap * 0.5;
+              other.y += ny * overlap * 0.5;
+    
+              // 탄성 반발 속도 적용
+              const kx = this.vx - other.vx;
+              const ky = this.vy - other.vy;
+              const p = 2 * (nx * kx + ny * ky) / 2;
+              this.vx -= p * nx * 0.8;
+              this.vy -= p * ny * 0.8;
+              other.vx += p * nx * 0.8;
+              other.vy += p * ny * 0.8;
+            }
+          }
+    
+          // 2. 돔 원형 바운더리 충돌
+          const cx = 112, cy = 112, maxDist = 96 - this.r;
+          const dx = this.x - cx;
+          const dy = this.y - cy;
           const dist = Math.sqrt(dx * dx + dy * dy);
+    
           if (dist > maxDist) {
-            const nx = dx / dist, ny = dy / dist;
+            const nx = dx / dist;
+            const ny = dy / dist;
             this.x = cx + nx * maxDist;
             this.y = cy + ny * maxDist;
+    
             const dot = this.vx * nx + this.vy * ny;
             this.vx = (this.vx - 2 * dot * nx) * 0.7;
             this.vy = (this.vy - 2 * dot * ny) * 0.7;
           }
+    
           this.vx *= 0.985;
           this.vy *= 0.985;
         }
+    
         draw(ctx) {
           ctx.save();
           ctx.beginPath();
@@ -4104,18 +4145,24 @@ function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
           ctx.lineWidth = 1;
           ctx.strokeStyle = 'rgba(255,255,255,0.4)';
           ctx.stroke();
+    
+          // 입체 광원 효과
           ctx.beginPath();
-          ctx.arc(this.x - 2.5, this.y - 2.5, 2.5, 0, Math.PI * 2);
+          ctx.arc(this.x - 3, this.y - 3, 3, 0, Math.PI * 2);
           ctx.fillStyle = 'rgba(255,255,255,0.65)';
           ctx.fill();
+    
+          // 볼 안의 숫자 폰트 크기 최적화 (9px)
           ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 14px Pretendard, sans-serif'; // 볼안에 숫자 크기 기존 7(볼 9px)
+          ctx.font = 'bold 9px Pretendard, sans-serif';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillText(this.num, this.x, this.y + 0.5);
           ctx.restore();
         }
       }
+
+      
     
       function initDomeBalls() {
         domeBalls = [];
@@ -4127,7 +4174,7 @@ function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
         if (currentMainTab === 'gacha') {
           domeCtx.clearRect(0, 0, domeCanvas.width, domeCanvas.height);
           for (let i = 0; i < domeBalls.length; i++) {
-            domeBalls[i].update(globalShake);
+            domeBalls[i].update(globalShake, domeBalls, i); // 👈 domeBalls와 인덱스 전달
             domeBalls[i].draw(domeCtx);
           }
           if (globalShake > 0.05) globalShake *= 0.9;
