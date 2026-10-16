@@ -3454,10 +3454,10 @@ function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
         if (score <= 400) return { max: 2.0, boost: 0.7 };
         return { max: 1.5, boost: 0.5 };
       } else {
-        if (score <= 100) return { max: 3.0, boost: 0.8 };
-        if (score <= 200) return { max: 2.0, boost: 0.7 };
-        if (score <= 300) return { max: 1.0, boost: 0.6 };
-        if (score <= 400) return { max: 1.0, boost: 0.4 };
+        if (score <= 100) return { max: 2.0, boost: 0.6 };
+        if (score <= 200) return { max: 1.5, boost: 0.5 };
+        if (score <= 300) return { max: 1.0, boost: 0.4 };
+        if (score <= 400) return { max: 1.0, boost: 0.3 };
         return { max: 1.0, boost: 0.3 };
       }
     }
