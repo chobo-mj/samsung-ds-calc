@@ -4116,7 +4116,7 @@ function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
           }
     
           // 2. 돔 원형 바운더리 충돌
-          const cx = 112, cy = 112, maxDist = 96 - this.r;
+          const cx = 112, cy = 112, maxDist = 104 - this.r; // 공이 벽에 달라붙게. 96-> 104
           const dx = this.x - cx;
           const dy = this.y - cy;
           const dist = Math.sqrt(dx * dx + dy * dy);
