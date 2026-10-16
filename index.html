@@ -1102,12 +1102,16 @@
                 </div>
               </div>
             </div>
-            <div class="flex items-center gap-2 mt-2">
+            <div class="flex items-center gap-2 mt-2 flex-wrap justify-center">
               <button type="button" id="shakeBtn" class="px-3 py-1.5 rounded-lg text-xs font-bold glass-panel hover:bg-white/10 text-amber-300 border border-amber-500/30 flex items-center gap-1 transition">
                 <i data-lucide="vibrate" class="w-3.5 h-3.5"></i> 머신 흔들기
               </button>
               <button type="button" id="autoPickBtn" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 shadow-md shadow-amber-500/20 flex items-center gap-1 transition">
                 <i data-lucide="zap" class="w-3.5 h-3.5"></i> 1세트 빠르게 뽑기
+              </button>
+              <!-- 👇 추가할 5세트 즉시 완성 버튼 -->
+              <button type="button" id="instantCompleteBtn" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-md shadow-emerald-500/20 flex items-center gap-1 transition">
+                <i data-lucide="check-check" class="w-3.5 h-3.5"></i> 5세트 즉시 완성
               </button>
             </div>
           </div>
@@ -4454,6 +4458,27 @@ function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
       document.getElementById('machineBase').className = `w-56 h-6 mx-auto -mt-1 rounded-b-2xl border border-t-0 shadow-lg flex items-center justify-center ${currentTheme.baseBg}`;
     
       // 이벤트 리스너 등록
+
+      // 5세트 즉시 완성 버튼 이벤트
+      document.getElementById('instantCompleteBtn').addEventListener('click', () => {
+        if (isExtracting) return;
+        
+        // 미리 계산된 5세트 유효 조합을 그대로 복사하여 완료 상태로 설정
+        completedSets = JSON.parse(JSON.stringify(precomputedSets));
+        currentSetIndex = 5;
+        currentBallPickIndex = 0;
+        isExtracting = false;
+    
+        // UI 및 보드 즉시 갱신
+        renderCurrentSlotPlaceholders();
+        renderRightLedger();
+        updateProgressDisplay();
+    
+        // 완성 모달 및 폭죽 실행
+        openCeremonyModal();
+        showGachaToast("5세트가 즉시 완성되었습니다!");
+      });
+      
       document.getElementById('shakeBtn').addEventListener('click', () => {
         machineWrapper.classList.remove('shake-machine');
         void machineWrapper.offsetWidth;
