@@ -1154,7 +1154,7 @@
           <button type="button" id="copyAllNumbersBtn" class="flex-1 py-2 px-3 rounded-lg font-bold bg-white/10 hover:bg-white/20 text-amber-200 border border-amber-400/40 transition flex items-center justify-center gap-1.5 text-xs">
             <i data-lucide="copy" class="w-3.5 h-3.5"></i> 번호 전체 복사
           </button>
-          <button type="button" id="restartGameBtn" class="flex-1 py-2 px-3 rounded-lg font-black bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 hover:brightness-110 shadow-md shadow-amber-500/30 transition flex items-center justify-center gap-1.5 text-xs">
+          <button type="button" id="gachaRestartBtn" class="flex-1 py-2 px-3 rounded-lg font-black bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 hover:brightness-110 shadow-md shadow-amber-500/30 transition flex items-center justify-center gap-1.5 text-xs">
             <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> 다시 뽑기
           </button>
         </div>
@@ -4466,7 +4466,7 @@ function renderMonthlySalaryTable(startSalary, initialPrevGrossWon) {
         startGachaGame();
         showGachaToast("머신이 초기화되었습니다.");
       });
-      document.getElementById('restartGameBtn').addEventListener('click', () => {
+      document.getElementById('gachaRestartBtn').addEventListener('click', () => {
         startGachaGame();
         showGachaToast("새로운 추첨이 시작되었습니다!");
       });
